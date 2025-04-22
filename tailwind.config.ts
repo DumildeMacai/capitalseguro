@@ -61,7 +61,28 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
-				}
+				},
+                // Investment app custom colors
+                navy: {
+                    DEFAULT: '#0A2647',
+                    light: '#144272',
+                    dark: '#051F3E'
+                },
+                purple: {
+                    DEFAULT: '#7E69AB',
+                    light: '#9b87f5',
+                    dark: '#5D4B88'
+                },
+                gold: {
+                    DEFAULT: '#FFD700',
+                    light: '#FFDF54',
+                    dark: '#D4AF37'
+                },
+                success: {
+                    DEFAULT: '#10B981',
+                    light: '#34D399',
+                    dark: '#059669'
+                }
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
