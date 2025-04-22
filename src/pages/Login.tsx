@@ -1,37 +1,18 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Link, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { LoginForm } from "@/components/auth/LoginForm";
+import { RegisterForm } from "@/components/auth/RegisterForm";
+import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 
 const Login = () => {
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const isRegister = searchParams.get("register") === "true";
   
   const [activeTab, setActiveTab] = useState<string>(isRegister ? "register" : "login");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   
-  // Login form state
-  const [loginEmail, setLoginEmail] = useState<string>("");
-  const [loginPassword, setLoginPassword] = useState<string>("");
-  const [rememberMe, setRememberMe] = useState<boolean>(false);
-  
-  // Register form state
-  const [name, setName] = useState<string>("");
-  const [email, setEmail] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [agreeTerms, setAgreeTerms] = useState<boolean>(false);
-  
-  // Update URL when tab changes
   useEffect(() => {
     const newUrl = activeTab === "register" 
       ? `${window.location.pathname}?register=true`
@@ -39,77 +20,6 @@ const Login = () => {
     
     window.history.replaceState({}, "", newUrl);
   }, [activeTab]);
-  
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: loginPassword,
-      });
-
-      if (error) throw error;
-
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('tipo')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profileData) {
-        switch (profileData.tipo) {
-          case 'admin':
-            navigate('/admin');
-            break;
-          case 'parceiro':
-            navigate('/parceiro');
-            break;
-          default:
-            navigate('/investidor');
-        }
-
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo de volta!",
-        });
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro no login",
-        description: "Email ou senha incorretos.",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (password !== confirmPassword) {
-      toast({
-        variant: "destructive",
-        title: "Passwords don't match",
-        description: "Please ensure both passwords match.",
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    
-    // Simulate registration
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Registration Successful",
-        description: "Your account has been created successfully!",
-      });
-      navigate("/dashboard");
-    }, 1500);
-  };
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row">
@@ -133,23 +43,23 @@ const Login = () => {
               </div>
               
               <h1 className="text-4xl font-bold mb-6">
-                {activeTab === "login" ? "Welcome Back!" : "Join Our Community"}
+                {activeTab === "login" ? "Bem-vindo de volta!" : "Junte-se a nós"}
               </h1>
               <p className="text-white/80 text-lg mb-8">
                 {activeTab === "login"
-                  ? "Sign in to access your investment dashboard and track your returns."
-                  : "Create an account to start your journey towards financial freedom with 50% annual returns."}
+                  ? "Entre para acessar seu painel de investimentos e acompanhar seus rendimentos."
+                  : "Crie uma conta para começar sua jornada rumo à liberdade financeira com 50% de retorno anual."}
               </p>
             </div>
             
             <div className="bg-white/10 backdrop-blur-md p-8 rounded-xl border border-white/20">
-              <h3 className="text-xl font-semibold mb-4">Investment Highlights</h3>
+              <h3 className="text-xl font-semibold mb-4">Destaques do Investimento</h3>
               <ul className="space-y-4">
                 <li className="flex items-start">
                   <svg className="h-6 w-6 mr-2 text-gold flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>50% guaranteed annual returns on all investments</span>
+                  <span>50% de retorno anual garantido em todos os investimentos</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="h-6 w-6 mr-2 text-gold flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,12 +98,12 @@ const Login = () => {
               </div>
             </Link>
             <h1 className="text-3xl font-bold">
-              {activeTab === "login" ? "Welcome Back!" : "Create Your Account"}
+              {activeTab === "login" ? "Bem-vindo de volta!" : "Junte-se a nós"}
             </h1>
             <p className="text-muted-foreground mt-2">
               {activeTab === "login"
-                ? "Sign in to access your investment dashboard"
-                : "Start your investment journey with FutureInvest"}
+                ? "Entre para acessar seu painel de investimentos"
+                : "Comece sua jornada rumo à liberdade financeira"}
             </p>
           </div>
           
@@ -204,160 +114,36 @@ const Login = () => {
           >
             <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-8">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
+                <TabsTrigger value="login">Entrar</TabsTrigger>
+                <TabsTrigger value="register">Registrar</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
-                <form onSubmit={handleLogin} className="space-y-6">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="name@example.com"
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <div className="flex justify-between items-center">
-                      <Label htmlFor="password">Password</Label>
-                      <Link to="/forgot-password" className="text-sm text-purple hover:text-purple-dark">
-                        Forgot password?
-                      </Link>
-                    </div>
-                    <Input
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="remember" 
-                      checked={rememberMe}
-                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
-                    />
-                    <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
-                      Remember me for 30 days
-                    </Label>
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-primary hover:opacity-90" 
-                    disabled={isLoading}
+                <LoginForm />
+                <div className="text-center text-sm text-muted-foreground mt-4">
+                  Não tem uma conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("register")}
+                    className="text-purple hover:text-purple-dark font-medium"
                   >
-                    {isLoading ? "Signing in..." : "Sign In"}
-                  </Button>
-                  
-                  <div className="text-center text-sm text-muted-foreground">
-                    Don't have an account?{" "}
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("register")}
-                      className="text-purple hover:text-purple-dark font-medium"
-                    >
-                      Sign up
-                    </button>
-                  </div>
-                </form>
+                    Cadastre-se
+                  </button>
+                </div>
               </TabsContent>
               
               <TabsContent value="register">
-                <form onSubmit={handleRegister} className="space-y-5">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input
-                      id="name"
-                      placeholder="John Doe"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="register-email">Email</Label>
-                    <Input
-                      id="register-email"
-                      type="email"
-                      placeholder="name@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="register-password">Password</Label>
-                    <Input
-                      id="register-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input
-                      id="confirm-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="terms" 
-                      checked={agreeTerms}
-                      onCheckedChange={(checked) => setAgreeTerms(checked as boolean)}
-                      required
-                    />
-                    <Label htmlFor="terms" className="text-sm font-normal cursor-pointer">
-                      I agree to the{" "}
-                      <Link to="/terms" className="text-purple hover:text-purple-dark">
-                        Terms of Service
-                      </Link>{" "}
-                      and{" "}
-                      <Link to="/privacy" className="text-purple hover:text-purple-dark">
-                        Privacy Policy
-                      </Link>
-                    </Label>
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-gradient-primary hover:opacity-90" 
-                    disabled={isLoading || !agreeTerms}
+                <RegisterForm />
+                <div className="text-center text-sm text-muted-foreground mt-4">
+                  Já tem uma conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("login")}
+                    className="text-purple hover:text-purple-dark font-medium"
                   >
-                    {isLoading ? "Creating Account..." : "Create Account"}
-                  </Button>
-                  
-                  <div className="text-center text-sm text-muted-foreground">
-                    Already have an account?{" "}
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("login")}
-                      className="text-purple hover:text-purple-dark font-medium"
-                    >
-                      Sign in
-                    </button>
-                  </div>
-                </form>
+                    Entre
+                  </button>
+                </div>
               </TabsContent>
             </Tabs>
             
@@ -368,66 +154,24 @@ const Login = () => {
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
                   <span className="bg-background px-2 text-muted-foreground">
-                    Or continue with
+                    Ou continue com
                   </span>
                 </div>
               </div>
               
-              <div className="mt-6 grid grid-cols-2 gap-4">
-                <Button variant="outline" type="button" className="h-11">
-                  <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                    <path
-                      d="M16.6576 2.97684C17.4488 2.0308 17.9933 0.784323 17.8031 -0.478333C16.6379 -0.563379 15.2657 0.191384 14.4444 1.15793C13.7109 2.02189 13.0543 3.29002 13.2747 4.51728C14.564 4.64854 15.8663 3.92289 16.6576 2.97684Z"
-                      fill="#EA4335"
-                    />
-                    <path
-                      d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
-                      fill="#34A853"
-                    />
-                  </svg>
-                  Google
-                </Button>
-                
-                <Button variant="outline" type="button" className="h-11">
-                  <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
-                    <path
-                      d="M16.6576 2.97684C17.4488 2.0308 17.9933 0.784323 17.8031 -0.478333C16.6379 -0.563379 15.2657 0.191384 14.4444 1.15793C13.7109 2.02189 13.0543 3.29002 13.2747 4.51728C14.564 4.64854 15.8663 3.92289 16.6576 2.97684Z"
-                      fill="#EA4335"
-                    />
-                    <path
-                      d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
-                      fill="#4285F4"
-                    />
-                    <path
-                      d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
-                      fill="#FBBC05"
-                    />
-                    <path
-                      d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
-                      fill="#34A853"
-                    />
-                  </svg>
-                  Apple
-                </Button>
+              <div className="mt-6">
+                <AuthSocialButtons />
               </div>
             </div>
             
             <p className="mt-8 text-center text-xs text-muted-foreground">
-              By clicking continue, you agree to our{" "}
-              <Link to="/terms" className="underline underline-offset-4 hover:text-foreground">
-                Terms of Service
+              Ao continuar, você concorda com nossos{" "}
+              <Link to="/termos" className="underline underline-offset-4 hover:text-foreground">
+                Termos de Serviço
               </Link>{" "}
-              and{" "}
-              <Link to="/privacy" className="underline underline-offset-4 hover:text-foreground">
-                Privacy Policy
+              e{" "}
+              <Link to="/privacidade" className="underline underline-offset-4 hover:text-foreground">
+                Política de Privacidade
               </Link>
               .
             </p>
