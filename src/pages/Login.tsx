@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -40,21 +40,52 @@ const Login = () => {
     window.history.replaceState({}, "", newUrl);
   }, [activeTab]);
   
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    
-    // Simulate login
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Login Successful",
-        description: "Welcome back to FutureInvest!",
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword,
       });
-      navigate("/dashboard");
-    }, 1500);
+
+      if (error) throw error;
+
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('tipo')
+        .eq('id', data.user.id)
+        .single();
+
+      if (profileData) {
+        switch (profileData.tipo) {
+          case 'admin':
+            navigate('/admin');
+            break;
+          case 'parceiro':
+            navigate('/parceiro');
+            break;
+          default:
+            navigate('/investidor');
+        }
+
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo de volta!",
+        });
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro no login",
+        description: "Email ou senha incorretos.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
-  
+
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -346,7 +377,7 @@ const Login = () => {
                 <Button variant="outline" type="button" className="h-11">
                   <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                     <path
-                      d="M12.0003 4.75C13.7703 4.75 15.3553 5.36002 16.6053 6.54998L20.0303 3.125C17.9502 1.19 15.2353 0 12.0003 0C7.31028 0 3.25527 2.69 1.28027 6.60998L5.27028 9.70498C6.21525 6.86002 8.87028 4.75 12.0003 4.75Z"
+                      d="M16.6576 2.97684C17.4488 2.0308 17.9933 0.784323 17.8031 -0.478333C16.6379 -0.563379 15.2657 0.191384 14.4444 1.15793C13.7109 2.02189 13.0543 3.29002 13.2747 4.51728C14.564 4.64854 15.8663 3.92289 16.6576 2.97684Z"
                       fill="#EA4335"
                     />
                     <path
@@ -369,11 +400,19 @@ const Login = () => {
                   <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
                     <path
                       d="M16.6576 2.97684C17.4488 2.0308 17.9933 0.784323 17.8031 -0.478333C16.6379 -0.563379 15.2657 0.191384 14.4444 1.15793C13.7109 2.02189 13.0543 3.29002 13.2747 4.51728C14.564 4.64854 15.8663 3.92289 16.6576 2.97684Z"
-                      fill="currentColor"
+                      fill="#EA4335"
                     />
                     <path
-                      d="M24 17.2815C23.7814 17.9131 23.5142 18.4949 23.1971 19.0368C22.6531 19.9745 21.9438 20.7823 21.2436 20.7803C20.5433 20.7783 20.2766 20.3026 19.4457 20.3026C18.6148 20.3026 18.32 20.7803 17.6578 20.7803C16.9956 20.7803 16.3058 20.0065 15.764 19.0688C14.9301 17.6887 14.2798 15.0582 15.1336 13.2014C15.5579 12.2855 16.4013 11.6675 17.347 11.6675C18.0652 11.6675 18.6408 12.1612 19.3984 12.1612C20.1561 12.1612 20.6375 11.6675 21.4782 11.6675C22.3139 11.6675 23.0832 12.17 23.504 12.9058C22.4199 13.5621 21.7505 14.6584 21.7505 15.8473C21.7505 16.7812 22.1026 17.6348 24 17.2815Z"
-                      fill="currentColor"
+                      d="M23.49 12.275C23.49 11.49 23.415 10.73 23.3 10H12V14.51H18.47C18.18 15.99 17.34 17.25 16.08 18.1L19.945 21.1C22.2 19.01 23.49 15.92 23.49 12.275Z"
+                      fill="#4285F4"
+                    />
+                    <path
+                      d="M5.26498 14.2949C5.02498 13.5699 4.88501 12.7999 4.88501 11.9999C4.88501 11.1999 5.01998 10.4299 5.26498 9.7049L1.275 6.60986C0.46 8.22986 0 10.0599 0 11.9999C0 13.9399 0.46 15.7699 1.28 17.3899L5.26498 14.2949Z"
+                      fill="#FBBC05"
+                    />
+                    <path
+                      d="M12.0004 24.0001C15.2404 24.0001 17.9654 22.935 19.9454 21.095L16.0804 18.095C15.0054 18.82 13.6204 19.245 12.0004 19.245C8.8704 19.245 6.21537 17.135 5.2654 14.29L1.27539 17.385C3.25539 21.31 7.3104 24.0001 12.0004 24.0001Z"
+                      fill="#34A853"
                     />
                   </svg>
                   Apple
