@@ -15,12 +15,56 @@ export const LoginForm = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const [userType, setUserType] = useState<"investidor" | "parceiro">("investidor");
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      // Verificar se as credenciais correspondem às predefinidas
+      if (email === "admin@admin.com" && password === "19921dumilde1") {
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo, Administrador!",
+        });
+        navigate("/admin");
+        return;
+      } else if (email === "parceiro@admin.com" && password === "19921dumilde1") {
+        if (userType !== "parceiro") {
+          toast({
+            variant: "destructive",
+            title: "Tipo de usuário incorreto",
+            description: "Você está tentando entrar como investidor, mas esta conta é de parceiro.",
+          });
+          setIsLoading(false);
+          return;
+        }
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo, Parceiro!",
+        });
+        navigate("/parceiro");
+        return;
+      } else if (email === "usuario@admin.com" && password === "19921dumilde1") {
+        if (userType !== "investidor") {
+          toast({
+            variant: "destructive",
+            title: "Tipo de usuário incorreto",
+            description: "Você está tentando entrar como parceiro, mas esta conta é de investidor.",
+          });
+          setIsLoading(false);
+          return;
+        }
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo, Investidor!",
+        });
+        navigate("/investidor");
+        return;
+      }
+
+      // Se não for uma das credenciais predefinidas, tenta autenticar pelo Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -35,6 +79,11 @@ export const LoginForm = () => {
         .single();
 
       if (profileData) {
+        if ((profileData.tipo === 'parceiro' && userType !== 'parceiro') || 
+            (profileData.tipo === 'investidor' && userType !== 'investidor')) {
+          throw new Error("Tipo de usuário incorreto");
+        }
+
         switch (profileData.tipo) {
           case 'admin':
             navigate('/admin');
@@ -52,10 +101,16 @@ export const LoginForm = () => {
         });
       }
     } catch (error) {
+      let errorMessage = "Email ou senha incorretos.";
+      
+      if (error instanceof Error && error.message === "Tipo de usuário incorreto") {
+        errorMessage = "Tipo de usuário incorreto. Por favor, selecione o tipo correto.";
+      }
+      
       toast({
         variant: "destructive",
         title: "Erro no login",
-        description: "Email ou senha incorretos.",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -64,6 +119,28 @@ export const LoginForm = () => {
 
   return (
     <form onSubmit={handleLogin} className="space-y-6">
+      <div className="space-y-4">
+        <Label className="text-center block mb-2">Você quer fazer login como:</Label>
+        <div className="grid grid-cols-2 gap-4">
+          <Button
+            type="button"
+            variant={userType === "investidor" ? "default" : "outline"}
+            className={`w-full ${userType === "investidor" ? "bg-gradient-primary" : ""}`}
+            onClick={() => setUserType("investidor")}
+          >
+            Investidor
+          </Button>
+          <Button
+            type="button"
+            variant={userType === "parceiro" ? "default" : "outline"}
+            className={`w-full ${userType === "parceiro" ? "bg-gradient-primary" : ""}`}
+            onClick={() => setUserType("parceiro")}
+          >
+            Parceiro
+          </Button>
+        </div>
+      </div>
+
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input

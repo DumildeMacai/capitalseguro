@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Link, useLocation } from "react-router-dom";
@@ -65,19 +66,19 @@ const Login = () => {
                   <svg className="h-6 w-6 mr-2 text-gold flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Real estate and business investment opportunities</span>
+                  <span>Oportunidades de investimento em imóveis e negócios</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="h-6 w-6 mr-2 text-gold flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Secure, transparent investment platform</span>
+                  <span>Plataforma de investimento segura e transparente</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="h-6 w-6 mr-2 text-gold flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>Principal available after just 1 year</span>
+                  <span>Capital disponível após apenas 1 ano</span>
                 </li>
               </ul>
             </div>
