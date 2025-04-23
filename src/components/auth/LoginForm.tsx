@@ -23,14 +23,14 @@ export const LoginForm = () => {
 
     try {
       // Verificar se as credenciais correspondem às predefinidas
-      if (email === "admin@admin.com" && password === "19921dumilde1") {
+      if (email === "dumildemacai@gmail.com" && password === "19921admin1") {
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo, Administrador!",
         });
         navigate("/admin");
         return;
-      } else if (email === "parceiro@admin.com" && password === "19921dumilde1") {
+      } else if (email === "dumildemacai@gmail.com" && password === "19921parceiro1") {
         if (userType !== "parceiro") {
           toast({
             variant: "destructive",
@@ -46,7 +46,7 @@ export const LoginForm = () => {
         });
         navigate("/parceiro");
         return;
-      } else if (email === "usuario@admin.com" && password === "19921dumilde1") {
+      } else if (email === "dumildemacai@gmail.com" && password === "19921investidor1") {
         if (userType !== "investidor") {
           toast({
             variant: "destructive",
