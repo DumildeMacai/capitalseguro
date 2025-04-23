@@ -33,24 +33,24 @@ const Navbar = () => {
           className="text-2xl font-bold flex items-center gap-2"
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
-            <span className="text-white text-lg font-bold">F</span>
+            <span className="text-white text-lg font-bold">M</span>
           </span>
-          <span className="text-gradient font-extrabold">FutureInvest</span>
+          <span className="text-gradient font-extrabold">MACAIINVEST</span>
         </Link>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8">
           <Link to="/" className="font-medium hover:text-purple transition-colors">
-            Home
+            Início
           </Link>
           <Link to="/investments" className="font-medium hover:text-purple transition-colors">
-            Investments
+            Investimentos
           </Link>
           <Link to="/about" className="font-medium hover:text-purple transition-colors">
-            About
+            Sobre
           </Link>
           <Link to="/contact" className="font-medium hover:text-purple transition-colors">
-            Contact
+            Contacto
           </Link>
         </nav>
 
@@ -58,12 +58,12 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-4">
           <Link to="/login">
             <Button variant="outline" className="font-medium">
-              Log In
+              Entrar
             </Button>
           </Link>
           <Link to="/login?register=true">
             <Button className="bg-gradient-primary hover:opacity-90 font-medium">
-              Start Investing
+              Comece a Investir
             </Button>
           </Link>
         </div>
