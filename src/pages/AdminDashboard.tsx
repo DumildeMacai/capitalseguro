@@ -1,11 +1,23 @@
 
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Users, UserCheck, Building, BarChart3, Settings, LogOut, 
+  PieChart, TrendingUp, Bell, Database
+} from "lucide-react";
+import AdminSidebar from "@/components/AdminSidebar";
+import AdminOverview from "@/components/AdminOverview";
+import AdminInvestors from "@/components/AdminInvestors";
+import AdminPartners from "@/components/AdminPartners";
+import AdminInvestments from "@/components/AdminInvestments";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState("overview");
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -13,17 +25,48 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="container mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-6">Painel Administrativo</h1>
-      <div className="grid gap-6">
-        <div className="bg-card p-6 rounded-lg shadow">
-          <h2 className="text-2xl font-semibold mb-4">Bem-vindo, Administrador!</h2>
-          <p className="text-muted-foreground mb-4">
-            Gerencie usuários, aprove parcerias e monitore a plataforma.
-          </p>
-          <Button onClick={handleLogout} variant="outline">
-            Sair
-          </Button>
+    <div className="flex min-h-screen bg-gray-100">
+      {/* Sidebar */}
+      <AdminSidebar activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout} />
+
+      {/* Main Content */}
+      <div className="flex-1 p-6 overflow-y-auto">
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold">
+            {activeTab === "overview" && "Painel Administrativo"}
+            {activeTab === "investors" && "Gerenciamento de Investidores"}
+            {activeTab === "partners" && "Gerenciamento de Parceiros"}
+            {activeTab === "investments" && "Gerenciamento de Investimentos"}
+            {activeTab === "settings" && "Configurações"}
+          </h1>
+          <div className="flex items-center gap-4">
+            <Button variant="outline" size="icon">
+              <Bell className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
+            <Button onClick={handleLogout} variant="outline">
+              Sair
+            </Button>
+          </div>
+        </div>
+
+        {/* Tab content */}
+        <div className="mt-6">
+          {activeTab === "overview" && <AdminOverview />}
+          {activeTab === "investors" && <AdminInvestors />}
+          {activeTab === "partners" && <AdminPartners />}
+          {activeTab === "investments" && <AdminInvestments />}
+          {activeTab === "settings" && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Configurações</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-muted-foreground">
+                  Gerenciar configurações da plataforma e permissões de usuários.
+                </p>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>
