@@ -22,21 +22,21 @@ const HeroSection = () => {
             className="flex flex-col items-start"
           >
             <span className="inline-flex items-center rounded-full border border-purple/30 bg-purple/10 px-3 py-1 text-sm font-medium text-purple mb-6">
-              50% Annual Returns
+              Retornos Anuais de 50%
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-6">
-              <span className="text-gradient">Future-Proof</span> Your Wealth With Passive Income
+              <span className="text-gradient">À Prova de Futuro</span> da sua Riqueza com Rendimento Passivo
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg">
-              Invest in high-yielding opportunities with FutureInvest. Earn passive income with 50% annual returns and transform your financial future.
+              Invista em oportunidades de alto rendimento com a FutureInvest. Obtenha rendimento passivo com retornos anuais de 50% e transforme o seu futuro financeiro.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
               <Button asChild size="lg" className="bg-gradient-primary hover:opacity-90 font-medium">
-                <Link to="/login?register=true">Start Investing Now</Link>
+                <Link to="/login?register=true">Comece a Investir Agora</Link>
               </Button>
               <Button asChild size="lg" variant="outline" className="font-medium">
-                <Link to="/investments">Explore Opportunities</Link>
+                <Link to="/investments">Explorar Oportunidades</Link>
               </Button>
             </div>
             
@@ -44,27 +44,27 @@ const HeroSection = () => {
               <div className="flex -space-x-2">
                 <img 
                   src="https://randomuser.me/api/portraits/women/79.jpg" 
-                  alt="User" 
+                  alt="Utilizador" 
                   className="h-10 w-10 rounded-full border-2 border-background"
                 />
                 <img 
                   src="https://randomuser.me/api/portraits/men/52.jpg" 
-                  alt="User" 
+                  alt="Utilizador" 
                   className="h-10 w-10 rounded-full border-2 border-background"
                 />
                 <img 
                   src="https://randomuser.me/api/portraits/women/67.jpg" 
-                  alt="User" 
+                  alt="Utilizador" 
                   className="h-10 w-10 rounded-full border-2 border-background"
                 />
                 <img 
                   src="https://randomuser.me/api/portraits/men/5.jpg" 
-                  alt="User" 
+                  alt="Utilizador" 
                   className="h-10 w-10 rounded-full border-2 border-background"
                 />
               </div>
               <div>
-                <p className="font-semibold">Trusted by 10,000+ investors</p>
+                <p className="font-semibold">Confiado por mais de 10.000 investidores</p>
                 <div className="flex items-center">
                   {[1, 2, 3, 4, 5].map((_, i) => (
                     <svg key={i} className="w-4 h-4 text-gold" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -88,7 +88,7 @@ const HeroSection = () => {
                 <div className="rounded-xl overflow-hidden">
                   <img 
                     src="https://images.unsplash.com/photo-1579621970563-ebec7560ff3e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1742&q=80" 
-                    alt="Investment Dashboard" 
+                    alt="Painel de Investimentos" 
                     className="w-full h-auto"
                   />
                 </div>
@@ -96,7 +96,7 @@ const HeroSection = () => {
               
               {/* Floating stats card */}
               <div className="absolute -bottom-6 -left-6 bg-white dark:bg-navy p-4 rounded-xl shadow-lg border border-border card-shadow">
-                <h4 className="font-semibold mb-2">Your Investments</h4>
+                <h4 className="font-semibold mb-2">Os Seus Investimentos</h4>
                 <div className="flex items-center gap-2">
                   <div className="h-10 w-10 rounded-full bg-success/20 flex items-center justify-center">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -104,7 +104,7 @@ const HeroSection = () => {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Total Returns</p>
+                    <p className="text-sm text-muted-foreground">Retornos Totais</p>
                     <p className="text-lg font-bold text-success">+50%</p>
                   </div>
                 </div>
@@ -112,7 +112,7 @@ const HeroSection = () => {
               
               {/* Floating ROI card */}
               <div className="absolute -top-6 -right-6 bg-white dark:bg-navy p-4 rounded-xl shadow-lg border border-border card-shadow">
-                <h4 className="font-semibold mb-2">Annual ROI</h4>
+                <h4 className="font-semibold mb-2">ROI Anual</h4>
                 <div className="flex items-center gap-2">
                   <div className="h-10 w-10 rounded-full bg-gold/20 flex items-center justify-center">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -120,7 +120,7 @@ const HeroSection = () => {
                     </svg>
                   </div>
                   <div>
-                    <p className="text-sm text-muted-foreground">Annual Rate</p>
+                    <p className="text-sm text-muted-foreground">Taxa Anual</p>
                     <p className="text-lg font-bold text-gold">50%</p>
                   </div>
                 </div>

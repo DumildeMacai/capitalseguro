@@ -4,15 +4,15 @@ import { ResponsiveContainer } from "recharts";
 import InvestorPortfolioChart from "./InvestorPortfolioChart";
 import { Users, Building2, Percent, TrendingUp } from "lucide-react";
 
-// Mock data for the dashboard
+// Dados simulados para o dashboard
 const mockStats = {
   totalInvestors: 248,
   totalPartners: 32,
-  totalInvested: "R$ 1.245.890",
+  totalInvested: "AOA 1.245.890",
   avgReturn: "8.7%"
 };
 
-// Mock data for the charts
+// Dados simulados para os gráficos
 const investmentDistribution = [
   { name: "Imóveis", value: 450000 },
   { name: "Ações", value: 320000 },
@@ -113,7 +113,7 @@ const AdminOverview = () => {
                 </div>
                 <div>
                   <p className="font-medium">Novo investidor cadastrado</p>
-                  <p className="text-sm text-muted-foreground">João Silva se registrou na plataforma</p>
+                  <p className="text-sm text-muted-foreground">João Silva registou-se na plataforma</p>
                   <p className="text-xs text-muted-foreground mt-1">Há 2 horas</p>
                 </div>
               </div>
