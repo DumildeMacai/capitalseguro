@@ -51,14 +51,14 @@ const InvestmentFilters = ({
             <div className="space-y-3">
               <Label htmlFor="category">Categoria</Label>
               <Select 
-                value={selectedCategory || ""} 
-                onValueChange={(value) => setSelectedCategory(value || null)}
+                value={selectedCategory || "all"} 
+                onValueChange={(value) => setSelectedCategory(value === "all" ? null : value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Todas as Categorias" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Todas Categorias</SelectItem>
+                  <SelectItem value="all">Todas Categorias</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>{category}</SelectItem>
                   ))}

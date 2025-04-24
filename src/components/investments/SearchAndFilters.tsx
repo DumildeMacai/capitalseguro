@@ -61,12 +61,12 @@ const SearchAndFilters = ({
             Filtros
           </Button>
           
-          <Select value={selectedCategory || ""} onValueChange={(value) => setSelectedCategory(value || null)}>
+          <Select value={selectedCategory || "all"} onValueChange={(value) => setSelectedCategory(value === "all" ? null : value)}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Categorias" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Todas Categorias</SelectItem>
+              <SelectItem value="all">Todas Categorias</SelectItem>
               {categories.map((category) => (
                 <SelectItem key={category} value={category}>{category}</SelectItem>
               ))}
