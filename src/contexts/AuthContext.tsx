@@ -26,40 +26,21 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Configurar listener para mudanças no estado de autenticação
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
+      (event, currentSession) => {
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
-        
-        if (currentSession?.user) {
-          // Buscar o tipo de usuário no perfil
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('tipo')
-            .eq('id', currentSession.user.id)
-            .single();
-            
-          if (data) {
-            setUserType(data.tipo as any);
-          } else if (error) {
-            console.error('Erro ao buscar tipo de usuário:', error);
-          }
-        } else {
-          setUserType(null);
-        }
-
-        setLoading(false);
       }
     );
 
-    // Verificar sessão atual na inicialização
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
       
       if (currentSession?.user) {
-        // Buscar o tipo de usuário no perfil usando setTimeout para evitar deadlock
+        // Fetch the user type from profiles
         setTimeout(async () => {
           const { data, error } = await supabase
             .from('profiles')
@@ -68,7 +49,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             .single();
             
           if (data) {
-            setUserType(data.tipo as any);
+            setUserType(data.tipo);
           } else if (error) {
             console.error('Erro ao buscar tipo de usuário:', error);
           }
@@ -129,7 +110,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string, userType: 'investidor' | 'parceiro', userData: any) => {
     try {
-      // Criar usuário
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -143,7 +123,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       if (error) throw error;
 
-      // Atualizar perfil com dados adicionais
       if (data.user) {
         const { error: profileError } = await supabase
           .from('profiles')
@@ -162,10 +141,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       toast({
         title: "Registro realizado com sucesso",
-        description: "Verifique seu email para confirmar a conta.",
+        description: "Agora você pode fazer login.",
       });
 
-      // Redirecionar para a página de login
       navigate('/login');
     } catch (error: any) {
       toast({
