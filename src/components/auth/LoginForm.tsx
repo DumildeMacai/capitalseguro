@@ -1,16 +1,14 @@
-
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 export const LoginForm = () => {
-  const navigate = useNavigate();
   const { toast } = useToast();
+  const { signIn } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -22,13 +20,13 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      // Verificar se as credenciais correspondem às predefinidas
+      // Estas verificações são mantidas para compatibilidade com o fluxo existente
       if (email === "dumildemacai@gmail.com" && password === "19921admin1") {
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo, Administrador!",
         });
-        navigate("/admin");
+        window.location.href = "/admin";
         return;
       } else if (email === "dumildemacai@gmail.com" && password === "19921parceiro1") {
         if (userType !== "parceiro") {
@@ -44,7 +42,7 @@ export const LoginForm = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo, Parceiro!",
         });
-        navigate("/parceiro");
+        window.location.href = "/parceiro";
         return;
       } else if (email === "dumildemacai@gmail.com" && password === "19921investidor1") {
         if (userType !== "investidor") {
@@ -60,58 +58,14 @@ export const LoginForm = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo, Investidor!",
         });
-        navigate("/investidor");
+        window.location.href = "/investidor";
         return;
       }
 
-      // Se não for uma das credenciais predefinidas, tenta autenticar pelo Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('tipo')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profileData) {
-        if ((profileData.tipo === 'parceiro' && userType !== 'parceiro') || 
-            (profileData.tipo === 'investidor' && userType !== 'investidor')) {
-          throw new Error("Tipo de usuário incorreto");
-        }
-
-        switch (profileData.tipo) {
-          case 'admin':
-            navigate('/admin');
-            break;
-          case 'parceiro':
-            navigate('/parceiro');
-            break;
-          default:
-            navigate('/investidor');
-        }
-
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo de volta!",
-        });
-      }
+      // Login pelo Supabase
+      await signIn(email, password);
     } catch (error) {
-      let errorMessage = "Email ou senha incorretos.";
-      
-      if (error instanceof Error && error.message === "Tipo de usuário incorreto") {
-        errorMessage = "Tipo de usuário incorreto. Por favor, selecione o tipo correto.";
-      }
-      
-      toast({
-        variant: "destructive",
-        title: "Erro no login",
-        description: errorMessage,
-      });
+      console.error("Erro no login:", error);
     } finally {
       setIsLoading(false);
     }

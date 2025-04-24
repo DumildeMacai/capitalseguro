@@ -9,23 +9,142 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      inscricoes_investimentos: {
+        Row: {
+          data_inicio: string | null
+          id: string
+          investimento_id: string
+          retorno_esperado: number
+          status: string | null
+          usuario_id: string
+          valor_investido: number
+        }
+        Insert: {
+          data_inicio?: string | null
+          id?: string
+          investimento_id: string
+          retorno_esperado: number
+          status?: string | null
+          usuario_id: string
+          valor_investido: number
+        }
+        Update: {
+          data_inicio?: string | null
+          id?: string
+          investimento_id?: string
+          retorno_esperado?: number
+          status?: string | null
+          usuario_id?: string
+          valor_investido?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inscricoes_investimentos_investimento_id_fkey"
+            columns: ["investimento_id"]
+            isOneToOne: false
+            referencedRelation: "investimentos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inscricoes_investimentos_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investimentos: {
+        Row: {
+          categoria: string
+          data_criacao: string | null
+          descricao: string
+          id: string
+          imagem_url: string | null
+          parceiro_id: string | null
+          prazo_minimo: number
+          retorno_estimado: number
+          status: string | null
+          titulo: string
+          valor_minimo: number
+        }
+        Insert: {
+          categoria: string
+          data_criacao?: string | null
+          descricao: string
+          id?: string
+          imagem_url?: string | null
+          parceiro_id?: string | null
+          prazo_minimo: number
+          retorno_estimado: number
+          status?: string | null
+          titulo: string
+          valor_minimo: number
+        }
+        Update: {
+          categoria?: string
+          data_criacao?: string | null
+          descricao?: string
+          id?: string
+          imagem_url?: string | null
+          parceiro_id?: string | null
+          prazo_minimo?: number
+          retorno_estimado?: number
+          status?: string | null
+          titulo?: string
+          valor_minimo?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investimentos_parceiro_id_fkey"
+            columns: ["parceiro_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
+          data_cadastro: string | null
+          documento_identidade_frente: string | null
+          documento_identidade_verso: string | null
           email: string | null
+          empresa_nome: string | null
           id: string
+          nome_completo: string | null
+          ramo_negocio: string | null
+          status_verificacao: string | null
+          telefone: string | null
           tipo: Database["public"]["Enums"]["user_type"]
         }
         Insert: {
           created_at?: string
+          data_cadastro?: string | null
+          documento_identidade_frente?: string | null
+          documento_identidade_verso?: string | null
           email?: string | null
+          empresa_nome?: string | null
           id: string
+          nome_completo?: string | null
+          ramo_negocio?: string | null
+          status_verificacao?: string | null
+          telefone?: string | null
           tipo?: Database["public"]["Enums"]["user_type"]
         }
         Update: {
           created_at?: string
+          data_cadastro?: string | null
+          documento_identidade_frente?: string | null
+          documento_identidade_verso?: string | null
           email?: string | null
+          empresa_nome?: string | null
           id?: string
+          nome_completo?: string | null
+          ramo_negocio?: string | null
+          status_verificacao?: string | null
+          telefone?: string | null
           tipo?: Database["public"]["Enums"]["user_type"]
         }
         Relationships: []

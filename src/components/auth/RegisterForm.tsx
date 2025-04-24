@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,20 +6,14 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Eye, EyeOff } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { uploadIdentityDocument } from "@/services/storage";
 
 export const RegisterForm = () => {
   const { toast } = useToast();
+  const { signUp } = useAuth();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [userType, setUserType] = useState<"investidor" | "parceiro">("investidor");
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -101,7 +94,7 @@ export const RegisterForm = () => {
     setCurrentStep(currentStep - 1);
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Validação de senha
@@ -126,21 +119,39 @@ export const RegisterForm = () => {
     
     setIsLoading(true);
     
-    // Simulando registro
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      // Dados do usuário a serem enviados
+      const userData = {
+        nome: formData.nome,
+        idade: parseInt(formData.idade),
+        endereco: formData.endereco,
+        documentoNumero: formData.documentoNumero,
+        telefone: formData.telefone,
+        nomeEmpresa: formData.nomeEmpresa,
+        ramoAtuacao: formData.ramoAtuacao,
+        profissao: formData.profissao,
+        website: formData.website,
+        contatoProfissional: formData.contatoProfissional
+      };
+
+      // Registrar usuário no Supabase
+      await signUp(formData.email, formData.senha, userType, userData);
+      
       toast({
         title: "Registro realizado com sucesso",
-        description: `Sua conta de ${userType} foi criada com sucesso!`,
+        description: `Sua conta de ${userType} foi criada. Por favor, verifique seu email para confirmar a conta.`,
       });
-      
-      // Redirecionar para a página correspondente
-      if (userType === "parceiro") {
-        window.location.href = "/parceiro";
-      } else {
-        window.location.href = "/investidor";
-      }
-    }, 1500);
+
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro no registro",
+        description: error.message || "Ocorreu um erro ao criar a conta.",
+      });
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
