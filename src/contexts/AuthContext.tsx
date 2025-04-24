@@ -4,29 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from '@/hooks/use-toast';
 import { Session, User } from '@supabase/supabase-js';
-
-interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  userType: 'investidor' | 'parceiro' | 'admin' | null;
-  loading: boolean;
-  signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, userType: 'investidor' | 'parceiro', userData: any) => Promise<void>;
-  signOut: () => Promise<void>;
-}
+import { AuthContextType } from '@/types/auth';
+import { useUserType } from '@/hooks/useUserType';
+import { handleAuthError, getRedirectPath } from '@/utils/authUtils';
 
 const AuthContext = createContext<AuthContextType>({} as AuthContextType);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [userType, setUserType] = useState<'investidor' | 'parceiro' | 'admin' | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { userType, loading: userTypeLoading } = useUserType(session);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         setSession(currentSession);
@@ -34,31 +25,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
-      
-      if (currentSession?.user) {
-        // Fetch the user type from profiles
-        setTimeout(async () => {
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('tipo')
-            .eq('id', currentSession.user.id)
-            .single();
-            
-          if (data) {
-            setUserType(data.tipo);
-          } else if (error) {
-            console.error('Erro ao buscar tipo de usuário:', error);
-          }
-          
-          setLoading(false);
-        }, 0);
-      } else {
-        setLoading(false);
-      }
     });
 
     return () => {
@@ -82,16 +51,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         .single();
 
       if (profileData) {
-        switch (profileData.tipo) {
-          case 'admin':
-            navigate('/admin');
-            break;
-          case 'parceiro':
-            navigate('/parceiro');
-            break;
-          default:
-            navigate('/investidor');
-        }
+        const redirectPath = getRedirectPath(profileData.tipo);
+        navigate(redirectPath);
 
         toast({
           title: "Login realizado com sucesso",
@@ -99,11 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         });
       }
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro no login",
-        description: error.message || "Email ou senha incorretos.",
-      });
+      handleAuthError(error, toast);
       throw error;
     }
   };
@@ -146,11 +103,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       navigate('/login');
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro no registro",
-        description: error.message || "Ocorreu um erro durante o registro.",
-      });
+      handleAuthError(error, toast);
       throw error;
     }
   };
@@ -164,11 +117,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         description: "Você foi desconectado com sucesso.",
       });
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao sair",
-        description: error.message || "Ocorreu um erro ao fazer logout.",
-      });
+      handleAuthError(error, toast);
     }
   };
 
@@ -178,7 +127,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         session,
         userType,
-        loading,
+        loading: userTypeLoading,
         signIn,
         signUp,
         signOut,
