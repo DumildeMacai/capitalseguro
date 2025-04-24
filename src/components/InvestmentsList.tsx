@@ -45,7 +45,16 @@ const InvestmentsList = ({ investments, onInvest, className }: InvestmentsListPr
                 <Badge variant="secondary" className="bg-white/90 text-secondary font-medium flex items-center gap-1">
                   {investment.icon} {investment.category}
                 </Badge>
-                <Badge variant={investment.risk === "Baixo" ? "success" : investment.risk === "Médio" ? "warning" : "destructive"} className="bg-opacity-90">
+                <Badge 
+                  variant={
+                    investment.risk === "Baixo" 
+                      ? "success" 
+                      : investment.risk === "Médio" 
+                      ? "warning" 
+                      : "destructive"
+                  } 
+                  className="bg-opacity-90"
+                >
                   Risco {investment.risk}
                 </Badge>
               </div>
