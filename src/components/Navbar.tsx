@@ -79,27 +79,27 @@ const Navbar = () => {
           <SheetContent side="right" className="w-[300px]">
             <nav className="flex flex-col gap-4 mt-8">
               <Link to="/" className="px-4 py-2 hover:bg-muted rounded-md transition-colors">
-                Home
+                Início
               </Link>
               <Link to="/investments" className="px-4 py-2 hover:bg-muted rounded-md transition-colors">
-                Investments
+                Investimentos
               </Link>
               <Link to="/about" className="px-4 py-2 hover:bg-muted rounded-md transition-colors">
-                About
+                Sobre
               </Link>
               <Link to="/contact" className="px-4 py-2 hover:bg-muted rounded-md transition-colors">
-                Contact
+                Contacto
               </Link>
               
               <div className="border-t mt-4 pt-4 px-4 flex flex-col gap-3">
                 <Link to="/login" className="w-full">
                   <Button variant="outline" className="w-full font-medium">
-                    Log In
+                    Entrar
                   </Button>
                 </Link>
                 <Link to="/login?register=true" className="w-full">
                   <Button className="w-full bg-gradient-primary hover:opacity-90 font-medium">
-                    Start Investing
+                    Comece a Investir
                   </Button>
                 </Link>
               </div>
