@@ -1,32 +1,12 @@
-
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { Link } from "react-router-dom";
+import { Building, CarTaxiFront, Coins } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Building,
-  CarTaxiFront,
-  Coins,
-  PiggyBank,
-  Search,
-  SlidersHorizontal,
-} from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-import InvestmentsList from "@/components/InvestmentsList";
-import InvestmentFilters from "@/components/InvestmentFilters";
-import MyInvestmentsList from "@/components/MyInvestmentsList";
+import SearchAndFilters from "@/components/investments/SearchAndFilters";
+import InvestmentsContent from "@/components/investments/InvestmentsContent";
+import FeaturedInvestments from "@/components/investments/FeaturedInvestments";
 import { Investment, UserInvestment } from "@/types/investment";
 
 const Investments = () => {
@@ -165,41 +145,28 @@ const Investments = () => {
     });
   };
 
-  // Filtrar investimentos por categoria
+  // Filtrar investimentos por categoria e outros critérios
   const filteredInvestments = availableInvestments.filter(investment => {
-    // Filtro por tab ativa (categoria)
     if (activeTab !== "todos" && investment.category.toLowerCase() !== activeTab) {
       return false;
     }
-    
-    // Filtro por busca
     if (searchQuery && !investment.title.toLowerCase().includes(searchQuery.toLowerCase()) && 
         !investment.description.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
-    
-    // Filtro por categoria selecionada
     if (selectedCategory && investment.category !== selectedCategory) {
       return false;
     }
-    
-    // Filtro por valor mínimo
     if (minValue && investment.minInvestment < minValue) {
       return false;
     }
-    
-    // Filtro por retorno máximo
     if (maxReturn && investment.returnRate > maxReturn) {
       return false;
     }
-    
     return true;
   });
 
-  // Os investimentos em destaque são os marcados como "featured"
   const featuredInvestments = availableInvestments.filter(inv => inv.featured);
-
-  // Categorias distintas para filtros
   const categories = [...new Set(availableInvestments.map(inv => inv.category))];
 
   return (
@@ -221,112 +188,32 @@ const Investments = () => {
             </p>
           </motion.div>
           
-          <div className="flex flex-col md:flex-row justify-between gap-4 mb-8">
-            <div className="relative w-full md:w-1/3">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground h-4 w-4" />
-              <Input
-                className="pl-10"
-                placeholder="Pesquisar investimentos..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex gap-3">
-              <Button
-                variant="outline"
-                className="flex items-center gap-2"
-                onClick={() => setShowFilters(!showFilters)}
-              >
-                <SlidersHorizontal className="h-4 w-4" /> 
-                Filtros
-              </Button>
-              
-              <Select value={selectedCategory || ""} onValueChange={(value) => setSelectedCategory(value || null)}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Categorias" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="">Todas Categorias</SelectItem>
-                  {categories.map((category) => (
-                    <SelectItem key={category} value={category}>{category}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <SearchAndFilters
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            showFilters={showFilters}
+            setShowFilters={setShowFilters}
+            selectedCategory={selectedCategory}
+            setSelectedCategory={setSelectedCategory}
+            categories={categories}
+            minValue={minValue}
+            setMinValue={setMinValue}
+            maxReturn={maxReturn}
+            setMaxReturn={setMaxReturn}
+          />
           
-          {showFilters && (
-            <InvestmentFilters 
-              minValue={minValue}
-              setMinValue={setMinValue}
-              maxReturn={maxReturn}
-              setMaxReturn={setMaxReturn}
-              categories={categories}
-              selectedCategory={selectedCategory}
-              setSelectedCategory={setSelectedCategory}
-            />
-          )}
+          <InvestmentsContent
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            filteredInvestments={filteredInvestments}
+            handleInvest={handleInvest}
+            myInvestments={myInvestments}
+          />
           
-          <Tabs defaultValue="todos" value={activeTab} onValueChange={setActiveTab} className="mb-10">
-            <TabsList className="mb-8">
-              <TabsTrigger value="todos">Todos</TabsTrigger>
-              <TabsTrigger value="imóveis">Imóveis</TabsTrigger>
-              <TabsTrigger value="empresas">Empresas</TabsTrigger>
-              <TabsTrigger value="transporte">Transporte</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value={activeTab}>
-              {filteredInvestments.length > 0 ? (
-                <InvestmentsList 
-                  investments={filteredInvestments} 
-                  onInvest={handleInvest} 
-                />
-              ) : (
-                <div className="text-center py-10">
-                  <PiggyBank className="mx-auto h-16 w-16 text-muted-foreground mb-4" />
-                  <h3 className="text-xl font-medium mb-2">Nenhum investimento encontrado</h3>
-                  <p className="text-muted-foreground">
-                    Tente ajustar seus filtros ou pesquisar por outros termos.
-                  </p>
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-          
-          {myInvestments.length > 0 && (
-            <section className="mt-16">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5 }}
-                className="mb-8"
-              >
-                <h2 className="text-2xl md:text-3xl font-bold mb-2">Meus Investimentos</h2>
-                <p className="text-muted-foreground">Acompanhe o desempenho dos seus investimentos ativos na plataforma.</p>
-              </motion.div>
-              
-              <MyInvestmentsList investments={myInvestments} />
-            </section>
-          )}
-          
-          <section className="mt-16">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="mb-8"
-            >
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">Investimentos em Destaque</h2>
-              <p className="text-muted-foreground">Oportunidades selecionadas com alto potencial de retorno.</p>
-            </motion.div>
-            
-            <InvestmentsList 
-              investments={featuredInvestments} 
-              onInvest={handleInvest} 
-              className="grid-cols-1 md:grid-cols-2" 
-            />
-          </section>
+          <FeaturedInvestments
+            investments={featuredInvestments}
+            onInvest={handleInvest}
+          />
         </div>
       </main>
       
