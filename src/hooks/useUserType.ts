@@ -35,4 +35,3 @@ export const useUserType = (session: Session | null) => {
 
   return { userType, loading };
 };
-

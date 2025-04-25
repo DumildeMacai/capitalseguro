@@ -19,4 +19,3 @@ export const getRedirectPath = (userType: string | undefined) => {
       return '/investidor';
   }
 };
-

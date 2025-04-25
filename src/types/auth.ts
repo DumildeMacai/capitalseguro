@@ -12,4 +12,3 @@ export interface AuthContextType {
   signUp: (email: string, password: string, userType: 'investidor' | 'parceiro', userData: any) => Promise<void>;
   signOut: () => Promise<void>;
 }
-
