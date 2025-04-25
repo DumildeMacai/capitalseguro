@@ -13,11 +13,11 @@ const ProtectedRoute = ({
 }: ProtectedRouteProps) => {
   const { user, userType, loading } = useAuth();
 
+  // Mostrar um indicador de carregamento enquanto verifica a autenticação
   if (loading) {
-    // Renderizar um estado de carregamento enquanto verifica a autenticação
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-purple"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-navy-blue"></div>
       </div>
     );
   }
@@ -29,6 +29,7 @@ const ProtectedRoute = ({
 
   // Se houver um tipo de usuário requerido e não corresponder, redirecionar
   if (requiredUserType && userType !== requiredUserType) {
+    // Redirecionar para página apropriada com base no tipo de usuário
     switch (userType) {
       case 'admin':
         return <Navigate to="/admin" />;
