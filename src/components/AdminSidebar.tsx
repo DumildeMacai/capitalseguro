@@ -6,7 +6,6 @@ import {
   LayoutDashboard, Users, Building2, BarChart3, 
   Settings, LogOut, ChevronLeft, ChevronRight 
 } from "lucide-react";
-import LogoMacaiInvest from "/logo-macaiinvest.png"; // Importando o logotipo
 
 interface AdminSidebarProps {
   activeTab: string;
@@ -34,10 +33,10 @@ const AdminSidebar = ({ activeTab, setActiveTab, onLogout }: AdminSidebarProps) 
       <div className="flex items-center justify-between p-4 border-b">
         {!collapsed ? (
           <div className="flex items-center">
-            <img src={LogoMacaiInvest} alt="MacaiInvest Logo" className="h-8 w-auto" />
+            <img src="/logo-macaiinvest.png" alt="MacaiInvest Logo" className="h-8 w-auto" />
           </div>
         ) : (
-          <img src={LogoMacaiInvest} alt="MacaiInvest Logo" className="h-6 w-auto mx-auto" />
+          <img src="/logo-macaiinvest.png" alt="MacaiInvest Logo" className="h-6 w-auto mx-auto" />
         )}
         <Button 
           variant="ghost" 

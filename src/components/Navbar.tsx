@@ -8,7 +8,6 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
-import LogoMacaiInvest from "/logo-macaiinvest.png"; // Importando o logotipo
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -42,7 +41,7 @@ const Navbar = () => {
         >
           {/* Logotipo */}
           <img 
-            src={LogoMacaiInvest} 
+            src="/logo-macaiinvest.png" 
             alt="MacaiInvest Logo" 
             className="h-10 w-auto" 
           />
