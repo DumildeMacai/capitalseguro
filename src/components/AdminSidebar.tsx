@@ -31,12 +31,8 @@ const AdminSidebar = ({ activeTab, setActiveTab, onLogout }: AdminSidebarProps) 
     )}>
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
-        {!collapsed ? (
-          <div className="flex items-center">
-            <img src="/logo-macaiinvest.png" alt="MacaiInvest Logo" className="h-8 w-auto" />
-          </div>
-        ) : (
-          <img src="/logo-macaiinvest.png" alt="MacaiInvest Logo" className="h-6 w-auto mx-auto" />
+        {!collapsed && (
+          <h2 className="text-lg font-semibold">Admin</h2>
         )}
         <Button 
           variant="ghost" 

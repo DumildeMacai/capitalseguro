@@ -8,7 +8,8 @@ export interface AuthContextType {
   session: Session | null;
   userType: UserType;
   loading: boolean;
-  signIn: (email: string, password: string, userType?: 'investidor' | 'parceiro') => Promise<void>;
+  signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string, userType: 'investidor' | 'parceiro', userData: any) => Promise<void>;
   signOut: () => Promise<void>;
 }
+
