@@ -1,472 +1,318 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { useNavigate } from "react-router-dom";
+import { Upload as UploadIcon } from "lucide-react";
+import * as z from "zod";
+
 import { useToast } from "@/hooks/use-toast";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Eye, EyeOff } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
-import { uploadIdentityDocument } from "@/services/storage";
+import { Button } from "@/components/ui/button";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
+import { handleAuthError } from "@/utils/authUtils";
+import { useAuth } from "@/hooks/useAuth";
+
+const registerFormSchema = z.object({
+  name: z.string().min(2, {
+    message: "Nome deve ter pelo menos 2 caracteres.",
+  }),
+  email: z.string().email({
+    message: "Por favor, insira um email válido.",
+  }),
+  password: z.string().min(8, {
+    message: "Senha deve ter pelo menos 8 caracteres.",
+  }),
+  phone: z.string().min(9, {
+    message: "Número de telefone deve ter pelo menos 9 caracteres.",
+  }),
+  address: z.string().min(5, {
+    message: "Endereço deve ter pelo menos 5 caracteres.",
+  }),
+  city: z.string().min(2, {
+    message: "Cidade deve ter pelo menos 2 caracteres.",
+  }),
+  province: z.string().min(2, {
+    message: "Província deve ter pelo menos 2 caracteres.",
+  }),
+  bio: z.string().max(160, {
+    message: "Bio deve ter no máximo 160 caracteres.",
+  }).optional(),
+  userType: z.enum(["investidor", "parceiro"], {
+    required_error: "Por favor, selecione um tipo de usuário.",
+  }),
+});
 
 export const RegisterForm = () => {
+  const [files, setFiles] = useState<{ biFront?: File; biBack?: File }>({});
   const { toast } = useToast();
+  const navigate = useNavigate();
   const { signUp } = useAuth();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [userType, setUserType] = useState<"investidor" | "parceiro">("investidor");
-  const [currentStep, setCurrentStep] = useState<number>(1);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
-  
-  const [formData, setFormData] = useState({
-    nome: "",
-    idade: "",
-    endereco: "",
-    documentoNumero: "",
-    email: "",
-    telefone: "",
-    senha: "",
-    confirmarSenha: "",
-    
-    profissao: "",
-    nomeEmpresa: "",
-    ramoAtuacao: "",
-    website: "",
-    contatoProfissional: "",
-    
-    documentoFrente: null as File | null,
-    documentoVerso: null as File | null,
-    fotoPerfil: null as File | null,
-    
-    aceitoTermos: false,
+
+  const form = useForm<z.infer<typeof registerFormSchema>>({
+    resolver: zodResolver(registerFormSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+      phone: "",
+      address: "",
+      city: "",
+      province: "",
+      bio: "",
+      userType: "investidor",
+    },
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
-  };
+  const isLoading = form.formState.isSubmitting;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, files } = e.target;
-    if (files && files.length > 0) {
-      setFormData({
-        ...formData,
-        [name]: files[0],
-      });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'biFront' | 'biBack') => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setFiles(prevFiles => ({ ...prevFiles, [field]: file }));
     }
   };
 
-  const handleCheckboxChange = (name: string, checked: boolean) => {
-    setFormData({
-      ...formData,
-      [name]: checked,
-    });
-  };
-
-  const nextStep = () => {
-    if (currentStep === 1) {
-      setCurrentStep(2);
-    } else if (currentStep === 2) {
-      if (userType === "parceiro" && formData.profissao.trim() === "") {
-        toast({
-          variant: "destructive",
-          title: "Campo obrigatório",
-          description: "Por favor, preencha sua profissão.",
-        });
-        return;
-      }
-      setCurrentStep(3);
-    }
-  };
-
-  const prevStep = () => {
-    setCurrentStep(currentStep - 1);
-  };
-
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (formData.senha !== formData.confirmarSenha) {
+  const onSubmit = async (values: z.infer<typeof registerFormSchema>) => {
+    if (!files.biFront || !files.biBack) {
       toast({
         variant: "destructive",
-        title: "As senhas não coincidem",
-        description: "Por favor, verifique se as senhas são iguais.",
+        title: "Erro ao registrar",
+        description: "Por favor, carregue as duas faces do seu BI.",
       });
       return;
     }
-    
-    if (!formData.aceitoTermos) {
-      toast({
-        variant: "destructive",
-        title: "Termos e Condições",
-        description: "Você precisa aceitar os termos para continuar.",
-      });
-      return;
-    }
-    
-    setIsLoading(true);
-    
+
     try {
-      const userData = {
-        nome: formData.nome,
-        idade: parseInt(formData.idade),
-        endereco: formData.endereco,
-        documentoNumero: formData.documentoNumero,
-        telefone: formData.telefone,
-        nomeEmpresa: formData.nomeEmpresa,
-        ramoAtuacao: formData.ramoAtuacao,
-        profissao: formData.profissao,
-        website: formData.website,
-        contatoProfissional: formData.contatoProfissional
-      };
-
-      await signUp(formData.email, formData.senha, userType, userData);
-      
-      toast({
-        title: "Registro realizado com sucesso",
-        description: `Sua conta de ${userType} foi criada. Por favor, verifique seu email para confirmar a conta.`,
+      await signUp(values.email, values.password, values.userType, {
+        name: values.name,
+        phone: values.phone,
+        address: values.address,
+        city: values.city,
+        province: values.province,
+        bio: values.bio,
+        biFront: files.biFront,
+        biBack: files.biBack,
       });
-
+      toast({
+        title: "Cadastro realizado com sucesso!",
+        description: "Você será redirecionado para a página de login.",
+      });
+      navigate("/login");
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro no registro",
-        description: error.message || "Ocorreu um erro ao criar a conta.",
-      });
-      console.error(error);
-    } finally {
-      setIsLoading(false);
+      handleAuthError(error, toast);
     }
   };
 
   return (
-    <form onSubmit={handleRegister} className="space-y-5">
-      {currentStep === 1 && (
-        <>
-          <div className="space-y-4">
-            <Label className="text-center block mb-2">Você está se cadastrando como:</Label>
-            <div className="grid grid-cols-2 gap-4">
-              <Button
-                type="button"
-                variant={userType === "investidor" ? "default" : "outline"}
-                className={`w-full ${userType === "investidor" ? "bg-gradient-primary" : ""}`}
-                onClick={() => setUserType("investidor")}
-              >
-                Investidor
-              </Button>
-              <Button
-                type="button"
-                variant={userType === "parceiro" ? "default" : "outline"}
-                className={`w-full ${userType === "parceiro" ? "bg-gradient-primary" : ""}`}
-                onClick={() => setUserType("parceiro")}
-              >
-                Parceiro (Empresa)
-              </Button>
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="nome">Nome Completo</Label>
-            <Input
-              id="nome"
-              name="nome"
-              placeholder="João Silva"
-              value={formData.nome}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="idade">Idade</Label>
-            <Input
-              id="idade"
-              name="idade"
-              type="number"
-              placeholder="30"
-              value={formData.idade}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="endereco">Endereço Completo (morada)</Label>
-            <Textarea
-              id="endereco"
-              name="endereco"
-              placeholder="Rua, número, bairro, cidade, estado, CEP"
-              value={formData.endereco}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <Button 
-            type="button" 
-            className="w-full bg-gradient-primary hover:opacity-90"
-            onClick={nextStep}
-          >
-            Continuar
-          </Button>
-        </>
-      )}
-      
-      {currentStep === 2 && (
-        <>
-          {userType === "parceiro" && (
-            <>
-              <div className="space-y-2">
-                <Label htmlFor="profissao">Profissão</Label>
-                <Input
-                  id="profissao"
-                  name="profissao"
-                  placeholder="Engenheiro, Médico, etc."
-                  value={formData.profissao}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="nomeEmpresa">Nome da Empresa ou Razão Social</Label>
-                <Input
-                  id="nomeEmpresa"
-                  name="nomeEmpresa"
-                  placeholder="Empresa XYZ Ltda."
-                  value={formData.nomeEmpresa}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="ramoAtuacao">Ramo de Atuação</Label>
-                <Input
-                  id="ramoAtuacao"
-                  name="ramoAtuacao"
-                  placeholder="Tecnologia, Construção, etc."
-                  value={formData.ramoAtuacao}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="website">Website ou Redes Sociais (opcional)</Label>
-                <Input
-                  id="website"
-                  name="website"
-                  placeholder="www.empresa.com.br"
-                  value={formData.website}
-                  onChange={handleInputChange}
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="contatoProfissional">Contato Profissional</Label>
-                <Input
-                  id="contatoProfissional"
-                  name="contatoProfissional"
-                  placeholder="Email ou telefone profissional"
-                  value={formData.contatoProfissional}
-                  onChange={handleInputChange}
-                  required
-                />
-              </div>
-            </>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Nome Completo</FormLabel>
+                <FormControl>
+                  <Input placeholder="João Silva" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="joao.silva@example.com" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <FormField
+          control={form.control}
+          name="password"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Senha</FormLabel>
+              <FormControl>
+                <Input type="password" {...field} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
           )}
-          
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="documentoNumero">Número do Documento de Identidade</Label>
-              <Input
-                id="documentoNumero"
-                name="documentoNumero"
-                placeholder="000.000.000-00"
-                value={formData.documentoNumero}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-            
-            <div className="grid gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="documentoFrente">Foto da Frente do Documento</Label>
-                <Input
-                  id="documentoFrente"
-                  name="documentoFrente"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  required
-                  className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+        />
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="phone"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Telefone</FormLabel>
+                <FormControl>
+                  <Input placeholder="9XX XXX XXX" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="userType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Tipo de Conta</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Selecione o tipo de conta" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="investidor">Investidor</SelectItem>
+                    <SelectItem value="parceiro">Parceiro</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <FormField
+            control={form.control}
+            name="address"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Endereço</FormLabel>
+                <FormControl>
+                  <Input placeholder="Rua, número, bairro" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Cidade</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Luanda" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="province"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Província</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Luanda" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        </div>
+
+        <FormField
+          control={form.control}
+          name="bio"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Bio</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Conte-nos um pouco sobre você (opcional)."
+                  className="resize-none"
+                  {...field}
                 />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="documentoVerso">Foto do Verso do Documento</Label>
-                <Input
-                  id="documentoVerso"
-                  name="documentoVerso"
-                  type="file"
-                  accept="image/*"
-                  onChange={handleFileChange}
-                  required
-                  className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-                />
-              </div>
-            </div>
-          </div>
-          
-          <div className="flex justify-between space-x-4">
-            <Button 
-              type="button" 
-              variant="outline"
-              className="w-1/2"
-              onClick={prevStep}
-            >
-              Voltar
-            </Button>
-            <Button 
-              type="button" 
-              className="w-1/2 bg-gradient-primary hover:opacity-90"
-              onClick={nextStep}
-            >
-              Continuar
-            </Button>
-          </div>
-        </>
-      )}
-      
-      {currentStep === 3 && (
-        <>
+              </FormControl>
+              <FormDescription>
+                Escreva uma breve descrição sobre você.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {/* Update the upload field styles for better alignment */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              name="email"
-              type="email"
-              placeholder="nome@exemplo.com"
-              value={formData.email}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="telefone">Telefone</Label>
-            <Input
-              id="telefone"
-              name="telefone"
-              placeholder="+55 (00) 00000-0000"
-              value={formData.telefone}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="fotoPerfil">Foto de Perfil (opcional)</Label>
-            <Input
-              id="fotoPerfil"
-              name="fotoPerfil"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="senha">Senha</Label>
-            <div className="relative">
+            <FormLabel>BI (Frente)</FormLabel>
+            <div className="flex items-center gap-2">
               <Input
-                id="senha"
-                name="senha"
-                type={showPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={formData.senha}
-                onChange={handleInputChange}
-                required
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, 'biFront')}
+                className="hidden"
+                id="biFront"
               />
-              <button
+              <Button
                 type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                onClick={() => setShowPassword(!showPassword)}
+                variant="outline"
+                size="sm"
+                className="h-9 px-3 flex items-center gap-2"
+                onClick={() => document.getElementById('biFront')?.click()}
               >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+                <UploadIcon size={16} />
+                <span>Explorar...</span>
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {files.biFront?.name || "Nenhum ficheiro selecionado"}
+              </span>
             </div>
           </div>
-          
+
           <div className="space-y-2">
-            <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
-            <div className="relative">
+            <FormLabel>BI (Verso)</FormLabel>
+            <div className="flex items-center gap-2">
               <Input
-                id="confirmarSenha"
-                name="confirmarSenha"
-                type={showConfirmPassword ? "text" : "password"}
-                placeholder="••••••••"
-                value={formData.confirmarSenha}
-                onChange={handleInputChange}
-                required
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleFileChange(e, 'biBack')}
+                className="hidden"
+                id="biBack"
               />
-              <button
+              <Button
                 type="button"
-                className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                variant="outline"
+                size="sm"
+                className="h-9 px-3 flex items-center gap-2"
+                onClick={() => document.getElementById('biBack')?.click()}
               >
-                {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
+                <UploadIcon size={16} />
+                <span>Explorar...</span>
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                {files.biBack?.name || "Nenhum ficheiro selecionado"}
+              </span>
             </div>
           </div>
-          
-          <div className="flex items-center space-x-2">
-            <Checkbox 
-              id="aceitoTermos" 
-              checked={formData.aceitoTermos}
-              onCheckedChange={(checked) => handleCheckboxChange("aceitoTermos", checked as boolean)}
-              required
-            />
-            <Label htmlFor="aceitoTermos" className="text-sm font-normal cursor-pointer">
-              Li e aceito os{" "}
-              <Link to="/termos" className="text-purple hover:text-purple-dark">
-                Termos de Serviço
-              </Link>{" "}
-              e{" "}
-              <Link to="/privacidade" className="text-purple hover:text-purple-dark">
-                Política de Privacidade
-              </Link>
-            </Label>
-          </div>
-          
-          <div className="flex justify-between space-x-4">
-            <Button 
-              type="button" 
-              variant="outline"
-              className="w-1/2"
-              onClick={prevStep}
-            >
-              Voltar
-            </Button>
-            <Button 
-              type="submit" 
-              className="w-1/2 bg-gradient-primary hover:opacity-90" 
-              disabled={isLoading || !formData.aceitoTermos}
-            >
-              {isLoading ? "Criando conta..." : "Criar conta"}
-            </Button>
-          </div>
-        </>
-      )}
-    </form>
+        </div>
+
+        <Button disabled={isLoading} className="w-full" type="submit">
+          {isLoading ? "Cadastrando..." : "Cadastrar"}
+        </Button>
+      </form>
+    </Form>
   );
 };
-
-export default RegisterForm;
