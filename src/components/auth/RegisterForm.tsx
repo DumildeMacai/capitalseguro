@@ -20,9 +20,7 @@ export const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   
-  // Dados do formulário
   const [formData, setFormData] = useState({
-    // Dados comuns
     nome: "",
     idade: "",
     endereco: "",
@@ -32,19 +30,16 @@ export const RegisterForm = () => {
     senha: "",
     confirmarSenha: "",
     
-    // Dados específicos de parceiro
     profissao: "",
     nomeEmpresa: "",
     ramoAtuacao: "",
     website: "",
     contatoProfissional: "",
     
-    // Arquivos
     documentoFrente: null as File | null,
     documentoVerso: null as File | null,
     fotoPerfil: null as File | null,
     
-    // Termos
     aceitoTermos: false,
   });
 
@@ -74,7 +69,6 @@ export const RegisterForm = () => {
   };
 
   const nextStep = () => {
-    // Validação básica para o primeiro passo
     if (currentStep === 1) {
       setCurrentStep(2);
     } else if (currentStep === 2) {
@@ -97,7 +91,6 @@ export const RegisterForm = () => {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validação de senha
     if (formData.senha !== formData.confirmarSenha) {
       toast({
         variant: "destructive",
@@ -107,7 +100,6 @@ export const RegisterForm = () => {
       return;
     }
     
-    // Validação de termos
     if (!formData.aceitoTermos) {
       toast({
         variant: "destructive",
@@ -120,7 +112,6 @@ export const RegisterForm = () => {
     setIsLoading(true);
     
     try {
-      // Dados do usuário a serem enviados
       const userData = {
         nome: formData.nome,
         idade: parseInt(formData.idade),
@@ -134,7 +125,6 @@ export const RegisterForm = () => {
         contatoProfissional: formData.contatoProfissional
       };
 
-      // Registrar usuário no Supabase
       await signUp(formData.email, formData.senha, userType, userData);
       
       toast({
@@ -292,42 +282,46 @@ export const RegisterForm = () => {
             </>
           )}
           
-          <div className="space-y-2">
-            <Label htmlFor="documentoNumero">Número do Documento de Identidade</Label>
-            <Input
-              id="documentoNumero"
-              name="documentoNumero"
-              placeholder="000.000.000-00"
-              value={formData.documentoNumero}
-              onChange={handleInputChange}
-              required
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="documentoFrente">Foto da Frente do Documento</Label>
-            <Input
-              id="documentoFrente"
-              name="documentoFrente"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              required
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="documentoVerso">Foto do Verso do Documento</Label>
-            <Input
-              id="documentoVerso"
-              name="documentoVerso"
-              type="file"
-              accept="image/*"
-              onChange={handleFileChange}
-              required
-              className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="documentoNumero">Número do Documento de Identidade</Label>
+              <Input
+                id="documentoNumero"
+                name="documentoNumero"
+                placeholder="000.000.000-00"
+                value={formData.documentoNumero}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+            
+            <div className="grid gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="documentoFrente">Foto da Frente do Documento</Label>
+                <Input
+                  id="documentoFrente"
+                  name="documentoFrente"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  required
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="documentoVerso">Foto do Verso do Documento</Label>
+                <Input
+                  id="documentoVerso"
+                  name="documentoVerso"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  required
+                  className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+                />
+              </div>
+            </div>
           </div>
           
           <div className="flex justify-between space-x-4">
@@ -474,3 +468,5 @@ export const RegisterForm = () => {
     </form>
   );
 };
+
+export default RegisterForm;
