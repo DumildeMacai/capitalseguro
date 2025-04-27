@@ -33,7 +33,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ files, onFileCha
             <Upload size={16} />
             <span>Explorar...</span>
           </Button>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-muted-foreground truncate max-w-[180px]">
             {files.biFront?.name || "Nenhum ficheiro selecionado"}
           </span>
         </div>
@@ -59,7 +59,7 @@ export const DocumentUpload: React.FC<DocumentUploadProps> = ({ files, onFileCha
             <Upload size={16} />
             <span>Explorar...</span>
           </Button>
-          <span className="text-sm text-muted-foreground">
+          <span className="text-sm text-muted-foreground truncate max-w-[180px]">
             {files.biBack?.name || "Nenhum ficheiro selecionado"}
           </span>
         </div>

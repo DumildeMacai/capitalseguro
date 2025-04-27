@@ -18,13 +18,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // First set up auth state listener to avoid missing auth events
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log("Auth state changed:", event);
         setSession(currentSession);
         setUser(currentSession?.user ?? null);
       }
     );
 
+    // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
@@ -37,29 +40,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
+      console.log("Tentando fazer login para:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro de login:", error);
+        throw error;
+      }
 
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('tipo')
-        .eq('id', data.user.id)
-        .single();
+      console.log("Login bem-sucedido:", data.user?.id);
 
-      if (profileData) {
-        const redirectPath = getRedirectPath(profileData.tipo);
-        navigate(redirectPath);
+      // Agora vamos buscar o tipo de usuário
+      if (data.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('tipo')
+          .eq('id', data.user.id)
+          .maybeSingle();
+        
+        if (profileError) {
+          console.error("Erro ao buscar perfil:", profileError);
+        }
 
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo de volta!",
-        });
+        if (profileData) {
+          const redirectPath = getRedirectPath(profileData.tipo);
+          console.log("Redirecionando para:", redirectPath);
+          navigate(redirectPath);
+
+          toast({
+            title: "Login realizado com sucesso",
+            description: "Bem-vindo de volta!",
+          });
+        }
       }
     } catch (error: any) {
+      console.error("Erro completo no login:", error);
       handleAuthError(error, toast);
       throw error;
     }
@@ -67,32 +85,90 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string, userType: 'investidor' | 'parceiro', userData: any) => {
     try {
+      console.log("Dados de registro:", { email, userType, userData });
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
             tipo: userType,
-            ...userData
+            nome: userData.name,
+            telefone: userData.phone,
           },
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Erro no registro:", error);
+        throw error;
+      }
 
+      console.log("Usuário registrado:", data.user?.id);
+
+      // If user was created successfully
       if (data.user) {
+        // Update profile information
         const { error: profileError } = await supabase
           .from('profiles')
           .update({
-            nome_completo: userData.nome,
-            telefone: userData.telefone,
+            nome_completo: userData.name,
+            telefone: userData.phone,
             empresa_nome: userType === 'parceiro' ? userData.nomeEmpresa : null,
             ramo_negocio: userType === 'parceiro' ? userData.ramoAtuacao : null,
+            email: email,
           })
           .eq('id', data.user.id);
 
         if (profileError) {
           console.error('Erro ao atualizar perfil:', profileError);
+        }
+
+        // Handle document uploads
+        if (userData.biFront instanceof File) {
+          try {
+            const { error: frontError } = await supabase.storage
+              .from('documentos')
+              .upload(`${data.user.id}/bi_frente`, userData.biFront);
+            
+            if (frontError) console.error("Erro no upload do BI (frente):", frontError);
+          } catch (uploadError) {
+            console.error("Erro ao fazer upload do BI (frente):", uploadError);
+          }
+        }
+
+        if (userData.biBack instanceof File) {
+          try {
+            const { error: backError } = await supabase.storage
+              .from('documentos')
+              .upload(`${data.user.id}/bi_verso`, userData.biBack);
+            
+            if (backError) console.error("Erro no upload do BI (verso):", backError);
+          } catch (uploadError) {
+            console.error("Erro ao fazer upload do BI (verso):", uploadError);
+          }
+        }
+
+        // Update document paths in profile
+        if (userData.biFront instanceof File || userData.biBack instanceof File) {
+          const docUpdate: { documento_identidade_frente?: string; documento_identidade_verso?: string } = {};
+          
+          if (userData.biFront instanceof File) {
+            docUpdate.documento_identidade_frente = `${data.user.id}/bi_frente`;
+          }
+          
+          if (userData.biBack instanceof File) {
+            docUpdate.documento_identidade_verso = `${data.user.id}/bi_verso`;
+          }
+
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update(docUpdate)
+            .eq('id', data.user.id);
+            
+          if (updateError) {
+            console.error("Erro ao atualizar caminhos dos documentos:", updateError);
+          }
         }
       }
 
@@ -103,6 +179,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       navigate('/login');
     } catch (error: any) {
+      console.error("Erro completo no registro:", error);
       handleAuthError(error, toast);
       throw error;
     }
