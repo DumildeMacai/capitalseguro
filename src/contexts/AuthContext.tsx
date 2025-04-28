@@ -29,6 +29,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     // Then check for existing session
     supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      console.log("Checking existing session:", currentSession?.user?.id || "No session");
       setSession(currentSession);
       setUser(currentSession?.user ?? null);
     });
@@ -40,20 +41,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signIn = async (email: string, password: string) => {
     try {
-      console.log("Tentando fazer login para:", email);
+      console.log("Attempting login for:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("Erro de login:", error);
+        console.error("Login error:", error);
         throw error;
       }
 
-      console.log("Login bem-sucedido:", data.user?.id);
+      console.log("Login successful:", data.user?.id);
 
-      // Agora vamos buscar o tipo de usuário
+      // Fetch user type
       if (data.user) {
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
@@ -62,12 +63,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           .maybeSingle();
         
         if (profileError) {
-          console.error("Erro ao buscar perfil:", profileError);
+          console.error("Error fetching profile:", profileError);
         }
 
         if (profileData) {
           const redirectPath = getRedirectPath(profileData.tipo);
-          console.log("Redirecionando para:", redirectPath);
+          console.log("Redirecting to:", redirectPath);
           navigate(redirectPath);
 
           toast({
@@ -77,7 +78,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       }
     } catch (error: any) {
-      console.error("Erro completo no login:", error);
+      console.error("Complete login error:", error);
       handleAuthError(error, toast);
       throw error;
     }
@@ -85,7 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = async (email: string, password: string, userType: 'investidor' | 'parceiro', userData: any) => {
     try {
-      console.log("Dados de registro:", { email, userType, userData });
+      console.log("Registration data:", { email, userType, userData });
       
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -100,86 +101,80 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       });
 
       if (error) {
-        console.error("Erro no registro:", error);
+        console.error("Registration error in auth context:", error);
         throw error;
       }
 
-      console.log("Usuário registrado:", data.user?.id);
+      console.log("User registered in auth context:", data.user?.id);
 
-      // If user was created successfully
+      // If user was created successfully, handle document uploads and profile update
       if (data.user) {
-        // Update profile information
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({
-            nome_completo: userData.name,
-            telefone: userData.phone,
-            empresa_nome: userType === 'parceiro' ? userData.nomeEmpresa : null,
-            ramo_negocio: userType === 'parceiro' ? userData.ramoAtuacao : null,
-            email: email,
-          })
-          .eq('id', data.user.id);
-
-        if (profileError) {
-          console.error('Erro ao atualizar perfil:', profileError);
-        }
-
-        // Handle document uploads
-        if (userData.biFront instanceof File) {
-          try {
+        try {
+          // Upload front document if available
+          if (userData.biFront instanceof File) {
             const { error: frontError } = await supabase.storage
               .from('documentos')
               .upload(`${data.user.id}/bi_frente`, userData.biFront);
             
-            if (frontError) console.error("Erro no upload do BI (frente):", frontError);
-          } catch (uploadError) {
-            console.error("Erro ao fazer upload do BI (frente):", uploadError);
+            if (frontError) console.error("Error uploading front document:", frontError);
           }
-        }
 
-        if (userData.biBack instanceof File) {
-          try {
+          // Upload back document if available
+          if (userData.biBack instanceof File) {
             const { error: backError } = await supabase.storage
               .from('documentos')
               .upload(`${data.user.id}/bi_verso`, userData.biBack);
             
-            if (backError) console.error("Erro no upload do BI (verso):", backError);
-          } catch (uploadError) {
-            console.error("Erro ao fazer upload do BI (verso):", uploadError);
+            if (backError) console.error("Error uploading back document:", backError);
           }
-        }
 
-        // Update document paths in profile
-        if (userData.biFront instanceof File || userData.biBack instanceof File) {
-          const docUpdate: { documento_identidade_frente?: string; documento_identidade_verso?: string } = {};
-          
+          // Update additional profile information
+          const profileData: Record<string, any> = {
+            nome_completo: userData.name,
+            telefone: userData.phone,
+            endereco: userData.address,
+            cidade: userData.city,
+            provincia: userData.province,
+            bio: userData.bio || '',
+            email,
+          };
+
+          // Add document paths if files were uploaded
           if (userData.biFront instanceof File) {
-            docUpdate.documento_identidade_frente = `${data.user.id}/bi_frente`;
+            profileData.documento_identidade_frente = `${data.user.id}/bi_frente`;
           }
           
           if (userData.biBack instanceof File) {
-            docUpdate.documento_identidade_verso = `${data.user.id}/bi_verso`;
+            profileData.documento_identidade_verso = `${data.user.id}/bi_verso`;
           }
 
-          const { error: updateError } = await supabase
-            .from('profiles')
-            .update(docUpdate)
-            .eq('id', data.user.id);
-            
-          if (updateError) {
-            console.error("Erro ao atualizar caminhos dos documentos:", updateError);
+          // Add business specific fields if user type is 'parceiro'
+          if (userType === 'parceiro' && userData.nomeEmpresa) {
+            profileData.empresa_nome = userData.nomeEmpresa;
+            profileData.ramo_negocio = userData.ramoAtuacao || '';
           }
+
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update(profileData)
+            .eq('id', data.user.id);
+
+          if (profileError) {
+            console.error('Error updating profile:', profileError);
+          }
+        } catch (updateError) {
+          console.error("Exception during document/profile handling:", updateError);
         }
       }
 
       toast({
-        title: "Registro realizado com sucesso",
+        title: "Cadastro realizado com sucesso",
         description: "Agora você pode fazer login.",
       });
 
       navigate('/login');
     } catch (error: any) {
-      console.error("Erro completo no registro:", error);
+      console.error("Complete registration error in auth context:", error);
       handleAuthError(error, toast);
       throw error;
     }
