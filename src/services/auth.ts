@@ -74,29 +74,26 @@ export const registerUser = async (
         }
       }
 
-      // Update profile with document paths and additional user data
+      // Update profile with document paths and additional user data using RPC
       try {
-        const updateData: Record<string, any> = {
+        const updateData = {
+          user_id: userId,
+          nome_completo: userData.name,
+          telefone: userData.phone,
           endereco: userData.address,
           cidade: userData.city,
           provincia: userData.province,
-          bio: userData.bio || ''
+          bio: userData.bio || '',
+          doc_frente: userData.biFront instanceof File ? `${userId}/bi_frente` : null,
+          doc_verso: userData.biBack instanceof File ? `${userId}/bi_verso` : null,
+          empresa_nome: userType === 'parceiro' && userData.nomeEmpresa ? userData.nomeEmpresa : null,
+          ramo_negocio: userType === 'parceiro' && userData.ramoAtuacao ? userData.ramoAtuacao : null
         };
-        
-        if (userData.biFront instanceof File) {
-          updateData.documento_identidade_frente = `${userId}/bi_frente`;
-        }
-        
-        if (userData.biBack instanceof File) {
-          updateData.documento_identidade_verso = `${userId}/bi_verso`;
-        }
         
         console.log("Updating profile with data:", updateData);
         
         const { error: updateError } = await supabase
-          .from('profiles')
-          .update(updateData)
-          .eq('id', userId);
+          .rpc('update_user_profile', updateData);
           
         if (updateError) {
           console.error("Error updating profile with document paths:", updateError);

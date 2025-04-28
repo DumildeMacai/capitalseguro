@@ -10,19 +10,22 @@ export const useUserType = (session: Session | null) => {
 
   useEffect(() => {
     const fetchUserType = async (userId: string) => {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('tipo')
-        .eq('id', userId)
-        .single();
+      try {
+        // Use raw SQL query instead of builder to get user type
+        const { data, error } = await supabase
+          .rpc('get_user_type', { user_id: userId });
+          
+        if (data) {
+          setUserType(data);
+        } else if (error) {
+          console.error('Erro ao buscar tipo de usuário:', error);
+        }
         
-      if (data) {
-        setUserType(data.tipo);
-      } else if (error) {
-        console.error('Erro ao buscar tipo de usuário:', error);
+        setLoading(false);
+      } catch (err) {
+        console.error('Exception ao buscar tipo de usuário:', err);
+        setLoading(false);
       }
-      
-      setLoading(false);
     };
 
     if (session?.user) {

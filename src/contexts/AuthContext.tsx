@@ -54,27 +54,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       console.log("Login successful:", data.user?.id);
 
-      // Fetch user type
+      // Fetch user type using RPC
       if (data.user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('tipo')
-          .eq('id', data.user.id)
-          .maybeSingle();
-        
-        if (profileError) {
-          console.error("Error fetching profile:", profileError);
-        }
+        try {
+          const { data: userTypeData, error: userTypeError } = await supabase
+            .rpc('get_user_type', { user_id: data.user.id });
+          
+          if (userTypeError) {
+            console.error("Error fetching user type:", userTypeError);
+          }
 
-        if (profileData) {
-          const redirectPath = getRedirectPath(profileData.tipo);
-          console.log("Redirecting to:", redirectPath);
-          navigate(redirectPath);
+          if (userTypeData) {
+            const redirectPath = getRedirectPath(userTypeData);
+            console.log("Redirecting to:", redirectPath);
+            navigate(redirectPath);
 
-          toast({
-            title: "Login realizado com sucesso",
-            description: "Bem-vindo de volta!",
-          });
+            toast({
+              title: "Login realizado com sucesso",
+              description: "Bem-vindo de volta!",
+            });
+          }
+        } catch (userTypeError) {
+          console.error("Exception during user type fetch:", userTypeError);
         }
       }
     } catch (error: any) {
@@ -128,39 +129,34 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (backError) console.error("Error uploading back document:", backError);
           }
 
-          // Update additional profile information
-          const profileData: Record<string, any> = {
-            nome_completo: userData.name,
-            telefone: userData.phone,
-            endereco: userData.address,
-            cidade: userData.city,
-            provincia: userData.province,
-            bio: userData.bio || '',
-            email,
-          };
-
-          // Add document paths if files were uploaded
-          if (userData.biFront instanceof File) {
-            profileData.documento_identidade_frente = `${data.user.id}/bi_frente`;
-          }
-          
-          if (userData.biBack instanceof File) {
-            profileData.documento_identidade_verso = `${data.user.id}/bi_verso`;
-          }
-
-          // Add business specific fields if user type is 'parceiro'
-          if (userType === 'parceiro' && userData.nomeEmpresa) {
-            profileData.empresa_nome = userData.nomeEmpresa;
-            profileData.ramo_negocio = userData.ramoAtuacao || '';
-          }
-
-          const { error: profileError } = await supabase
-            .from('profiles')
-            .update(profileData)
-            .eq('id', data.user.id);
-
-          if (profileError) {
-            console.error('Error updating profile:', profileError);
+          // Update additional profile information using RPC
+          try {
+            const updateData = {
+              user_id: data.user.id,
+              nome_completo: userData.name,
+              telefone: userData.phone,
+              endereco: userData.address,
+              cidade: userData.city,
+              provincia: userData.province,
+              bio: userData.bio || '',
+              doc_frente: userData.biFront instanceof File ? `${data.user.id}/bi_frente` : null,
+              doc_verso: userData.biBack instanceof File ? `${data.user.id}/bi_verso` : null,
+              empresa_nome: userType === 'parceiro' && userData.nomeEmpresa ? userData.nomeEmpresa : null,
+              ramo_negocio: userType === 'parceiro' && userData.ramoAtuacao ? userData.ramoAtuacao : null
+            };
+            
+            console.log("Updating profile with data:", updateData);
+            
+            const { error: updateError } = await supabase
+              .rpc('update_user_profile', updateData);
+              
+            if (updateError) {
+              console.error('Error updating profile:', updateError);
+            } else {
+              console.log("Profile updated successfully");
+            }
+          } catch (updateError) {
+            console.error("Exception during profile update:", updateError);
           }
         } catch (updateError) {
           console.error("Exception during document/profile handling:", updateError);
