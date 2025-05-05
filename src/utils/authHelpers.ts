@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { ToastType } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { handleAuthError, getRedirectPath } from '@/utils/authUtils';
 import { UserType } from '@/types/auth';
 import { NavigateFunction } from 'react-router-dom';
@@ -25,7 +25,7 @@ export const handleSignIn = async (
   email: string, 
   password: string, 
   navigate: NavigateFunction,
-  toast: ToastType
+  toast: ReturnType<typeof useToast>['toast']
 ) => {
   try {
     console.log("Attempting login for:", email);
@@ -57,7 +57,6 @@ export const handleSignIn = async (
       }
     }
     
-    return data;
   } catch (error: any) {
     console.error("Complete login error:", error);
     handleAuthError(error, toast);
@@ -71,7 +70,7 @@ export const handleSignUp = async (
   userType: 'investidor' | 'parceiro', 
   userData: any,
   navigate: NavigateFunction,
-  toast: ToastType
+  toast: ReturnType<typeof useToast>['toast']
 ) => {
   try {
     console.log("Registration data:", { email, userType, userData });
@@ -108,7 +107,6 @@ export const handleSignUp = async (
 
     navigate('/login');
     
-    return data;
   } catch (error: any) {
     console.error("Complete registration error in auth context:", error);
     handleAuthError(error, toast);
@@ -171,7 +169,7 @@ export const updateUserProfile = async (userId: string, userData: any, userType:
   }
 };
 
-export const handleSignOut = async (navigate: NavigateFunction, toast: ToastType) => {
+export const handleSignOut = async (navigate: NavigateFunction, toast: ReturnType<typeof useToast>['toast']) => {
   try {
     await supabase.auth.signOut();
     navigate('/login');
