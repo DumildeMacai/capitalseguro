@@ -74,6 +74,41 @@ export type Database = {
           },
         ]
       }
+      inscricoes_investimentos: {
+        Row: {
+          data_inscricao: string | null
+          id: string
+          investimento_id: string | null
+          status: string
+          usuario_id: string | null
+          valor_investido: number
+        }
+        Insert: {
+          data_inscricao?: string | null
+          id?: string
+          investimento_id?: string | null
+          status?: string
+          usuario_id?: string | null
+          valor_investido: number
+        }
+        Update: {
+          data_inscricao?: string | null
+          id?: string
+          investimento_id?: string | null
+          status?: string
+          usuario_id?: string | null
+          valor_investido?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inscricoes_investimentos_investimento_id_fkey"
+            columns: ["investimento_id"]
+            isOneToOne: false
+            referencedRelation: "investimentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       investidores: {
         Row: {
           data_criacao: string | null
@@ -176,12 +211,82 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          bio: string | null
+          cidade: string | null
+          data_criacao: string | null
+          documento_frente: string | null
+          documento_verso: string | null
+          email: string
+          empresa_nome: string | null
+          endereco: string | null
+          id: string
+          nome_completo: string | null
+          provincia: string | null
+          ramo_negocio: string | null
+          telefone: string | null
+          tipo: Database["public"]["Enums"]["user_type"]
+        }
+        Insert: {
+          bio?: string | null
+          cidade?: string | null
+          data_criacao?: string | null
+          documento_frente?: string | null
+          documento_verso?: string | null
+          email: string
+          empresa_nome?: string | null
+          endereco?: string | null
+          id: string
+          nome_completo?: string | null
+          provincia?: string | null
+          ramo_negocio?: string | null
+          telefone?: string | null
+          tipo?: Database["public"]["Enums"]["user_type"]
+        }
+        Update: {
+          bio?: string | null
+          cidade?: string | null
+          data_criacao?: string | null
+          documento_frente?: string | null
+          documento_verso?: string | null
+          email?: string
+          empresa_nome?: string | null
+          endereco?: string | null
+          id?: string
+          nome_completo?: string | null
+          provincia?: string | null
+          ramo_negocio?: string | null
+          telefone?: string | null
+          tipo?: Database["public"]["Enums"]["user_type"]
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_type: {
+        Args: { user_id: string }
+        Returns: Database["public"]["Enums"]["user_type"]
+      }
+      update_user_profile: {
+        Args: {
+          user_id: string
+          nome_completo: string
+          telefone: string
+          endereco: string
+          cidade: string
+          provincia: string
+          bio: string
+          doc_frente: string
+          doc_verso: string
+          empresa_nome?: string
+          ramo_negocio?: string
+        }
+        Returns: undefined
+      }
     }
     Enums: {
       user_type: "admin" | "parceiro" | "investidor"

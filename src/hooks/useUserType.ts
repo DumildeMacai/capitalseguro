@@ -11,12 +11,12 @@ export const useUserType = (session: Session | null) => {
   useEffect(() => {
     const fetchUserType = async (userId: string) => {
       try {
-        // Use raw SQL query instead of builder to get user type
+        // Usar a função RPC get_user_type para obter o tipo do usuário
         const { data, error } = await supabase
           .rpc('get_user_type', { user_id: userId });
           
         if (data) {
-          setUserType(data);
+          setUserType(data as UserType);
         } else if (error) {
           console.error('Erro ao buscar tipo de usuário:', error);
         }
