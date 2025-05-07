@@ -1,27 +1,28 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Users, UserCheck, Building, BarChart3, Settings, LogOut, 
-  PieChart, TrendingUp, Bell, Database
+  Bell
 } from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
 import AdminOverview from "@/components/AdminOverview";
 import AdminInvestors from "@/components/AdminInvestors";
 import AdminPartners from "@/components/AdminPartners";
 import AdminInvestments from "@/components/AdminInvestments";
+import AdminUsers from "@/components/AdminUsers";
+import { useAuth } from "@/contexts/AuthContext";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
+  const { signOut } = useAuth();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate("/login");
+    await signOut();
   };
 
   return (
@@ -37,6 +38,7 @@ const AdminDashboard = () => {
             {activeTab === "investors" && "Gerenciamento de Investidores"}
             {activeTab === "partners" && "Gerenciamento de Parceiros"}
             {activeTab === "investments" && "Gerenciamento de Investimentos"}
+            {activeTab === "users" && "Gerenciamento de Usuários"}
             {activeTab === "settings" && "Configurações"}
           </h1>
           <div className="flex items-center gap-4">
@@ -55,6 +57,7 @@ const AdminDashboard = () => {
           {activeTab === "investors" && <AdminInvestors />}
           {activeTab === "partners" && <AdminPartners />}
           {activeTab === "investments" && <AdminInvestments />}
+          {activeTab === "users" && <AdminUsers />}
           {activeTab === "settings" && (
             <Card>
               <CardHeader>

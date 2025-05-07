@@ -211,6 +211,39 @@ export type Database = {
         }
         Relationships: []
       }
+      perfis: {
+        Row: {
+          atualizado_em: string | null
+          criado_em: string | null
+          data_nascimento: string | null
+          email: string | null
+          id: string
+          nome: string | null
+          telefone: string | null
+          tipo_usuario: string | null
+        }
+        Insert: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          data_nascimento?: string | null
+          email?: string | null
+          id: string
+          nome?: string | null
+          telefone?: string | null
+          tipo_usuario?: string | null
+        }
+        Update: {
+          atualizado_em?: string | null
+          criado_em?: string | null
+          data_nascimento?: string | null
+          email?: string | null
+          id?: string
+          nome?: string | null
+          telefone?: string | null
+          tipo_usuario?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           bio: string | null
