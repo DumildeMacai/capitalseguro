@@ -64,7 +64,8 @@ const AdminUsers = () => {
 
   const setUserAsAdmin = async (userId: string, email: string) => {
     try {
-      const { error } = await supabase.rpc('set_user_as_admin', { user_email: email });
+      // Use the raw query instead of the typed RPC call
+      const { error } = await supabase.rpc('set_user_as_admin', { user_email: email } as any);
       
       if (error) throw error;
       
