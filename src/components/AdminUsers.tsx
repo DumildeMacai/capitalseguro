@@ -64,11 +64,8 @@ const AdminUsers = () => {
 
   const setUserAsAdmin = async (userId: string, email: string) => {
     try {
-      // Use a direct query since set_user_as_admin isn't in the TypeScript types
-      const { error } = await supabase.from('rpc').select('*', { 
-        head: true, 
-        count: 'exact' 
-      }).rpc('set_user_as_admin', { user_email: email });
+      // Fix for TypeScript error - use a direct function call instead of from().rpc()
+      const { error } = await supabase.rpc('set_user_as_admin', { user_email: email });
       
       if (error) throw error;
       

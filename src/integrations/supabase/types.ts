@@ -9,94 +9,32 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      administradores: {
-        Row: {
-          data_criacao: string | null
-          email: string
-          id: string
-          nivel_acesso: string | null
-          nome_completo: string
-          telefone: string | null
-          user_id: string | null
-        }
-        Insert: {
-          data_criacao?: string | null
-          email: string
-          id?: string
-          nivel_acesso?: string | null
-          nome_completo: string
-          telefone?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          data_criacao?: string | null
-          email?: string
-          id?: string
-          nivel_acesso?: string | null
-          nome_completo?: string
-          telefone?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      aplicacoes: {
-        Row: {
-          data_investimento: string | null
-          data_resgate: string | null
-          id: string
-          investimento_id: string | null
-          user_id: string | null
-          valor_investido: number
-        }
-        Insert: {
-          data_investimento?: string | null
-          data_resgate?: string | null
-          id?: string
-          investimento_id?: string | null
-          user_id?: string | null
-          valor_investido: number
-        }
-        Update: {
-          data_investimento?: string | null
-          data_resgate?: string | null
-          id?: string
-          investimento_id?: string | null
-          user_id?: string | null
-          valor_investido?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "aplicacoes_investimento_id_fkey"
-            columns: ["investimento_id"]
-            isOneToOne: false
-            referencedRelation: "investimentos"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       inscricoes_investimentos: {
         Row: {
+          data_aprovacao: string | null
           data_inscricao: string | null
           id: string
-          investimento_id: string | null
+          investimento_id: string
           status: string
-          usuario_id: string | null
+          usuario_id: string
           valor_investido: number
         }
         Insert: {
+          data_aprovacao?: string | null
           data_inscricao?: string | null
           id?: string
-          investimento_id?: string | null
+          investimento_id: string
           status?: string
-          usuario_id?: string | null
+          usuario_id: string
           valor_investido: number
         }
         Update: {
+          data_aprovacao?: string | null
           data_inscricao?: string | null
           id?: string
-          investimento_id?: string | null
+          investimento_id?: string
           status?: string
-          usuario_id?: string | null
+          usuario_id?: string
           valor_investido?: number
         }
         Relationships: [
@@ -109,138 +47,45 @@ export type Database = {
           },
         ]
       }
-      investidores: {
-        Row: {
-          data_criacao: string | null
-          documento_frente: string | null
-          documento_verso: string | null
-          id: string
-          idade: number | null
-          morada: string | null
-          nome_completo: string
-          user_id: string | null
-        }
-        Insert: {
-          data_criacao?: string | null
-          documento_frente?: string | null
-          documento_verso?: string | null
-          id?: string
-          idade?: number | null
-          morada?: string | null
-          nome_completo: string
-          user_id?: string | null
-        }
-        Update: {
-          data_criacao?: string | null
-          documento_frente?: string | null
-          documento_verso?: string | null
-          id?: string
-          idade?: number | null
-          morada?: string | null
-          nome_completo?: string
-          user_id?: string | null
-        }
-        Relationships: []
-      }
       investimentos: {
         Row: {
+          ativo: boolean | null
+          categoria: string | null
+          criado_por: string | null
+          data_criacao: string | null
           descricao: string | null
           id: string
           imagem: string | null
-          nome_investimento: string
-          rentabilidade: number | null
-          tipo: string | null
+          prazo_minimo: number | null
+          retorno_estimado: number | null
+          titulo: string
           valor_minimo: number | null
         }
         Insert: {
+          ativo?: boolean | null
+          categoria?: string | null
+          criado_por?: string | null
+          data_criacao?: string | null
           descricao?: string | null
           id?: string
           imagem?: string | null
-          nome_investimento: string
-          rentabilidade?: number | null
-          tipo?: string | null
+          prazo_minimo?: number | null
+          retorno_estimado?: number | null
+          titulo: string
           valor_minimo?: number | null
         }
         Update: {
+          ativo?: boolean | null
+          categoria?: string | null
+          criado_por?: string | null
+          data_criacao?: string | null
           descricao?: string | null
           id?: string
           imagem?: string | null
-          nome_investimento?: string
-          rentabilidade?: number | null
-          tipo?: string | null
+          prazo_minimo?: number | null
+          retorno_estimado?: number | null
+          titulo?: string
           valor_minimo?: number | null
-        }
-        Relationships: []
-      }
-      parceiros: {
-        Row: {
-          data_criacao: string | null
-          documento_frente: string | null
-          documento_verso: string | null
-          id: string
-          idade: number | null
-          morada: string | null
-          nome_completo: string
-          ramo_negocio: string | null
-          trabalho: string | null
-          user_id: string | null
-        }
-        Insert: {
-          data_criacao?: string | null
-          documento_frente?: string | null
-          documento_verso?: string | null
-          id?: string
-          idade?: number | null
-          morada?: string | null
-          nome_completo: string
-          ramo_negocio?: string | null
-          trabalho?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          data_criacao?: string | null
-          documento_frente?: string | null
-          documento_verso?: string | null
-          id?: string
-          idade?: number | null
-          morada?: string | null
-          nome_completo?: string
-          ramo_negocio?: string | null
-          trabalho?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      perfis: {
-        Row: {
-          atualizado_em: string | null
-          criado_em: string | null
-          data_nascimento: string | null
-          email: string | null
-          id: string
-          nome: string | null
-          telefone: string | null
-          tipo_usuario: string | null
-        }
-        Insert: {
-          atualizado_em?: string | null
-          criado_em?: string | null
-          data_nascimento?: string | null
-          email?: string | null
-          id: string
-          nome?: string | null
-          telefone?: string | null
-          tipo_usuario?: string | null
-        }
-        Update: {
-          atualizado_em?: string | null
-          criado_em?: string | null
-          data_nascimento?: string | null
-          email?: string | null
-          id?: string
-          nome?: string | null
-          telefone?: string | null
-          tipo_usuario?: string | null
         }
         Relationships: []
       }
@@ -303,6 +148,10 @@ export type Database = {
       get_user_type: {
         Args: { user_id: string }
         Returns: Database["public"]["Enums"]["user_type"]
+      }
+      set_user_as_admin: {
+        Args: { user_email: string }
+        Returns: undefined
       }
       update_user_profile: {
         Args: {
