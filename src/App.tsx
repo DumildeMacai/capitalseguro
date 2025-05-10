@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -16,18 +16,37 @@ import InvestorDashboard from "./pages/InvestorDashboard";
 import NotFound from "./pages/NotFound";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 const App = () => {
+  const [storageInitialized, setStorageInitialized] = useState<boolean | null>(null);
+
   useEffect(() => {
     // Inicializar storage quando a aplicação carregar
     const init = async () => {
-      await initializeStorage();
+      try {
+        console.log("Iniciando inicialização de armazenamento");
+        const result = await initializeStorage();
+        console.log("Resultado da inicialização:", result);
+        setStorageInitialized(result);
+      } catch (error) {
+        console.error("Erro ao inicializar armazenamento:", error);
+        setStorageInitialized(false);
+        // Continua a execução mesmo com erro
+      }
     };
     
     init();
   }, []);
 
+  // Renderizar a aplicação independentemente do resultado da inicialização do armazenamento
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>

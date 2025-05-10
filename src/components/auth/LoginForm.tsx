@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
+import { isAdminEmail, getRedirectPath, handleAuthError } from "@/utils/authUtils";
 
 export const LoginForm = () => {
   const { toast } = useToast();
@@ -22,13 +23,16 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      // Essas verificações são mantidas para compatibilidade com o fluxo existente
+      console.log("Tentando login para:", email);
+      
+      // Verificações para contas hardcoded para desenvolvimento
       if (email === "dumildemacai@gmail.com" && password === "19921admin1") {
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo, Administrador!",
         });
         navigate("/admin");
+        setIsLoading(false);
         return;
       } else if (email === "dumildemacai@gmail.com" && password === "19921parceiro1") {
         if (userType !== "parceiro") {
@@ -45,6 +49,7 @@ export const LoginForm = () => {
           description: "Bem-vindo, Parceiro!",
         });
         navigate("/parceiro");
+        setIsLoading(false);
         return;
       } else if (email === "dumildemacai@gmail.com" && password === "19921investidor1") {
         if (userType !== "investidor") {
@@ -61,56 +66,58 @@ export const LoginForm = () => {
           description: "Bem-vindo, Investidor!",
         });
         navigate("/investidor");
+        setIsLoading(false);
         return;
       }
 
-      // Login pelo Supabase
-      console.log("Tentando login para:", email);
+      // Login pelo Supabase com tratamento de erros melhorado
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
-        console.error("Erro no login:", error);
-        toast({
-          variant: "destructive",
-          title: "Erro no login",
-          description: error.message || "Credenciais inválidas. Por favor, verifique e tente novamente.",
-        });
-        setIsLoading(false);
-        return;
+        throw error;
       }
 
       console.log("Login bem-sucedido:", data.user?.id);
 
-      // Obter o tipo de usuário usando a função RPC
+      // Verifica se o usuário é admin pelo email
+      if (data.user && isAdminEmail(data.user.email || '')) {
+        console.log("Usuário é admin, redirecionando para /admin");
+        toast({
+          title: "Login realizado com sucesso",
+          description: "Bem-vindo, Administrador!",
+        });
+        navigate("/admin");
+        setIsLoading(false);
+        return;
+      }
+      
+      // Para usuários não-admin, tenta obter o tipo pelo perfil ou usa o tipo selecionado
+      let userRole = userType; // Fallback para o tipo selecionado
+      
       if (data.user) {
         const { data: userType, error: typeError } = await supabase.rpc('get_user_type', { user_id: data.user.id });
         
-        if (typeError) {
-          console.error("Erro ao obter tipo de usuário:", typeError);
+        if (!typeError && userType) {
+          userRole = userType as "admin" | "parceiro" | "investidor";
+        } else {
+          console.warn("Não foi possível obter o tipo de usuário da RPC, usando tipo selecionado:", userType);
         }
-        
-        console.log("Tipo de usuário:", userType);
-        
-        const redirectPath = userType === 'admin' ? '/admin' : 
-                            userType === 'parceiro' ? '/parceiro' : '/investidor';
-        
-        toast({
-          title: "Login realizado com sucesso",
-          description: `Bem-vindo! Redirecionando para ${redirectPath}`,
-        });
-        
-        navigate(redirectPath);
       }
+        
+      const redirectPath = getRedirectPath(userRole);
+        
+      toast({
+        title: "Login realizado com sucesso",
+        description: `Bem-vindo! Redirecionando para ${redirectPath}`,
+      });
+        
+      navigate(redirectPath);
     } catch (error: any) {
       console.error("Erro completo no login:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro no login",
-        description: error.message || "Ocorreu um erro durante o login.",
-      });
+      handleAuthError(error, toast);
     } finally {
       setIsLoading(false);
     }
@@ -192,3 +199,4 @@ export const LoginForm = () => {
     </form>
   );
 };
+
