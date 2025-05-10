@@ -22,7 +22,7 @@ export const handleAuthError = (error: Error, toast: ReturnType<typeof useToast>
   });
 };
 
-export const getRedirectPath = (userType: string | undefined) => {
+export const getRedirectPath = (userType: string | undefined | null) => {
   // Lógica de redirecionamento melhorada
   switch (userType) {
     case 'admin':
@@ -55,4 +55,3 @@ export const determineUserType = (email: string, selectedType: string): 'admin' 
   
   return 'investidor';
 };
-

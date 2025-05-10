@@ -1,0 +1,131 @@
+
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
+import { RegisterFormValues } from "@/components/auth/RegisterFormSchema";
+import { uploadDocumentWithoutAuth } from "./storageUtils";
+
+export type DocumentFiles = { 
+  biFront?: File; 
+  biBack?: File 
+};
+
+export const registerUser = async (
+  values: RegisterFormValues, 
+  files: DocumentFiles,
+  toast: ReturnType<typeof useToast>['toast']
+) => {
+  if (!files.biFront || !files.biBack) {
+    toast({
+      variant: "destructive",
+      title: "Erro ao registrar",
+      description: "Por favor, carregue as duas faces do seu BI.",
+    });
+    return { success: false };
+  }
+
+  try {
+    console.log("Iniciando registro com dados:", { 
+      email: values.email, 
+      userType: values.userType,
+      userData: {
+        name: values.name,
+        phone: values.phone
+      } 
+    });
+    
+    // Registro direto com Supabase
+    const { data, error } = await supabase.auth.signUp({
+      email: values.email,
+      password: values.password,
+      options: {
+        data: {
+          tipo: values.userType,
+          nome: values.name,
+          telefone: values.phone
+        }
+      }
+    });
+
+    if (error) {
+      console.error("Erro ao registrar usuário:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao registrar",
+        description: error.message || "Ocorreu um erro durante o registro.",
+      });
+      return { success: false };
+    }
+    
+    console.log("Usuário registrado com sucesso:", data.user?.id);
+    
+    // Se o usuário foi criado com sucesso, fazer upload dos documentos
+    if (data.user) {
+      await handleDocumentUpload(data.user.id, files);
+      await updateUserProfile(data.user.id, values, files);
+      
+      toast({
+        title: "Cadastro realizado com sucesso!",
+        description: "Você será redirecionado para a página de login.",
+      });
+      
+      return { success: true };
+    }
+
+    return { success: false };
+  } catch (error: any) {
+    console.error("Erro completo no registro:", error);
+    toast({
+      variant: "destructive",
+      title: "Erro ao registrar",
+      description: error.message || "Ocorreu um erro durante o registro.",
+    });
+    return { success: false };
+  }
+};
+
+const handleDocumentUpload = async (userId: string, files: DocumentFiles) => {
+  try {
+    // Upload do documento frente
+    if (files.biFront) {
+      await uploadDocumentWithoutAuth('documentos', `${userId}/bi_frente`, files.biFront);
+    }
+    
+    // Upload do documento verso
+    if (files.biBack) {
+      await uploadDocumentWithoutAuth('documentos', `${userId}/bi_verso`, files.biBack);
+    }
+  } catch (error) {
+    console.error("Erro durante o upload de documentos:", error);
+  }
+};
+
+const updateUserProfile = async (userId: string, values: RegisterFormValues, files: DocumentFiles) => {
+  try {
+    const updateData = {
+      user_id: userId,
+      nome_completo: values.name,
+      telefone: values.phone,
+      endereco: values.address,
+      cidade: values.city,
+      provincia: values.province,
+      bio: values.bio || '',
+      doc_frente: files.biFront ? `${userId}/bi_frente` : null,
+      doc_verso: files.biBack ? `${userId}/bi_verso` : null,
+      empresa_nome: values.userType === 'parceiro' ? values.name : null,
+      ramo_negocio: null
+    };
+    
+    console.log("Atualizando perfil com dados:", updateData);
+    
+    const { error } = await supabase
+      .rpc('update_user_profile', updateData);
+      
+    if (error) {
+      console.error("Erro ao atualizar perfil:", error);
+    } else {
+      console.log("Perfil atualizado com sucesso");
+    }
+  } catch (updateError) {
+    console.error("Exceção durante atualização de perfil:", updateError);
+  }
+};
