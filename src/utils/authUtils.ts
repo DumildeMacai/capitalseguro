@@ -1,7 +1,8 @@
 
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from "@/hooks/use-toast";
 
 export const handleAuthError = (error: Error, toast: ReturnType<typeof useToast>['toast']) => {
+  console.error("Erro de autenticação:", error);
   toast({
     variant: "destructive",
     title: "Erro na autenticação",

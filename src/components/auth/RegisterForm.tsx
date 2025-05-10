@@ -7,8 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Form, FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { handleAuthError } from "@/utils/authUtils";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { registerFormSchema, type RegisterFormValues } from "./RegisterFormSchema";
 import { PersonalInfoFields } from "./PersonalInfoFields";
 import { AddressFields } from "./AddressFields";
@@ -18,8 +17,7 @@ export const RegisterForm = () => {
   const [files, setFiles] = useState<{ biFront?: File; biBack?: File }>({});
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { signUp } = useAuth();
-
+  
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
     defaultValues: {
@@ -55,24 +53,122 @@ export const RegisterForm = () => {
     }
 
     try {
-      await signUp(values.email, values.password, values.userType, {
-        name: values.name,
-        phone: values.phone,
-        address: values.address,
-        city: values.city,
-        province: values.province,
-        bio: values.bio,
-        biFront: files.biFront,
-        biBack: files.biBack,
+      console.log("Iniciando registro com dados:", { 
+        email: values.email, 
+        userType: values.userType,
+        userData: {
+          name: values.name,
+          phone: values.phone
+        } 
       });
       
+      // Registro direto com Supabase
+      const { data, error } = await supabase.auth.signUp({
+        email: values.email,
+        password: values.password,
+        options: {
+          data: {
+            tipo: values.userType,
+            nome: values.name,
+            telefone: values.phone
+          }
+        }
+      });
+
+      if (error) {
+        console.error("Erro ao registrar usuário:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro ao registrar",
+          description: error.message || "Ocorreu um erro durante o registro.",
+        });
+        return;
+      }
+      
+      console.log("Usuário registrado com sucesso:", data.user?.id);
+      
+      // Se o usuário foi criado com sucesso, fazer upload dos documentos
+      if (data.user) {
+        await handleDocumentUpload(data.user.id, files);
+        await updateUserProfile(data.user.id, values, files);
+      }
+
       toast({
         title: "Cadastro realizado com sucesso!",
         description: "Você será redirecionado para a página de login.",
       });
+      
       navigate("/login");
     } catch (error: any) {
-      handleAuthError(error, toast);
+      console.error("Erro completo no registro:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro ao registrar",
+        description: error.message || "Ocorreu um erro durante o registro.",
+      });
+    }
+  };
+
+  const handleDocumentUpload = async (userId: string, files: { biFront?: File; biBack?: File }) => {
+    try {
+      // Upload do documento frente
+      if (files.biFront) {
+        const { error: frontError } = await supabase.storage
+          .from('documentos')
+          .upload(`${userId}/bi_frente`, files.biFront);
+          
+        if (frontError) {
+          console.error("Erro ao fazer upload do documento (frente):", frontError);
+        } else {
+          console.log("Upload da frente do documento realizado com sucesso");
+        }
+      }
+      
+      // Upload do documento verso
+      if (files.biBack) {
+        const { error: backError } = await supabase.storage
+          .from('documentos')
+          .upload(`${userId}/bi_verso`, files.biBack);
+          
+        if (backError) {
+          console.error("Erro ao fazer upload do documento (verso):", backError);
+        } else {
+          console.log("Upload do verso do documento realizado com sucesso");
+        }
+      }
+    } catch (error) {
+      console.error("Erro durante o upload de documentos:", error);
+    }
+  };
+  
+  const updateUserProfile = async (userId: string, values: RegisterFormValues, files: { biFront?: File; biBack?: File }) => {
+    try {
+      const updateData = {
+        user_id: userId,
+        nome_completo: values.name,
+        telefone: values.phone,
+        endereco: values.address,
+        cidade: values.city,
+        provincia: values.province,
+        bio: values.bio || '',
+        doc_frente: files.biFront ? `${userId}/bi_frente` : null,
+        doc_verso: files.biBack ? `${userId}/bi_verso` : null,
+        empresa_nome: values.userType === 'parceiro' ? values.name : null,
+        ramo_negocio: null
+      };
+      
+      console.log("Atualizando perfil com dados:", updateData);
+      
+      const { error } = await supabase
+        .rpc('update_user_profile', updateData);
+        
+      if (error) {
+        console.error("Erro ao atualizar perfil:", error);
+      } else {
+        console.log("Perfil atualizado com sucesso");
+      }
+    } catch (updateError) {
+      console.error("Exceção durante atualização de perfil:", updateError);
     }
   };
 

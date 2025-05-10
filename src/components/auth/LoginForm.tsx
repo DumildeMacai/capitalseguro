@@ -1,14 +1,16 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useNavigate } from "react-router-dom";
 
 export const LoginForm = () => {
   const { toast } = useToast();
-  const { signIn } = useAuth();
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
@@ -20,13 +22,13 @@ export const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      // Estas verificações são mantidas para compatibilidade com o fluxo existente
+      // Essas verificações são mantidas para compatibilidade com o fluxo existente
       if (email === "dumildemacai@gmail.com" && password === "19921admin1") {
         toast({
           title: "Login realizado com sucesso",
           description: "Bem-vindo, Administrador!",
         });
-        window.location.href = "/admin";
+        navigate("/admin");
         return;
       } else if (email === "dumildemacai@gmail.com" && password === "19921parceiro1") {
         if (userType !== "parceiro") {
@@ -42,7 +44,7 @@ export const LoginForm = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo, Parceiro!",
         });
-        window.location.href = "/parceiro";
+        navigate("/parceiro");
         return;
       } else if (email === "dumildemacai@gmail.com" && password === "19921investidor1") {
         if (userType !== "investidor") {
@@ -58,14 +60,57 @@ export const LoginForm = () => {
           title: "Login realizado com sucesso",
           description: "Bem-vindo, Investidor!",
         });
-        window.location.href = "/investidor";
+        navigate("/investidor");
         return;
       }
 
       // Login pelo Supabase
-      await signIn(email, password);
-    } catch (error) {
-      console.error("Erro no login:", error);
+      console.log("Tentando login para:", email);
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        console.error("Erro no login:", error);
+        toast({
+          variant: "destructive",
+          title: "Erro no login",
+          description: error.message || "Credenciais inválidas. Por favor, verifique e tente novamente.",
+        });
+        setIsLoading(false);
+        return;
+      }
+
+      console.log("Login bem-sucedido:", data.user?.id);
+
+      // Obter o tipo de usuário usando a função RPC
+      if (data.user) {
+        const { data: userType, error: typeError } = await supabase.rpc('get_user_type', { user_id: data.user.id });
+        
+        if (typeError) {
+          console.error("Erro ao obter tipo de usuário:", typeError);
+        }
+        
+        console.log("Tipo de usuário:", userType);
+        
+        const redirectPath = userType === 'admin' ? '/admin' : 
+                            userType === 'parceiro' ? '/parceiro' : '/investidor';
+        
+        toast({
+          title: "Login realizado com sucesso",
+          description: `Bem-vindo! Redirecionando para ${redirectPath}`,
+        });
+        
+        navigate(redirectPath);
+      }
+    } catch (error: any) {
+      console.error("Erro completo no login:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro no login",
+        description: error.message || "Ocorreu um erro durante o login.",
+      });
     } finally {
       setIsLoading(false);
     }
