@@ -1,5 +1,7 @@
 
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -54,6 +56,26 @@ const Dashboard = () => {
     },
   ];
   
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleNewInvestment = () => navigate('/investments');
+  const handleAddFunds = () => navigate('/investidor');
+  const handleExport = () => {
+    // Simple CSV export of investmentData
+    const headers = ['Investimento','Valor','Valor Atual','Taxa de Retorno','Categoria'];
+    const rows = investmentData.map(i => [i.name, i.amount, i.currentValue, i.returnRate, i.category]);
+    const csv = [headers, ...rows].map(r => r.join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'investments.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    toast({ title: 'Exportado', description: 'Resumo de investimentos exportado como CSV.' });
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
@@ -76,14 +98,29 @@ const Dashboard = () => {
           </div>
           
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={handleExport}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+              Exportar
+            </Button>
+            <Button variant="outline" size="sm" onClick={handleNewInvestment}>
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                 <path d="M5 12h14" />
                 <path d="M12 5v14" />
               </svg>
               Novo Investimento
             </Button>
-            
+
+            <Button className="bg-gradient-primary hover:opacity-90" size="sm" onClick={handleAddFunds}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <path d="M5 12h14" />
+                <path d="M12 5v14" />
+              </svg>
+              Adicionar Fundos
+            </Button>
+
             <Avatar>
               <AvatarImage src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" />
               <AvatarFallback>JD</AvatarFallback>
@@ -118,24 +155,20 @@ const Dashboard = () => {
         </div>
         
         <div className="grid gap-6 md:grid-cols-3 mb-8">
-          <motion.div
+            <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Investido
-                </CardTitle>
-                <CardHeader>
-                <CardTitle>Crescimento do Investimento</CardTitle>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium text-muted-foreground">Total Investido</CardTitle>
                 </CardHeader>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Em {investmentData.length} investimentos
-                </p>
-              </CardContent>
-            </Card>
+                <CardContent>
+                  <h3 className="text-lg font-semibold">Crescimento do Investimento</h3>
+                  <p className="text-xs text-muted-foreground mt-1">Em {investmentData.length} investimentos</p>
+                </CardContent>
+              </Card>
           </motion.div>
           
           <motion.div

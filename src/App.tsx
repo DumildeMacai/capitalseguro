@@ -11,6 +11,10 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Investments from "./pages/Investments";
 import InvestmentDetail from "./pages/InvestmentDetail";
+import About from "./pages/About";
+import Contact from "./pages/Contact";
+import Terms from "./pages/Terms";
+import Privacy from "./pages/Privacy";
 import AdminDashboard from "./pages/AdminDashboard";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import InvestorDashboard from "./pages/InvestorDashboard";
@@ -60,6 +64,10 @@ const App = () => {
               <Route path="/login" element={<Login />} />
               <Route path="/investments" element={<Investments />} />
               <Route path="/investments/:id" element={<InvestmentDetail />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/termos" element={<Terms />} />
+              <Route path="/privacidade" element={<Privacy />} />
               <Route 
                 path="/admin" 
                 element={
