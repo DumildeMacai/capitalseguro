@@ -36,22 +36,6 @@ export const getRedirectPath = (userType: string | undefined | null) => {
   }
 };
 
-// Função auxiliar para verificar se um email é de administrador
-export const isAdminEmail = (email: string): boolean => {
-  const adminEmails = ['dumildemacai@gmail.com', 'dumildemacai69@gmail.com'];
-  return adminEmails.includes(email.toLowerCase());
-};
-
-// Função temporária para atribuir o tipo de usuário sem depender do banco
-export const determineUserType = (email: string, selectedType: string): 'admin' | 'parceiro' | 'investidor' => {
-  if (isAdminEmail(email)) {
-    return 'admin';
-  }
-  
-  // Garantir que selectedType seja um valor válido
-  if (selectedType === 'parceiro') {
-    return 'parceiro';
-  }
-  
-  return 'investidor';
-};
+// Nota: Verificação de admin agora é feita através da tabela user_roles no banco
+// Para tornar um usuário admin, execute no SQL Editor:
+// SELECT public.set_user_as_admin('user-id-aqui');
