@@ -2,13 +2,13 @@
 import { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from "@/integrations/supabase/client";
-import { useUserType } from '@/hooks/useUserType';
+import { useUserRoles } from '@/hooks/useUserRoles';
 import { AuthState } from '@/types/auth.types';
 
 export const useAuthState = (): AuthState => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const { userType, loading: userTypeLoading } = useUserType(session);
+  const { userType, loading: userTypeLoading } = useUserRoles(session);
 
   useEffect(() => {
     // First set up auth state listener to avoid missing auth events
