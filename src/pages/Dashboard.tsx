@@ -58,12 +58,12 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="container flex items-center justify-between h-16 px-4">
-          <div className="flex items-center gap-4">
+              <div className="flex items-center gap-4">
             <Link to="/" className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
-                <span className="text-white text-sm font-bold">F</span>
+                <span className="text-white text-sm font-bold">C</span>
               </span>
-              <span className="font-semibold">FutureInvest</span>
+              <span className="font-semibold">Capital Seguro</span>
             </Link>
             
             <nav className="hidden md:flex items-center gap-6 text-sm">
@@ -81,7 +81,7 @@ const Dashboard = () => {
                 <path d="M5 12h14" />
                 <path d="M12 5v14" />
               </svg>
-              New Investment
+              Novo Investimento
             </Button>
             
             <Avatar>
@@ -95,8 +95,8 @@ const Dashboard = () => {
       <main className="container px-4 py-8">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <p className="text-muted-foreground">Welcome back, John. Here's your investment summary.</p>
+              <h1 className="text-3xl font-bold">Painel</h1>
+            <p className="text-muted-foreground">Bem-vindo de volta, John. Aqui está o resumo dos seus investimentos.</p>
           </div>
           <div className="flex items-center gap-4 mt-4 md:mt-0">
             <Button variant="outline">
@@ -105,14 +105,14 @@ const Dashboard = () => {
                 <polyline points="7 10 12 15 17 10" />
                 <line x1="12" x2="12" y1="15" y2="3" />
               </svg>
-              Export
+              Exportar
             </Button>
             <Button className="bg-gradient-primary hover:opacity-90">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
                 <path d="M5 12h14" />
                 <path d="M12 5v14" />
               </svg>
-              Add Funds
+              Adicionar Fundos
             </Button>
           </div>
         </div>
@@ -126,13 +126,13 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Invested
+                  Total Investido
                 </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${investmentSummary.totalInvested.toLocaleString()}</div>
+                <CardHeader>
+                <CardTitle>Crescimento do Investimento</CardTitle>
+                </CardHeader>
                 <p className="text-xs text-muted-foreground mt-1">
-                  Across {investmentData.length} investments
+                  Em {investmentData.length} investimentos
                 </p>
               </CardContent>
             </Card>
@@ -146,17 +146,17 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Current Value
+                  Valor Atual
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold">${investmentSummary.currentValue.toLocaleString()}</div>
+                <div className="text-2xl font-bold">Kz {investmentSummary.currentValue.toLocaleString('pt-PT')}</div>
                 <div className="flex items-center mt-1">
                   <span className="text-xs text-success font-medium flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1">
                       <path d="m18 15-6-6-6 6" />
                     </svg>
-                    {investmentSummary.returnsPercentage}% growth
+                    {investmentSummary.returnsPercentage}% de crescimento
                   </span>
                 </div>
               </CardContent>
@@ -171,14 +171,14 @@ const Dashboard = () => {
             <Card>
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium text-muted-foreground">
-                  Total Returns
+                  Retornos Totais
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-2xl font-bold text-success">+${investmentSummary.totalReturns.toLocaleString()}</div>
+                <div className="text-2xl font-bold text-success">+Kz {investmentSummary.totalReturns.toLocaleString('pt-PT')}</div>
                 <div className="flex items-center mt-1">
                   <span className="text-xs text-muted-foreground">
-                    Next withdrawal available in {Math.floor(investmentSummary.timeUntilWithdrawal / 30)} months
+                    Próximo resgate disponível em {Math.floor(investmentSummary.timeUntilWithdrawal / 30)} meses
                   </span>
                 </div>
               </CardContent>
@@ -209,16 +209,16 @@ const Dashboard = () => {
             transition={{ duration: 0.3, delay: 0.4 }}
           >
             <Card>
-              <CardHeader className="pb-2">
-                <CardTitle>Investment Allocation</CardTitle>
-              </CardHeader>
+                <CardHeader className="pb-2">
+                <CardTitle>Alocação de Investimentos</CardTitle>
+                </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {investmentData.map((investment) => (
                     <div key={investment.id} className="space-y-2">
                       <div className="flex justify-between items-center">
                         <span className="text-sm font-medium">{investment.name}</span>
-                        <span className="text-sm font-medium">${investment.amount.toLocaleString()}</span>
+                        <span className="text-sm font-medium">Kz {investment.amount.toLocaleString('pt-PT')}</span>
                       </div>
                       <Progress value={investment.progress} className="h-2" />
                       <div className="flex justify-between items-center text-xs text-muted-foreground">
@@ -255,12 +255,12 @@ const Dashboard = () => {
                     <table className="w-full">
                       <thead className="bg-muted/50">
                         <tr>
-                          <th className="text-left p-4 font-medium">Investment</th>
-                          <th className="text-left p-4 font-medium">Amount</th>
-                          <th className="text-left p-4 font-medium">Current Value</th>
-                          <th className="text-left p-4 font-medium">Return Rate</th>
+                          <th className="text-left p-4 font-medium">Investimento</th>
+                          <th className="text-left p-4 font-medium">Valor</th>
+                          <th className="text-left p-4 font-medium">Valor Atual</th>
+                          <th className="text-left p-4 font-medium">Taxa de Retorno</th>
                           <th className="text-left p-4 font-medium">Status</th>
-                          <th className="text-left p-4 font-medium">Actions</th>
+                          <th className="text-left p-4 font-medium">Ações</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -270,8 +270,8 @@ const Dashboard = () => {
                               <div className="font-medium">{investment.name}</div>
                               <div className="text-sm text-muted-foreground">{investment.category}</div>
                             </td>
-                            <td className="p-4">${investment.amount.toLocaleString()}</td>
-                            <td className="p-4">${investment.currentValue.toLocaleString()}</td>
+                            <td className="p-4">Kz {investment.amount.toLocaleString('pt-PT')}</td>
+                            <td className="p-4">Kz {investment.currentValue.toLocaleString('pt-PT')}</td>
                             <td className="p-4 text-success">+{investment.returnRate}%</td>
                             <td className="p-4">
                               <span className="inline-flex items-center rounded-full bg-green-100 px-2 py-1 text-xs font-medium text-green-700">
@@ -279,7 +279,7 @@ const Dashboard = () => {
                               </span>
                             </td>
                             <td className="p-4">
-                              <Button variant="outline" size="sm">View</Button>
+                              <Button variant="outline" size="sm">Ver</Button>
                             </td>
                           </tr>
                         ))}
@@ -306,11 +306,11 @@ const Dashboard = () => {
                     <table className="w-full">
                       <thead className="bg-muted/50">
                         <tr>
-                          <th className="text-left p-4 font-medium">Investment</th>
-                          <th className="text-left p-4 font-medium">Amount</th>
-                          <th className="text-left p-4 font-medium">Maturity Date</th>
-                          <th className="text-left p-4 font-medium">Progress</th>
-                          <th className="text-left p-4 font-medium">Actions</th>
+                          <th className="text-left p-4 font-medium">Investimento</th>
+                          <th className="text-left p-4 font-medium">Valor</th>
+                          <th className="text-left p-4 font-medium">Data de Vencimento</th>
+                          <th className="text-left p-4 font-medium">Progresso</th>
+                          <th className="text-left p-4 font-medium">Ações</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -320,7 +320,7 @@ const Dashboard = () => {
                               <div className="font-medium">{investment.name}</div>
                               <div className="text-sm text-muted-foreground">{investment.category}</div>
                             </td>
-                            <td className="p-4">${investment.amount.toLocaleString()}</td>
+                            <td className="p-4">Kz {investment.amount.toLocaleString('pt-PT')}</td>
                             <td className="p-4">{new Date(investment.maturityDate).toLocaleDateString()}</td>
                             <td className="p-4 w-32">
                               <div className="flex items-center gap-2">
@@ -330,8 +330,8 @@ const Dashboard = () => {
                             </td>
                             <td className="p-4">
                               <div className="flex gap-2">
-                                <Button variant="outline" size="sm">Details</Button>
-                                <Button variant="ghost" size="sm" className="text-purple">Add More</Button>
+                                <Button variant="outline" size="sm">Detalhes</Button>
+                                <Button variant="ghost" size="sm" className="text-purple">Adicionar Mais</Button>
                               </div>
                             </td>
                           </tr>
@@ -365,7 +365,7 @@ const Dashboard = () => {
                       Your investment history will appear here once you've completed your first investment term.
                     </p>
                     <Button className="bg-gradient-primary hover:opacity-90">
-                      Browse Investment Opportunities
+                      Explorar Oportunidades de Investimento
                     </Button>
                   </div>
                 </CardContent>
@@ -384,11 +384,11 @@ const Dashboard = () => {
               <div className="mb-6 md:mb-0 text-center md:text-left">
                 <h3 className="text-2xl font-bold mb-2">Ready to expand your portfolio?</h3>
                 <p className="opacity-90 max-w-md">
-                  Discover new investment opportunities with 50% annual returns. Grow your wealth faster with FutureInvest.
+                  Discover new investment opportunities with 50% annual returns. Grow your wealth faster with Capital Seguro.
                 </p>
               </div>
               <Button size="lg" className="min-w-[180px] bg-white text-purple-dark hover:bg-white/90">
-                Invest Now
+                Investir Agora
               </Button>
             </CardContent>
           </Card>

@@ -10,36 +10,36 @@ import {
 
 const faqs = [
   {
-    question: "How is a 50% annual return possible?",
-    answer: "Our unique investment model combines strategic real estate acquisitions, innovative business partnerships, and optimized operational efficiency. By focusing on high-growth markets and leveraging our extensive expertise, we consistently achieve this exceptional return rate for our investors."
+    question: "Como é possível um retorno anual de 50%?",
+    answer: "Nosso modelo combina aquisições estratégicas, parcerias comerciais e eficiência operacional. Ao focarmos em mercados de alto crescimento e aplicar nossa expertise, conseguimos taxas de retorno superiores para os investidores."
   },
   {
-    question: "When can I withdraw my initial investment?",
-    answer: "Your initial investment has a minimum lock period of 1 year. After this period, you can withdraw your principal amount along with the earned returns through our simple withdrawal process in your dashboard."
+    question: "Quando posso resgatar meu investimento inicial?",
+    answer: "O investimento inicial possui um período mínimo de carência de 1 ano. Após esse período, você pode resgatar o valor principal juntamente com os rendimentos através do processo de retirada no seu painel."
   },
   {
-    question: "How often are returns distributed?",
-    answer: "Returns are calculated on an annual basis at a rate of 50%. You can track the growth of your investment in real-time through your investor dashboard, and you'll receive detailed monthly statements."
+    question: "Com que frequência os rendimentos são distribuídos?",
+    answer: "Os rendimentos são calculados anualmente com a taxa informada em cada oportunidade. Você pode acompanhar o crescimento do seu investimento em tempo real pelo painel do investidor e receber extratos detalhados mensalmente."
   },
   {
-    question: "What is the minimum investment amount?",
-    answer: "The minimum investment amount varies by opportunity, starting from $2,500 for some business investments to $15,000 for premium real estate developments. Each investment opportunity clearly displays its minimum requirement."
+    question: "Qual é o investimento mínimo?",
+    answer: "O valor mínimo varia conforme a oportunidade, começando em Kz 2.500 para alguns negócios e podendo chegar a Kz 15.000 para desenvolvimentos imobiliários premium. Cada oportunidade informa claramente o mínimo exigido."
   },
   {
-    question: "How are my investments secured?",
-    answer: "Your investments are backed by real, tangible assets such as properties, business equity, or secured contracts. Additionally, we implement stringent risk management protocols and diversification strategies to safeguard your capital."
+    question: "Como meus investimentos são garantidos?",
+    answer: "Os investimentos são lastreados em ativos reais, como imóveis, participações societárias ou contratos garantidos. Além disso, aplicamos protocolos de gestão de risco e diversificação para proteger o capital."
   },
   {
-    question: "Can I invest from outside the United States?",
-    answer: "Yes, we welcome international investors. Our platform supports global investments with secure international payment methods. However, certain jurisdictions may have specific regulations, so we recommend consulting your local financial advisor."
+    question: "Posso investir estando fora do Brasil?",
+    answer: "Sim — aceitamos investidores internacionais. A plataforma suporta pagamentos internacionais seguros, mas algumas jurisdições podem ter regras específicas; recomendamos consultar um assessor financeiro local."
   },
   {
-    question: "What happens if I need to withdraw before the 1-year period?",
-    answer: "While we encourage maintaining your investment for the full term to maximize returns, we understand circumstances change. Early withdrawals are subject to a processing fee and may affect the calculated returns. Please contact our investor relations team for specific details."
+    question: "E se eu precisar resgatar antes do período de 1 ano?",
+    answer: "Entendemos que situações podem mudar. Resgates antecipados podem estar sujeitos a taxas de processamento e afetar o rendimento calculado. Entre em contato com a nossa equipe de relacionamento com investidores para orientações específicas."
   },
   {
-    question: "How do I track my investment performance?",
-    answer: "Your personalized investor dashboard provides real-time updates on all your investments, including current value, projected returns, and time until maturity. You can access detailed analytics and reports at any time."
+    question: "Como acompanho o desempenho dos meus investimentos?",
+    answer: "Seu painel de investidor fornece atualizações em tempo real sobre todos os investimentos, incluindo valor atual, projeções de retorno e tempo até o vencimento. Você também pode acessar relatórios e análises detalhadas a qualquer momento."
   }
 ];
 
@@ -54,10 +54,10 @@ const FAQSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Frequently Asked Questions</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Perguntas Frequentes</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Find answers to common questions about investing with FutureInvest. 
-            If you need further assistance, our support team is always available.
+            Encontre respostas para as perguntas mais comuns sobre investimento na Capital Seguro.
+            Se precisar de mais ajuda, nossa equipe de suporte está disponível.
           </p>
         </motion.div>
         
@@ -90,13 +90,13 @@ const FAQSection = () => {
             viewport={{ once: true }}
             className="text-center mt-12 p-6 rounded-xl border border-border bg-card shadow-sm"
           >
-            <h3 className="text-xl font-semibold mb-2">Still have questions?</h3>
+            <h3 className="text-xl font-semibold mb-2">Ainda tem dúvidas?</h3>
             <p className="text-muted-foreground mb-4">
-              Our team is ready to assist you with any questions about our investment opportunities.
+              Nossa equipe está pronta para ajudar com qualquer dúvida sobre as oportunidades de investimento.
             </p>
             <div className="flex justify-center">
               <a href="/contact" className="text-purple hover:text-purple-dark font-medium flex items-center">
-                Contact Our Support Team
+                Fale com a nossa equipe de suporte
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
                   <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                 </svg>

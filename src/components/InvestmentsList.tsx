@@ -71,7 +71,7 @@ const InvestmentsList = ({ investments, onInvest, className }: InvestmentsListPr
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-muted-foreground">Investimento Mínimo</p>
-                  <p className="text-xl font-semibold">AOA {investment.minInvestment.toLocaleString()}</p>
+                  <p className="text-xl font-semibold">AOA {investment.minInvestment.toLocaleString('pt-PT')}</p>
                 </div>
               </div>
               
@@ -88,9 +88,9 @@ const InvestmentsList = ({ investments, onInvest, className }: InvestmentsListPr
                 </div>
                 <div className="flex justify-between mt-1 text-xs text-muted-foreground">
                   <span>
-                    AOA {(investment.totalFunding - investment.remaining).toLocaleString()} captados
+                    AOA {(investment.totalFunding - investment.remaining).toLocaleString('pt-PT')} captados
                   </span>
-                  <span>AOA {investment.remaining.toLocaleString()} restantes</span>
+                  <span>AOA {investment.remaining.toLocaleString('pt-PT')} restantes</span>
                 </div>
               </div>
               

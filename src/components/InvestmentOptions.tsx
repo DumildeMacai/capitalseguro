@@ -7,10 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InvestmentCard from "./InvestmentCard";
 
 const categories = [
-  "All",
-  "Real Estate",
-  "Businesses",
-  "Properties"
+  "Todos",
+  "Imóveis",
+  "Empresas",
+  "Propriedades"
 ];
 
 const investments = [
@@ -18,7 +18,7 @@ const investments = [
     id: "real-estate-fund-1",
     title: "Premium Real Estate Fund",
     description: "Diversified portfolio of high-yield commercial properties in prime locations with stable rental income.",
-    category: "Real Estate",
+    category: "Imóveis",
     returnRate: 50,
     minInvestment: 5000,
     remaining: 1250000,
@@ -30,7 +30,7 @@ const investments = [
     id: "luxury-apartments-complex",
     title: "Luxury Apartment Complex",
     description: "High-end residential apartment complex in an emerging metropolitan area with strong rental demand.",
-    category: "Properties",
+    category: "Propriedades",
     returnRate: 50,
     minInvestment: 10000,
     remaining: 750000,
@@ -41,7 +41,7 @@ const investments = [
     id: "tech-startup-expansion",
     title: "Tech Startup Expansion",
     description: "Rapidly growing technology company seeking capital for market expansion and product development.",
-    category: "Businesses",
+    category: "Empresas",
     returnRate: 50,
     minInvestment: 2500,
     remaining: 350000,
@@ -52,7 +52,7 @@ const investments = [
     id: "commercial-plaza-development",
     title: "Commercial Plaza Development",
     description: "New commercial plaza development in high-traffic urban area with pre-signed lease agreements.",
-    category: "Real Estate",
+    category: "Imóveis",
     returnRate: 50,
     minInvestment: 15000,
     remaining: 2000000,
@@ -64,7 +64,7 @@ const investments = [
     id: "eco-resort-expansion",
     title: "Eco-Resort Expansion",
     description: "Established eco-resort expanding facilities and accommodations to meet growing sustainable tourism demand.",
-    category: "Properties",
+    category: "Propriedades",
     returnRate: 50,
     minInvestment: 7500,
     remaining: 800000,
@@ -75,7 +75,7 @@ const investments = [
     id: "restaurant-chain-growth",
     title: "Restaurant Chain Growth",
     description: "Successful restaurant chain seeking funds for new locations across major cities.",
-    category: "Businesses",
+    category: "Empresas",
     returnRate: 50,
     minInvestment: 5000,
     remaining: 400000,
@@ -101,10 +101,9 @@ const InvestmentOptions = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Investment Opportunities</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Oportunidades de Investimento</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Explore our diverse range of high-return investment options, each offering 50% annual returns
-            and backed by real assets or established businesses.
+            Explore nossa variedade de oportunidades de investimento com alto potencial de retorno, apoiadas em ativos reais ou negócios consolidados.
           </p>
         </motion.div>
         
@@ -154,7 +153,7 @@ const InvestmentOptions = () => {
           className="text-center"
         >
           <Button asChild size="lg" className="bg-gradient-primary hover:opacity-90 font-medium">
-            <Link to="/investments">View All Opportunities</Link>
+            <Link to="/investments">Ver Todas as Oportunidades</Link>
           </Button>
         </motion.div>
       </div>

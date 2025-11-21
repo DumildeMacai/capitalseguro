@@ -16,35 +16,35 @@ const testimonials = [
     name: "Sarah Johnson",
     title: "Real Estate Investor",
     image: "https://randomuser.me/api/portraits/women/79.jpg",
-    quote: "FutureInvest has transformed my financial future. The 50% annual returns are just incredible, and the platform is so easy to use. I've already recommended it to all my friends."
+    quote: "Capital Seguro transformou o meu futuro financeiro. Os retornos anuais de 50% são incríveis, e a plataforma é muito fácil de usar. Já recomendei a todos os meus amigos."
   },
   {
     id: 2,
     name: "Michael Reeves",
     title: "Business Owner",
     image: "https://randomuser.me/api/portraits/men/52.jpg",
-    quote: "I was skeptical at first, but FutureInvest delivered exactly what they promised. The returns have been consistent, and the investment process is seamless. Truly a game-changer!"
+    quote: "Eu estava cético no início, mas a Capital Seguro entregou exatamente o prometido. Os retornos foram consistentes e o processo de investimento é simples. Realmente mudou o jogo!"
   },
   {
     id: 3,
     name: "Emily Chang",
     title: "Financial Advisor",
     image: "https://randomuser.me/api/portraits/women/67.jpg",
-    quote: "As a financial professional, I'm always looking for reliable investment opportunities for my clients. FutureInvest provides exceptional returns with a straightforward approach."
+    quote: "Como profissional financeiro, procuro oportunidades confiáveis para meus clientes. A Capital Seguro fornece retornos excepcionais com uma abordagem direta."
   },
   {
     id: 4,
     name: "David Thompson",
     title: "Retired Executive",
     image: "https://randomuser.me/api/portraits/men/5.jpg",
-    quote: "In retirement, passive income is crucial. FutureInvest delivers consistent 50% returns that allow me to enjoy my retirement without financial worries. Outstanding service!"
+    quote: "Na aposentadoria, a renda passiva é crucial. A Capital Seguro entrega retornos consistentes de 50% que me permitem aproveitar a aposentadoria sem preocupações financeiras. Serviço excepcional!"
   },
   {
     id: 5,
     name: "Jessica Rivera",
     title: "Tech Entrepreneur",
     image: "https://randomuser.me/api/portraits/women/45.jpg",
-    quote: "The team at FutureInvest understands what investors need. Their platform is intuitive, the investment options are diverse, and the returns speak for themselves."
+    quote: "A equipa da Capital Seguro entende as necessidades dos investidores. A plataforma é intuitiva, as opções de investimento são diversas e os retornos falam por si."
   }
 ];
 
@@ -59,10 +59,10 @@ const TestimonialsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">What Our Investors Say</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">O que os nossos investidores dizem</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Don't just take our word for it. Hear from investors who have experienced
-            the benefits of FutureInvest's passive income opportunities.
+            Não precisa só acreditar em nós — ouça investidores que já experimentaram
+            os benefícios das oportunidades de rendimento passivo da Capital Seguro.
           </p>
         </motion.div>
         

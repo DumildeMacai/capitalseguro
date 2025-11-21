@@ -77,10 +77,10 @@ const HowItWorksSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">How It Works</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Como Funciona</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Four simple steps to start earning 50% annual returns on your investments with FutureInvest.
-            It's never been easier to build passive wealth.
+            Quatro passos simples para começar a obter retornos anuais de 50% nos seus investimentos com a Capital Seguro.
+            Nunca foi tão fácil construir riqueza passiva.
           </p>
         </motion.div>
         

@@ -97,7 +97,7 @@ const Index = () => {
               viewport={{ once: true }}
               className="text-center mb-16"
             >
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">Por Que Escolher FutureInvest</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">Por que escolher Capital Seguro</h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
                 Oferecemos uma combinação única de altos retornos, segurança de investimento e uma experiência de utilizador sem complicações,
                 tornando a construção de riqueza acessível a todos.

@@ -14,7 +14,7 @@ export const uploadIdentityDocument = async (
     const filePath = `${fileName}`;
 
     const { error } = await supabase.storage
-      .from('documentos_identidade')
+      .from('documentos')
       .upload(filePath, file, {
         cacheControl: '3600',
         upsert: true
@@ -24,7 +24,7 @@ export const uploadIdentityDocument = async (
 
     // Obter URL do arquivo
     const { data } = supabase.storage
-      .from('documentos_identidade')
+      .from('documentos')
       .getPublicUrl(filePath);
 
     return { url: data.publicUrl };

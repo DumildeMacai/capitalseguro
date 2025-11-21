@@ -33,9 +33,9 @@ const Navbar = () => {
           className="text-2xl font-bold flex items-center gap-2"
         >
           <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
-            <span className="text-white text-lg font-bold">M</span>
+            <span className="text-white text-lg font-bold">C</span>
           </span>
-          <span className="text-gradient font-extrabold">MACAIINVEST</span>
+          <span className="text-gradient font-extrabold">Capital Seguro</span>
         </Link>
 
         {/* Desktop Navigation */}

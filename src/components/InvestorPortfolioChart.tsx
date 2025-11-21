@@ -31,7 +31,7 @@ const InvestorPortfolioChart = ({ data, showBars = false }: InvestorPortfolioCha
           <XAxis dataKey="name" />
           <YAxis />
           <Tooltip
-            formatter={(value) => [`R$ ${value.toLocaleString()}`, 'Valor']}
+            formatter={(value) => [`Kz ${value.toLocaleString('pt-PT')}`, 'Valor']}
           />
           <Legend />
           <Bar dataKey="value" name="Valor Investido">
@@ -64,7 +64,7 @@ const InvestorPortfolioChart = ({ data, showBars = false }: InvestorPortfolioCha
             ))}
           </Pie>
           <Tooltip 
-            formatter={(value) => [`R$ ${value.toLocaleString()}`, 'Valor']}
+            formatter={(value) => [`Kz ${value.toLocaleString('pt-PT')}`, 'Valor']}
           />
           <Legend />
         </PieChart>
@@ -72,7 +72,7 @@ const InvestorPortfolioChart = ({ data, showBars = false }: InvestorPortfolioCha
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <div className="text-center">
           <p className="text-sm font-medium text-muted-foreground">Total</p>
-          <p className="text-xl font-bold">R$ {totalValue.toLocaleString()}</p>
+          <p className="text-xl font-bold">Kz {totalValue.toLocaleString('pt-PT')}</p>
         </div>
       </div>
     </div>

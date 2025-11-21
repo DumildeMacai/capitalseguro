@@ -35,10 +35,10 @@ const StatsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6">Our Track Record Speaks For Itself</h2>
+          <h2 className="text-3xl md:text-4xl font-bold mb-6">Nosso histórico fala por si</h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            FutureInvest has consistently delivered exceptional returns to investors, building a reputation
-            for reliability and excellence in passive income generation.
+            A Capital Seguro tem consistentemente entregue retornos excepcionais aos investidores, construindo uma reputação
+            de confiabilidade e excelência na geração de rendimento passivo.
           </p>
         </motion.div>
         

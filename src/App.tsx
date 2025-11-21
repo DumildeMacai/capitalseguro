@@ -10,6 +10,7 @@ import { initializeStorage } from "./utils/initStorage";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Investments from "./pages/Investments";
+import InvestmentDetail from "./pages/InvestmentDetail";
 import AdminDashboard from "./pages/AdminDashboard";
 import PartnerDashboard from "./pages/PartnerDashboard";
 import InvestorDashboard from "./pages/InvestorDashboard";
@@ -58,6 +59,7 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/login" element={<Login />} />
               <Route path="/investments" element={<Investments />} />
+              <Route path="/investments/:id" element={<InvestmentDetail />} />
               <Route 
                 path="/admin" 
                 element={

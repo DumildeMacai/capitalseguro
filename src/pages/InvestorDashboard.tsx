@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -11,10 +11,34 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import InvestmentCard from "@/components/InvestmentCard";
 import InvestorPortfolioChart from "@/components/InvestorPortfolioChart";
 import InvestmentOptions from "@/components/InvestmentOptions";
+import EditProfileModal from "@/components/profile/EditProfileModal";
+import UploadAvatar from "@/components/profile/UploadAvatar";
+import Questionnaire from "@/components/profile/Questionnaire";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 const InvestorDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("visao-geral");
+  const [editOpen, setEditOpen] = useState(false);
+  const [avatarOpen, setAvatarOpen] = useState(false);
+  const [questionOpen, setQuestionOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [profile, setProfile] = useState<any>(null);
+
+  // load profile on mount
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+        const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
+        setProfile(data || null);
+        if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+      } catch (err) {
+        console.error('Erro ao carregar perfil:', err);
+      }
+    })();
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -90,9 +114,9 @@ const InvestorDashboard = () => {
       <div className="flex min-h-screen w-full bg-background">
         <Sidebar>
           <SidebarHeader>
-            <div className="flex items-center gap-2 px-2">
+              <div className="flex items-center gap-2 px-2">
               <Wallet className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-bold">InvestiMente</h1>
+              <h1 className="text-xl font-bold">Capital Seguro</h1>
             </div>
           </SidebarHeader>
           
@@ -186,7 +210,7 @@ const InvestorDashboard = () => {
                     <CardDescription>Somatório de todos investimentos</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-bold">R$ 100.000,00</p>
+                    <p className="text-3xl font-bold">Kz 100.000,00</p>
                     <p className="text-sm text-success mt-1">+15% este ano</p>
                   </CardContent>
                 </Card>
@@ -197,7 +221,7 @@ const InvestorDashboard = () => {
                     <CardDescription>Ganhos totais realizados</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-3xl font-bold">R$ 12.500,00</p>
+                    <p className="text-3xl font-bold">Kz 12.500,00</p>
                     <p className="text-sm text-success mt-1">+5% este mês</p>
                   </CardContent>
                 </Card>
@@ -236,7 +260,7 @@ const InvestorDashboard = () => {
                           <TableRow key={investment.id}>
                             <TableCell className="font-medium">{investment.name}</TableCell>
                             <TableCell>{investment.type}</TableCell>
-                            <TableCell>R$ {investment.value.toLocaleString()}</TableCell>
+                            <TableCell>Kz {investment.value.toLocaleString('pt-PT')}</TableCell>
                             <TableCell>
                               <span className={`px-2 py-1 rounded-full text-xs ${
                                 investment.status === "Ativo" ? "bg-green-100 text-green-800" : 
@@ -337,8 +361,8 @@ const InvestorDashboard = () => {
                           <TableCell className="font-medium">{investment.name}</TableCell>
                           <TableCell>{investment.type}</TableCell>
                           <TableCell>{new Date(investment.date).toLocaleDateString('pt-BR')}</TableCell>
-                          <TableCell>R$ {investment.value.toLocaleString()}</TableCell>
-                          <TableCell>R$ {Math.round(investment.value * (1 + investment.return/100)).toLocaleString()}</TableCell>
+                          <TableCell>Kz {investment.value.toLocaleString('pt-PT')}</TableCell>
+                          <TableCell>Kz {Math.round(investment.value * (1 + investment.return/100)).toLocaleString('pt-PT')}</TableCell>
                           <TableCell className="text-success">+{investment.return}%</TableCell>
                           <TableCell>
                             <span className={`px-2 py-1 rounded-full text-xs ${
@@ -401,41 +425,48 @@ const InvestorDashboard = () => {
                       <div className="space-y-4">
                         <div>
                           <h3 className="text-md font-medium text-muted-foreground mb-1">Nome Completo</h3>
-                          <p className="text-lg">João Silva Investidor</p>
+                          <p className="text-lg">{profile?.nome_completo || 'João Silva Investidor'}</p>
                         </div>
                         
                         <div>
                           <h3 className="text-md font-medium text-muted-foreground mb-1">E-mail</h3>
-                          <p className="text-lg">joao.investidor@email.com</p>
+                          <p className="text-lg">{profile?.email || profile?.email || ''}</p>
                         </div>
                         
                         <div>
                           <h3 className="text-md font-medium text-muted-foreground mb-1">Telefone</h3>
-                          <p className="text-lg">+55 11 98765-4321</p>
+                          <p className="text-lg">{profile?.telefone || '+55 11 98765-4321'}</p>
                         </div>
                         
                         <div>
                           <h3 className="text-md font-medium text-muted-foreground mb-1">Endereço</h3>
-                          <p className="text-lg">Av. Paulista, 1000, São Paulo - SP</p>
+                          <p className="text-lg">{profile?.endereco || 'Av. Paulista, 1000, São Paulo - SP'}</p>
                         </div>
                         
                         <div>
                           <h3 className="text-md font-medium text-muted-foreground mb-1">Documento de Identidade</h3>
-                          <p className="text-lg">123.456.789-00</p>
+                          <p className="text-lg">{profile?.documento_frente || '123.456.789-00'}</p>
                         </div>
                       </div>
                       
                       <div className="mt-6">
-                        <Button>Editar Informações</Button>
+                        <Button onClick={() => setEditOpen(true)}>Editar Informações</Button>
                       </div>
                     </div>
                     
                     <div className="flex flex-col items-center">
                       <div className="w-40 h-40 rounded-full bg-muted flex items-center justify-center overflow-hidden border-2 border-primary mb-4">
-                        <User className="h-20 w-20 text-muted-foreground" />
+                        {avatarUrl ? (
+                          <Avatar className="h-40 w-40">
+                            <AvatarImage src={avatarUrl} alt="Avatar" />
+                            <AvatarFallback>U</AvatarFallback>
+                          </Avatar>
+                        ) : (
+                          <User className="h-20 w-20 text-muted-foreground" />
+                        )}
                       </div>
                       
-                      <div className="space-y-4 text-center">
+                        <div className="space-y-4 text-center">
                         <div>
                           <h3 className="text-md font-medium text-muted-foreground mb-1">Perfil de Risco</h3>
                           <p className="text-lg font-medium px-4 py-1 bg-yellow-100 text-yellow-800 rounded-full">Moderado</p>
@@ -446,7 +477,7 @@ const InvestorDashboard = () => {
                           <p className="text-lg">Janeiro 2024</p>
                         </div>
                         
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => setAvatarOpen(true)}>
                           Atualizar Foto
                         </Button>
                       </div>
@@ -461,9 +492,31 @@ const InvestorDashboard = () => {
                   <CardDescription>Refaça o teste para atualizar seu perfil de risco</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button>Iniciar Questionário</Button>
+                  <Button onClick={() => setQuestionOpen(true)}>Iniciar Questionário</Button>
                 </CardContent>
               </Card>
+
+              {/* Modals */}
+              <EditProfileModal open={editOpen} onOpenChange={setEditOpen} onSaved={(p) => setProfile(p)} />
+
+              {/* Avatar upload dialog - reuse Dialog via UploadAvatar inside */}
+              <Questionnaire open={questionOpen} onOpenChange={setQuestionOpen} />
+
+              {/* Simple Dialog wrapper for UploadAvatar */}
+              <div>
+                {/* Hidden dialog usage: show UploadAvatar when avatarOpen true */}
+                {avatarOpen && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <div className="w-full max-w-md bg-background rounded-lg shadow-lg p-6">
+                      <div className="flex justify-between items-center mb-4">
+                        <h3 className="text-lg font-semibold">Atualizar Foto</h3>
+                        <button onClick={() => setAvatarOpen(false)} className="text-muted-foreground">Fechar</button>
+                      </div>
+                      <UploadAvatar onUpload={(url) => { setAvatarUrl(url); setAvatarOpen(false); }} />
+                    </div>
+                  </div>
+                )}
+              </div>
             </TabsContent>
             
             {/* Configurações Tab */}

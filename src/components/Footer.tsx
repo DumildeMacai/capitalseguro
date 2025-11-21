@@ -11,9 +11,9 @@ const Footer = () => {
               className="text-2xl font-bold flex items-center gap-2 mb-4"
             >
               <span className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-primary">
-                <span className="text-white text-lg font-bold">M</span>
+                <span className="text-white text-lg font-bold">C</span>
               </span>
-              <span className="text-gradient font-extrabold">MACAIINVEST</span>
+              <span className="text-gradient font-extrabold">Capital Seguro</span>
             </Link>
             <p className="text-muted-foreground mb-4">
               Construindo um futuro de liberdade financeira através de investimentos inteligentes e passivos.
@@ -130,7 +130,7 @@ const Footer = () => {
         
         <div className="border-t border-border mt-12 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-muted-foreground text-sm mb-4 md:mb-0">
-            © {new Date().getFullYear()} MACAIINVEST. Todos os direitos reservados.
+            © {new Date().getFullYear()} Capital Seguro. Todos os direitos reservados.
           </p>
           <div className="flex gap-6">
             <Link to="/privacy" className="text-sm text-muted-foreground hover:text-foreground transition-colors">

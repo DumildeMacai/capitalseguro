@@ -102,15 +102,15 @@ const ReturnCalculator = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <Card className="p-4 bg-muted/50">
               <p className="text-sm text-muted-foreground mb-1">Initial Investment</p>
-              <p className="text-2xl font-bold">${investment.toLocaleString()}</p>
+              <p className="text-2xl font-bold">Kz {investment.toLocaleString('pt-PT')}</p>
             </Card>
             <Card className="p-4 bg-muted/50">
               <p className="text-sm text-muted-foreground mb-1">Total Return</p>
-              <p className="text-2xl font-bold">${Math.round(estimatedReturn).toLocaleString()}</p>
+              <p className="text-2xl font-bold">Kz {Math.round(estimatedReturn).toLocaleString('pt-PT')}</p>
             </Card>
             <Card className="p-4 bg-success/10">
               <p className="text-sm text-muted-foreground mb-1">Total Profit</p>
-              <p className="text-2xl font-bold text-success">+${Math.round(totalProfit).toLocaleString()}</p>
+              <p className="text-2xl font-bold text-success">+Kz {Math.round(totalProfit).toLocaleString('pt-PT')}</p>
             </Card>
           </div>
 

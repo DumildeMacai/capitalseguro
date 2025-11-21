@@ -37,7 +37,7 @@ const mockInvestors = [
     phone: "+244 923 456 789",
     profileType: "Moderado",
     registrationDate: "12/04/2023",
-    totalInvested: "R$ 50.000",
+    totalInvested: "Kz 50.000",
     status: "Ativo",
   },
   {
@@ -47,7 +47,7 @@ const mockInvestors = [
     phone: "+244 923 987 654",
     profileType: "Conservador",
     registrationDate: "25/03/2023",
-    totalInvested: "R$ 120.000",
+    totalInvested: "Kz 120.000",
     status: "Ativo",
   },
   {
@@ -57,7 +57,7 @@ const mockInvestors = [
     phone: "+244 923 123 456",
     profileType: "Arrojado",
     registrationDate: "05/05/2023",
-    totalInvested: "R$ 75.000",
+    totalInvested: "Kz 75.000",
     status: "Suspenso",
   },
 ];

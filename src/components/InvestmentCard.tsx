@@ -47,7 +47,7 @@ const InvestmentCard = ({
     >
       {featured && (
         <div className="absolute top-4 right-4 z-10">
-          <Badge className="bg-gradient-primary">Featured</Badge>
+          <Badge className="bg-gradient-primary">Destaque</Badge>
         </div>
       )}
       
@@ -71,19 +71,19 @@ const InvestmentCard = ({
         
         <div className="flex justify-between items-center mb-4">
           <div>
-            <p className="text-sm text-muted-foreground">Annual Return</p>
+            <p className="text-sm text-muted-foreground">Retorno Anual</p>
             <p className="text-xl font-bold text-success">{returnRate}%</p>
           </div>
           <div className="text-right">
-            <p className="text-sm text-muted-foreground">Min. Investment</p>
-            <p className="text-xl font-semibold">${minInvestment.toLocaleString()}</p>
+            <p className="text-sm text-muted-foreground">Investimento Mín.</p>
+            <p className="text-xl font-semibold">Kz {minInvestment.toLocaleString('pt-PT')}</p>
           </div>
         </div>
         
         {progress !== null && (
           <div className="mb-4">
             <div className="flex justify-between mb-1 text-sm">
-              <span>Funding Progress</span>
+              <span>Progresso de captação</span>
               <span className="font-medium">{progress.toFixed(0)}%</span>
             </div>
             <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
@@ -92,17 +92,17 @@ const InvestmentCard = ({
                 style={{ width: `${progress}%` }}
               ></div>
             </div>
-            <div className="flex justify-between mt-1 text-xs text-muted-foreground">
+              <div className="flex justify-between mt-1 text-xs text-muted-foreground">
               <span>
-                ${(totalFunding! - remaining!).toLocaleString()} raised
+                Kz {(totalFunding! - remaining!).toLocaleString('pt-PT')} arrecadado
               </span>
-              <span>${remaining!.toLocaleString()} remaining</span>
+              <span>Kz {remaining!.toLocaleString('pt-PT')} restante</span>
             </div>
           </div>
         )}
         
         <Button asChild className="w-full bg-gradient-primary hover:opacity-90">
-          <Link to={`/investments/${id}`}>Invest Now</Link>
+          <Link to={`/investments/${id}`}>Investir Agora</Link>
         </Button>
       </div>
     </motion.div>

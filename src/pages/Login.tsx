@@ -40,7 +40,7 @@ const Login = () => {
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
                   <span className="text-white text-lg font-bold">F</span>
                 </span>
-                <span className="text-white text-3xl font-extrabold">FutureInvest</span>
+                <span className="text-white text-3xl font-extrabold">Capital Seguro</span>
               </div>
               
               <h1 className="text-4xl font-bold mb-6">
@@ -95,7 +95,7 @@ const Login = () => {
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary">
                   <span className="text-white text-lg font-bold">F</span>
                 </span>
-                <span className="text-gradient text-3xl font-extrabold">FutureInvest</span>
+                <span className="text-gradient text-3xl font-extrabold">Capital Seguro</span>
               </div>
             </Link>
             <h1 className="text-3xl font-bold">

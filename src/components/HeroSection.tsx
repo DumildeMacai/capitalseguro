@@ -28,7 +28,7 @@ const HeroSection = () => {
               <span className="text-gradient">À Prova de Futuro</span> da sua Riqueza com Rendimento Passivo
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg">
-              Invista em oportunidades de alto rendimento com a FutureInvest. Obtenha rendimento passivo com retornos anuais de 50% e transforme o seu futuro financeiro.
+              Invista em oportunidades de alto rendimento com a Capital Seguro. Obtenha rendimento passivo com retornos anuais de 50% e transforme o seu futuro financeiro.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
