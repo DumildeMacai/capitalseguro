@@ -33,23 +33,8 @@ const UploadAvatar: React.FC<Props> = ({ onUpload }) => {
 
       const { data } = supabase.storage.from('documentos').getPublicUrl(fileName);
       const publicUrl = data.publicUrl;
-      // try to persist avatar url to profiles table (if column exists)
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (user) {
-          const { error: upsertError } = await supabase.from('profiles').upsert({ id: user.id, avatar_url: publicUrl });
-          if (upsertError) {
-            console.warn('Avatar enviado, mas não foi possível atualizar profiles.avatar_url:', upsertError);
-            toast({ title: 'Foto enviada', description: 'Imagem enviada, porém falha ao atualizar perfil. Verifique coluna `avatar_url` no Supabase.' });
-            onUpload?.(publicUrl);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Erro ao atualizar profile avatar_url', err);
-      }
 
-      toast({ title: 'Foto atualizada', description: 'Sua foto de perfil foi enviada e salva.' });
+      toast({ title: 'Foto atualizada', description: 'Sua foto de perfil foi enviada com sucesso.' });
       onUpload?.(publicUrl);
     } catch (err: any) {
       console.error(err);
