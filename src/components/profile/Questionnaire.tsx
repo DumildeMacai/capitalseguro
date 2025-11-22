@@ -74,7 +74,7 @@ const Questionnaire: React.FC<Props> = ({ open, onOpenChange }) => {
 
       // Save summary to profiles.bio as JSON string (lightweight approach)
       const bio = JSON.stringify({ risk_profile: risk, questionnaire: answers });
-      const { error } = await supabase.from('profiles').upsert({ id: user.id, bio });
+      const { error } = await supabase.from('profiles').update({ bio }).eq('id', user.id);
       if (error) throw error;
 
       toast({ title: 'Questionário enviado', description: `Seu perfil de risco foi atualizado: ${risk}` });

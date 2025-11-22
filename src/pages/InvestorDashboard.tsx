@@ -33,7 +33,7 @@ const InvestorDashboard = () => {
         if (!user) return;
         const { data } = await supabase.from('profiles').select('*').eq('id', user.id).single();
         setProfile(data || null);
-        if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+        if (data && 'avatar_url' in data && data.avatar_url) setAvatarUrl(data.avatar_url as string);
       } catch (err) {
         console.error('Erro ao carregar perfil:', err);
       }

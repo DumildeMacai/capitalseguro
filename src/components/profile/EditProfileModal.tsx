@@ -11,7 +11,7 @@ type Props = {
   onSaved?: (profile: any) => void;
 };
 
-const EditProfileModal: React.FC<Props> = ({ open, onOpenChange }) => {
+const EditProfileModal: React.FC<Props> = ({ open, onOpenChange, onSaved }) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
