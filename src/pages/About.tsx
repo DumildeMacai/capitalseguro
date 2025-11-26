@@ -1,8 +1,10 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Shield, Target, Users, TrendingUp, Award, HeartHandshake } from "lucide-react";
+import { Shield, Target, Users, TrendingUp, Award, HeartHandshake, Lightbulb, CheckCircle2, Building2, Globe } from "lucide-react";
 import FeatureCard from "@/components/FeatureCard";
 import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const About = () => {
   const values = [
@@ -43,6 +45,68 @@ const About = () => {
     { value: "1000+", label: "Investidores Ativos" },
     { value: "95%", label: "Taxa de Satisfação" },
     { value: "18%", label: "Retorno Médio Anual" }
+  ];
+
+  const timeline = [
+    {
+      year: "2020",
+      title: "Fundação",
+      description: "Início da Capital Seguro com a visão de democratizar investimentos de qualidade."
+    },
+    {
+      year: "2021",
+      title: "Primeiros Investimentos",
+      description: "Lançamento das primeiras oportunidades em imóveis e negócios locais."
+    },
+    {
+      year: "2022",
+      title: "Expansão",
+      description: "Atingimos 500 investidores e 2M Kz em investimentos na plataforma."
+    },
+    {
+      year: "2023",
+      title: "Consolidação",
+      description: "Ultrapassamos 1000 investidores ativos e lançamos novos produtos."
+    },
+    {
+      year: "2024",
+      title: "Liderança de Mercado",
+      description: "Reconhecidos como uma das principais plataformas de investimento em Angola."
+    }
+  ];
+
+  const team = [
+    {
+      name: "Carlos Silva",
+      role: "CEO & Fundador",
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+      description: "15 anos de experiência em mercados financeiros"
+    },
+    {
+      name: "Ana Santos",
+      role: "Diretora de Investimentos",
+      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+      description: "Especialista em análise de investimentos e gestão de portfólio"
+    },
+    {
+      name: "João Costa",
+      role: "Diretor de Tecnologia",
+      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+      description: "Expert em fintech e desenvolvimento de plataformas"
+    },
+    {
+      name: "Maria Fernandes",
+      role: "Diretora de Relacionamento",
+      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
+      description: "Focada em experiência do cliente e suporte"
+    }
+  ];
+
+  const achievements = [
+    { icon: <Building2 className="h-6 w-6" />, text: "Mais de 50 projetos financiados com sucesso" },
+    { icon: <Users className="h-6 w-6" />, text: "Comunidade de 1000+ investidores satisfeitos" },
+    { icon: <Globe className="h-6 w-6" />, text: "Presente em 3 províncias de Angola" },
+    { icon: <Award className="h-6 w-6" />, text: "Prêmio de Inovação Financeira 2023" }
   ];
 
   return (
@@ -164,44 +228,173 @@ const About = () => {
         </div>
       </section>
 
-      {/* Story Section */}
-      <section className="py-20 px-4">
-        <div className="container mx-auto max-w-4xl">
+      {/* Timeline Section */}
+      <section className="py-20 px-4 bg-secondary/5">
+        <div className="container mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             viewport={{ once: true }}
-            className="space-y-6"
+            className="text-center mb-16"
           >
-            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12">Nossa História</h2>
-            
-            <div className="prose prose-lg max-w-none">
-              <p className="text-lg text-muted-foreground">
-                A Capital Seguro nasceu da visão de criar uma ponte entre investidores e oportunidades 
-                reais de crescimento financeiro. Fundada em 2020, começamos com o objetivo simples: 
-                tornar investimentos de qualidade acessíveis a todos.
-              </p>
-              
-              <p className="text-lg text-muted-foreground">
-                Desde então, crescemos para nos tornar uma das plataformas de investimento mais 
-                confiáveis do mercado, conectando milhares de investidores a oportunidades em 
-                imóveis, empresas locais e projetos de desenvolvimento.
-              </p>
-              
-              <p className="text-lg text-muted-foreground">
-                Nossa equipe é composta por profissionais experientes em finanças, tecnologia e 
-                desenvolvimento imobiliário, todos comprometidos em oferecer a melhor experiência 
-                de investimento possível.
-              </p>
-              
-              <p className="text-lg text-muted-foreground">
-                Hoje, com mais de 5 milhões de kwanzas investidos através da nossa plataforma e 
-                uma taxa de satisfação de 95%, continuamos crescendo e inovando para servir melhor 
-                nossa comunidade de investidores.
-              </p>
-            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Nossa Jornada</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Do início modesto à plataforma de investimentos líder
+            </p>
           </motion.div>
+
+          <div className="max-w-4xl mx-auto">
+            {timeline.map((item, index) => (
+              <motion.div
+                key={item.year}
+                initial={{ opacity: 0, x: index % 2 === 0 ? -20 : 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.6, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="relative pl-8 pb-12 border-l-2 border-primary/30 last:pb-0"
+              >
+                <div className="absolute left-0 top-0 w-4 h-4 rounded-full bg-primary -translate-x-[9px]" />
+                <div className="bg-card border rounded-lg p-6 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="text-sm font-semibold text-primary mb-2">{item.year}</div>
+                  <h3 className="text-xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-muted-foreground">{item.description}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Team Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Nossa Equipe</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Profissionais experientes dedicados ao seu sucesso financeiro
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {team.map((member, index) => (
+              <motion.div
+                key={member.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card className="text-center hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <Avatar className="h-24 w-24 mx-auto mb-4">
+                      <AvatarImage src={member.image} alt={member.name} />
+                      <AvatarFallback>{member.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                    </Avatar>
+                    <h3 className="text-lg font-bold mb-1">{member.name}</h3>
+                    <p className="text-sm text-primary font-medium mb-3">{member.role}</p>
+                    <p className="text-sm text-muted-foreground">{member.description}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Achievements Section */}
+      <section className="py-20 px-4 bg-secondary/5">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Conquistas</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Marcos importantes na nossa trajetória de sucesso
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+            {achievements.map((achievement, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, scale: 0.9 }}
+                whileInView={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card className="hover:shadow-md transition-shadow">
+                  <CardContent className="flex items-center gap-4 p-6">
+                    <div className="h-12 w-12 rounded-full bg-gradient-primary flex items-center justify-center flex-shrink-0">
+                      <div className="text-white">{achievement.icon}</div>
+                    </div>
+                    <p className="font-medium">{achievement.text}</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Vision & Mission Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Card className="h-full">
+                <CardContent className="p-8">
+                  <div className="h-12 w-12 rounded-full bg-gradient-primary flex items-center justify-center mb-6">
+                    <Target className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">Nossa Visão</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Ser a plataforma de investimentos mais confiável e inovadora de Angola, 
+                    transformando a vida financeira de milhares de pessoas através de oportunidades 
+                    acessíveis e rentáveis. Queremos criar um futuro onde todos tenham a possibilidade 
+                    de construir riqueza de forma inteligente e segura.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.6 }}
+              viewport={{ once: true }}
+            >
+              <Card className="h-full">
+                <CardContent className="p-8">
+                  <div className="h-12 w-12 rounded-full bg-gradient-primary flex items-center justify-center mb-6">
+                    <Lightbulb className="h-6 w-6 text-white" />
+                  </div>
+                  <h3 className="text-2xl font-bold mb-4">Nossa Missão</h3>
+                  <p className="text-muted-foreground leading-relaxed">
+                    Democratizar o acesso a investimentos de qualidade, oferecendo uma plataforma 
+                    transparente, segura e fácil de usar. Conectamos investidores a oportunidades 
+                    sólidas, fornecemos educação financeira contínua e construímos uma comunidade 
+                    engajada em crescimento mútuo e prosperidade.
+                  </p>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </div>
         </div>
       </section>
 
