@@ -1,11 +1,13 @@
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { Mail, Phone, MapPin, Send, MessageSquare, Clock } from "lucide-react";
+import { Mail, Phone, MapPin, Send, MessageSquare, Clock, Facebook, Instagram, Linkedin, Youtube, HelpCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
@@ -14,7 +16,9 @@ const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
+    phone: "",
     subject: "",
+    category: "",
     message: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -31,7 +35,7 @@ const Contact = () => {
       description: "Entraremos em contato em breve. Obrigado!"
     });
     
-    setFormData({ name: "", email: "", subject: "", message: "" });
+    setFormData({ name: "", email: "", phone: "", subject: "", category: "", message: "" });
     setIsSubmitting(false);
   };
 
@@ -56,18 +60,57 @@ const Contact = () => {
     }
   ];
 
+  const departments = [
+    {
+      title: "Suporte ao Investidor",
+      email: "suporte@capitalseguro.com",
+      phone: "+244 923 456 789",
+      description: "Dúvidas sobre investimentos e sua conta"
+    },
+    {
+      title: "Parcerias Comerciais",
+      email: "parcerias@capitalseguro.com",
+      phone: "+244 923 456 790",
+      description: "Oportunidades de negócios e colaboração"
+    },
+    {
+      title: "Departamento Jurídico",
+      email: "juridico@capitalseguro.com",
+      phone: "+244 923 456 791",
+      description: "Questões legais e contratuais"
+    },
+    {
+      title: "Imprensa",
+      email: "imprensa@capitalseguro.com",
+      phone: "+244 923 456 792",
+      description: "Consultas de mídia e comunicação"
+    }
+  ];
+
   const faqs = [
     {
       question: "Qual o investimento mínimo?",
-      answer: "O investimento mínimo varia por oportunidade, geralmente a partir de 5.000 Kz."
+      answer: "O investimento mínimo varia por oportunidade, geralmente a partir de 5.000 Kz. Algumas oportunidades podem ter valores mínimos diferentes dependendo do tipo de ativo e estrutura do investimento."
     },
     {
       question: "Como funciona o processo de investimento?",
-      answer: "Após criar sua conta, você pode explorar oportunidades, escolher um investimento e transferir o valor desejado."
+      answer: "Após criar sua conta e completar o processo de verificação, você pode explorar oportunidades disponíveis, analisar os detalhes de cada investimento, e fazer sua aplicação diretamente pela plataforma através de transferência bancária ou outros meios de pagamento aceitos."
     },
     {
       question: "Quando recebo os retornos?",
-      answer: "Os retornos são pagos de acordo com o tipo de investimento, podendo ser mensais, trimestrais ou no vencimento."
+      answer: "Os retornos são pagos de acordo com o tipo de investimento. Investimentos em renda fixa pagam mensalmente, enquanto outros podem ter pagamentos trimestrais, semestrais ou no vencimento. Todas as informações sobre pagamento estão detalhadas na página de cada oportunidade."
+    },
+    {
+      question: "Como posso acompanhar meus investimentos?",
+      answer: "Você pode acompanhar todos os seus investimentos através do painel do investidor em sua conta. Lá você encontra relatórios detalhados, histórico de transações e projeções de retorno."
+    },
+    {
+      question: "É seguro investir pela Capital Seguro?",
+      answer: "Sim! Utilizamos tecnologia de criptografia avançada, seguimos normas de segurança bancária e todos os investimentos são registrados legalmente. Além disso, fazemos due diligence rigorosa em todas as oportunidades oferecidas."
+    },
+    {
+      question: "Posso retirar meu dinheiro a qualquer momento?",
+      answer: "Cada investimento tem seu próprio período de carência e condições de liquidez. Investimentos de curto prazo geralmente têm maior liquidez, enquanto projetos de longo prazo podem ter períodos de lock-up. Consulte os termos específicos de cada oportunidade."
     }
   ];
 
@@ -139,7 +182,7 @@ const Contact = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <label htmlFor="name" className="text-sm font-medium">
-                          Nome Completo
+                          Nome Completo *
                         </label>
                         <Input
                           id="name"
@@ -151,7 +194,7 @@ const Contact = () => {
                       </div>
                       <div className="space-y-2">
                         <label htmlFor="email" className="text-sm font-medium">
-                          Email
+                          Email *
                         </label>
                         <Input
                           id="email"
@@ -163,10 +206,46 @@ const Contact = () => {
                         />
                       </div>
                     </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <label htmlFor="phone" className="text-sm font-medium">
+                          Telefone
+                        </label>
+                        <Input
+                          id="phone"
+                          type="tel"
+                          placeholder="+244 923 456 789"
+                          value={formData.phone}
+                          onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="category" className="text-sm font-medium">
+                          Categoria *
+                        </label>
+                        <Select
+                          value={formData.category}
+                          onValueChange={(value) => setFormData({ ...formData, category: value })}
+                          required
+                        >
+                          <SelectTrigger id="category">
+                            <SelectValue placeholder="Selecione uma categoria" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="investimento">Dúvidas sobre Investimento</SelectItem>
+                            <SelectItem value="conta">Problemas com Conta</SelectItem>
+                            <SelectItem value="parceria">Oportunidade de Parceria</SelectItem>
+                            <SelectItem value="suporte">Suporte Técnico</SelectItem>
+                            <SelectItem value="outro">Outro Assunto</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
                     
                     <div className="space-y-2">
                       <label htmlFor="subject" className="text-sm font-medium">
-                        Assunto
+                        Assunto *
                       </label>
                       <Input
                         id="subject"
@@ -179,11 +258,11 @@ const Contact = () => {
                     
                     <div className="space-y-2">
                       <label htmlFor="message" className="text-sm font-medium">
-                        Mensagem
+                        Mensagem *
                       </label>
                       <Textarea
                         id="message"
-                        placeholder="Descreva sua dúvida ou solicitação..."
+                        placeholder="Descreva sua dúvida ou solicitação em detalhes..."
                         rows={6}
                         value={formData.message}
                         onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -241,24 +320,6 @@ const Contact = () => {
                 </CardContent>
               </Card>
 
-              {/* Quick FAQs */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Perguntas Frequentes</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  {faqs.map((faq, index) => (
-                    <div key={index} className="space-y-1">
-                      <h4 className="font-medium text-sm">{faq.question}</h4>
-                      <p className="text-sm text-muted-foreground">{faq.answer}</p>
-                    </div>
-                  ))}
-                  <Button variant="outline" className="w-full mt-4" asChild>
-                    <a href="/#faq">Ver Todas as Perguntas</a>
-                  </Button>
-                </CardContent>
-              </Card>
-
               {/* Social Media */}
               <Card>
                 <CardHeader>
@@ -272,35 +333,174 @@ const Contact = () => {
                     <a
                       href="#"
                       className="h-10 w-10 flex items-center justify-center rounded-full bg-muted hover:bg-primary hover:text-white transition-colors"
-                      aria-label="Twitter"
+                      aria-label="Facebook"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-2.719 0-4.92 2.203-4.92 4.917 0 .39.045.765.127 1.124C7.691 8.094 4.066 6.13 1.64 3.161c-.427.722-.666 1.561-.666 2.475 0 1.71.87 3.213 2.188 4.096-.807-.026-1.566-.248-2.228-.616v.061c0 2.385 1.693 4.374 3.946 4.827-.413.111-.849.171-1.296.171-.314 0-.615-.03-.916-.086.631 1.953 2.445 3.377 4.604 3.417-1.68 1.319-3.809 2.105-6.102 2.105-.39 0-.779-.023-1.17-.067 2.189 1.394 4.768 2.209 7.557 2.209 9.054 0 14-7.503 14-14 0-.21-.005-.42-.015-.63.961-.689 1.8-1.56 2.46-2.548l-.047-.02z"/>
-                      </svg>
-                    </a>
-                    <a
-                      href="#"
-                      className="h-10 w-10 flex items-center justify-center rounded-full bg-muted hover:bg-primary hover:text-white transition-colors"
-                      aria-label="LinkedIn"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/>
-                      </svg>
+                      <Facebook className="h-4 w-4" />
                     </a>
                     <a
                       href="#"
                       className="h-10 w-10 flex items-center justify-center rounded-full bg-muted hover:bg-primary hover:text-white transition-colors"
                       aria-label="Instagram"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.204.013-3.583.07-4.849-.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.204.013-3.583.07-4.849-.149-3.227 1.664-4.771 4.919-4.919 1.266-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                      </svg>
+                      <Instagram className="h-4 w-4" />
+                    </a>
+                    <a
+                      href="#"
+                      className="h-10 w-10 flex items-center justify-center rounded-full bg-muted hover:bg-primary hover:text-white transition-colors"
+                      aria-label="LinkedIn"
+                    >
+                      <Linkedin className="h-4 w-4" />
+                    </a>
+                    <a
+                      href="#"
+                      className="h-10 w-10 flex items-center justify-center rounded-full bg-muted hover:bg-primary hover:text-white transition-colors"
+                      aria-label="Youtube"
+                    >
+                      <Youtube className="h-4 w-4" />
                     </a>
                   </div>
                 </CardContent>
               </Card>
             </motion.div>
           </div>
+        </div>
+      </section>
+
+      {/* Departments Section */}
+      <section className="py-20 px-4 bg-secondary/5">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Nossos Departamentos</h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Entre em contato direto com o departamento que pode ajudá-lo melhor
+            </p>
+          </motion.div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {departments.map((dept, index) => (
+              <motion.div
+                key={dept.title}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+              >
+                <Card className="h-full hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <h3 className="font-bold mb-3">{dept.title}</h3>
+                    <p className="text-sm text-muted-foreground mb-4">{dept.description}</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-primary flex-shrink-0" />
+                        <a href={`mailto:${dept.email}`} className="hover:text-primary transition-colors break-all">
+                          {dept.email}
+                        </a>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-primary flex-shrink-0" />
+                        <a href={`tel:${dept.phone}`} className="hover:text-primary transition-colors">
+                          {dept.phone}
+                        </a>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ Section */}
+      <section className="py-20 px-4">
+        <div className="container mx-auto max-w-4xl">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-16"
+          >
+            <div className="h-12 w-12 rounded-full bg-gradient-primary flex items-center justify-center mx-auto mb-6">
+              <HelpCircle className="h-6 w-6 text-white" />
+            </div>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Perguntas Frequentes</h2>
+            <p className="text-lg text-muted-foreground">
+              Encontre respostas rápidas para as dúvidas mais comuns
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <Card>
+              <CardContent className="p-6">
+                <Accordion type="single" collapsible className="w-full">
+                  {faqs.map((faq, index) => (
+                    <AccordionItem key={index} value={`item-${index}`}>
+                      <AccordionTrigger className="text-left">
+                        {faq.question}
+                      </AccordionTrigger>
+                      <AccordionContent className="text-muted-foreground">
+                        {faq.answer}
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
+                <div className="mt-6 pt-6 border-t text-center">
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Não encontrou sua resposta?
+                  </p>
+                  <Button variant="outline" asChild>
+                    <a href="#contact-form">Entre em Contato Conosco</a>
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Map Section */}
+      <section className="py-20 px-4 bg-secondary/5">
+        <div className="container mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">Visite Nosso Escritório</h2>
+            <p className="text-lg text-muted-foreground">
+              Rua Principal, Luanda, Angola
+            </p>
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            viewport={{ once: true }}
+            className="aspect-video rounded-2xl overflow-hidden shadow-xl"
+          >
+            <div className="w-full h-full bg-muted flex items-center justify-center">
+              <div className="text-center">
+                <MapPin className="h-12 w-12 mx-auto mb-4 text-primary" />
+                <p className="text-muted-foreground">Mapa de localização</p>
+                <p className="text-sm text-muted-foreground mt-2">Rua Principal, Luanda, Angola</p>
+              </div>
+            </div>
+          </motion.div>
         </div>
       </section>
 
