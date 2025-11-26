@@ -1,4 +1,3 @@
-
 import { Session, User } from '@supabase/supabase-js';
 import { UserType } from './auth';
 

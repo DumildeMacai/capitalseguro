@@ -14,10 +14,10 @@ Execute o arquivo `supabase/fix-security-and-storage.sql` no **SQL Editor** do S
 
 Após executar a migração, você precisa promover seu usuário para admin. Execute este comando no SQL Editor:
 
-```sql
+\`\`\`sql
 -- Substitua 'SEU-USER-ID' pelo seu ID de usuário
 SELECT public.set_user_as_admin('75f9ba92-f94f-452e-8fff-5e1096e571ec');
-```
+\`\`\`
 
 Para encontrar seu User ID:
 - Vá em **Authentication > Users** no Supabase
@@ -27,9 +27,9 @@ Para encontrar seu User ID:
 
 Execute no SQL Editor para confirmar:
 
-```sql
+\`\`\`sql
 SELECT * FROM public.user_roles WHERE user_id = auth.uid();
-```
+\`\`\`
 
 ## 🛡️ O que foi corrigido?
 
@@ -51,12 +51,12 @@ SELECT * FROM public.user_roles WHERE user_id = auth.uid();
 ## 📋 Nova Estrutura de Banco de Dados
 
 ### Tabela `user_roles`
-```sql
+\`\`\`sql
 - id: UUID (PK)
 - user_id: UUID (FK -> auth.users)
 - role: app_role ENUM ('admin', 'parceiro', 'investidor')
 - created_at: TIMESTAMP
-```
+\`\`\`
 
 ### Funções Disponíveis
 
@@ -72,29 +72,29 @@ Promove um usuário para admin (execute via SQL apenas)
 ## 🔐 Como Gerenciar Roles
 
 ### Promover Usuário a Admin
-```sql
+\`\`\`sql
 SELECT public.set_user_as_admin('user-id-aqui');
-```
+\`\`\`
 
 ### Adicionar Role de Parceiro
-```sql
+\`\`\`sql
 INSERT INTO public.user_roles (user_id, role)
 VALUES ('user-id-aqui', 'parceiro');
-```
+\`\`\`
 
 ### Remover Role
-```sql
+\`\`\`sql
 DELETE FROM public.user_roles 
 WHERE user_id = 'user-id-aqui' AND role = 'admin';
-```
+\`\`\`
 
 ### Listar Todos os Admins
-```sql
+\`\`\`sql
 SELECT u.email, ur.role, ur.created_at
 FROM public.user_roles ur
 JOIN auth.users u ON u.id = ur.user_id
 WHERE ur.role = 'admin';
-```
+\`\`\`
 
 ## 🚨 Segurança - O que NÃO fazer
 

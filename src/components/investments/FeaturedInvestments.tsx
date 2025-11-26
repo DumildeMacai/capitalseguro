@@ -1,4 +1,3 @@
-
 import { motion } from "framer-motion";
 import { Investment } from "@/types/investment";
 import InvestmentsList from "@/components/InvestmentsList";

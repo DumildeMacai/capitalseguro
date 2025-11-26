@@ -1,4 +1,3 @@
-
 import { PieChart, Pie, BarChart, Bar, Cell, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend } from "recharts";
 
 interface PortfolioData {

@@ -1,4 +1,3 @@
-
 import { ensureStorageBucket } from "./storageUtils";
 
 export const initializeStorage = async () => {
@@ -17,4 +16,3 @@ export const initializeStorage = async () => {
     return false;
   }
 };
-

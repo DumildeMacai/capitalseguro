@@ -1,4 +1,3 @@
-
 -- Este arquivo deve ser executado manualmente no Editor SQL do Supabase
 -- para criar o bucket de armazenamento para documentos
 

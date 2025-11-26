@@ -1,4 +1,3 @@
-
 import { useToast } from "@/hooks/use-toast";
 
 export const handleAuthError = (error: Error, toast: ReturnType<typeof useToast>['toast']) => {

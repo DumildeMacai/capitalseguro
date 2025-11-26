@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export const ensureStorageBucket = async (bucketName: string) => {
@@ -81,4 +80,3 @@ export const uploadDocumentWithoutAuth = async (
     return { success: false, error };
   }
 };
-

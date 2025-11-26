@@ -1,4 +1,3 @@
-
 import { Investment, UserInvestment } from "@/types/investment";
 import { PiggyBank } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
