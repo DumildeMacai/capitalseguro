@@ -1,15 +1,17 @@
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { EyeIcon, EyeOffIcon } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { getRedirectPath, handleAuthError } from "@/utils/authUtils";
+"use client"
+
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import * as z from "zod"
+import { useNavigate } from "react-router-dom"
+import { useToast } from "@/hooks/use-toast"
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { EyeIcon, EyeOffIcon } from "lucide-react"
+import { supabase } from "@/integrations/supabase/client"
+import { getRedirectPath, handleAuthError } from "@/utils/authUtils"
 
 const loginFormSchema = z.object({
   email: z.string().email({
@@ -18,77 +20,83 @@ const loginFormSchema = z.object({
   password: z.string().min(1, {
     message: "Por favor, insira uma senha.",
   }),
-});
+})
 
-type LoginFormValues = z.infer<typeof loginFormSchema>;
+type LoginFormValues = z.infer<typeof loginFormSchema>
 
 export const LoginForm = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const { toast } = useToast();
-  const navigate = useNavigate();
-  
+  const [showPassword, setShowPassword] = useState(false)
+  const { toast } = useToast()
+  const navigate = useNavigate()
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
       email: "",
       password: "",
     },
-  });
-  
-  const isLoading = form.formState.isSubmitting;
+  })
+
+  const isLoading = form.formState.isSubmitting
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      console.log("Tentando login para:", values.email);
+      console.log("[v0] Tentando login para:", values.email)
 
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
-      });
+      })
 
       if (error) {
-        console.error("Erro no login:", error);
-        throw error;
+        console.error("[v0] Erro no login:", error)
+        throw error
       }
 
-      console.log("Login bem-sucedido para:", values.email);
+      console.log("[v0] Login bem-sucedido para:", values.email)
+      console.log("[v0] User ID:", data.user?.id)
 
       if (data.user) {
         // Verificar tipo de usuário usando RPC
-        let userType: 'admin' | 'parceiro' | 'investidor' | null = null;
-        
+        let userType: "admin" | "parceiro" | "investidor" | null = null
+
         try {
-          console.log("Buscando tipo de usuário para:", data.user.id);
-          
-          const { data: userTypeData, error: userTypeError } = await supabase.rpc(
-            'get_user_type', 
-            { user_id: data.user.id }
-          );
-          
+          console.log("[v0] Buscando tipo de usuário para user_id:", data.user.id)
+
+          const { data: userTypeData, error: userTypeError } = await supabase.rpc("get_user_type", {
+            user_id: data.user.id,
+          })
+
+          console.log("[v0] Resposta da RPC get_user_type:", userTypeData)
+          console.log("[v0] Erro da RPC get_user_type:", userTypeError)
+
           if (userTypeError) {
-            console.error("Erro ao buscar tipo de usuário:", userTypeError);
-          } else {
-            userType = userTypeData as 'admin' | 'parceiro' | 'investidor';
-            console.log("Tipo de usuário obtido:", userType);
+            console.error("[v0] Erro ao buscar tipo de usuário:", userTypeError)
+          } else if (userTypeData) {
+            // Garantir que é uma string válida
+            userType = (userTypeData as string).toLowerCase() as "admin" | "parceiro" | "investidor"
+            console.log("[v0] Tipo de usuário processado:", userType)
           }
         } catch (userTypeError) {
-          console.error("Exceção ao buscar tipo de usuário:", userTypeError);
+          console.error("[v0] Exceção ao buscar tipo de usuário:", userTypeError)
         }
 
+        console.log("[v0] userType final:", userType)
+
         // Redirecionar com base no tipo de usuário
-        const redirectPath = getRedirectPath(userType);
-        console.log("Redirecionando para:", redirectPath);
-        navigate(redirectPath);
+        const redirectPath = getRedirectPath(userType)
+        console.log("[v0] Redirecionando para:", redirectPath)
+        navigate(redirectPath)
 
         toast({
           title: "Login bem-sucedido",
           description: "Bem-vindo de volta!",
-        });
+        })
       }
     } catch (error) {
-      handleAuthError(error as Error, toast);
+      handleAuthError(error as Error, toast)
     }
-  };
+  }
 
   return (
     <Form {...form}>
@@ -100,11 +108,7 @@ export const LoginForm = () => {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="seu@email.com" 
-                  autoComplete="email"
-                  {...field} 
-                />
+                <Input placeholder="seu@email.com" autoComplete="email" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -146,5 +150,5 @@ export const LoginForm = () => {
         </Button>
       </form>
     </Form>
-  );
-};
+  )
+}
