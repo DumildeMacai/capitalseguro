@@ -18,6 +18,13 @@ import {
   Mail,
   Award,
   Zap,
+  FileText,
+  BarChart3,
+  Lock,
+  Percent,
+  CreditCard,
+  Download,
+  Share2,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -234,7 +241,7 @@ const InvestmentDetail = () => {
   const similarInvestments = availableInvestments.filter((inv) => inv.id !== id && inv.category === investment.category)
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30">
       <Navbar />
 
       <main className="pt-28 pb-20">
@@ -248,114 +255,118 @@ const InvestmentDetail = () => {
             <span>Voltar aos investimentos</span>
           </motion.button>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="mb-12"
-          >
-            <div className="relative h-[500px] rounded-2xl overflow-hidden mb-8 shadow-2xl">
-              <img
-                src={investment.image || "/placeholder.svg"}
-                alt={investment.title}
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent"></div>
-              <div className="absolute bottom-0 left-0 right-0 p-12">
-                <div className="flex items-end justify-between">
-                  <div className="flex-1">
-                    <div className="flex gap-3 mb-4 flex-wrap">
-                      <Badge className="bg-white/95 text-foreground font-semibold flex items-center gap-2 text-sm py-1.5 px-4">
-                        {investment.icon}
-                        {investment.category}
-                      </Badge>
-                      <Badge
-                        variant={
-                          investment.risk === "Baixo"
-                            ? "success"
-                            : investment.risk === "Médio"
-                              ? "warning"
-                              : "destructive"
-                        }
-                        className="text-sm py-1.5 px-4 font-semibold"
-                      >
-                        Risco {investment.risk}
-                      </Badge>
-                      <Badge className="bg-cyan-500/90 text-white text-sm py-1.5 px-4 font-semibold">
-                        {numInvestors} investidores
-                      </Badge>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-8">
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <div className="relative h-[500px] rounded-2xl overflow-hidden mb-8 shadow-2xl group">
+                  <img
+                    src={investment.image || "/placeholder.svg"}
+                    alt={investment.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+
+                  <div className="absolute top-6 right-6 flex gap-2">
+                    <Button size="sm" variant="outline" className="bg-white/10 border-white/20 hover:bg-white/20">
+                      <Share2 size={16} className="mr-1" />
+                      Compartilhar
+                    </Button>
+                    <Button size="sm" variant="outline" className="bg-white/10 border-white/20 hover:bg-white/20">
+                      <Download size={16} className="mr-1" />
+                      PDF
+                    </Button>
+                  </div>
+
+                  <div className="absolute bottom-0 left-0 right-0 p-12">
+                    <div className="flex items-end justify-between">
+                      <div className="flex-1">
+                        <div className="flex gap-3 mb-4 flex-wrap">
+                          <Badge className="bg-white/95 text-foreground font-semibold flex items-center gap-2 text-sm py-2 px-4">
+                            {investment.icon}
+                            {investment.category}
+                          </Badge>
+                          <Badge
+                            variant={
+                              investment.risk === "Baixo"
+                                ? "success"
+                                : investment.risk === "Médio"
+                                  ? "warning"
+                                  : "destructive"
+                            }
+                            className="text-sm py-2 px-4 font-semibold"
+                          >
+                            Risco {investment.risk}
+                          </Badge>
+                          <Badge className="bg-cyan-500/90 text-white text-sm py-2 px-4 font-semibold">
+                            {numInvestors} investidores
+                          </Badge>
+                        </div>
+                        <h1 className="text-white text-5xl font-bold leading-tight max-w-3xl">{investment.title}</h1>
+                        <p className="text-gray-100 text-lg mt-4 max-w-2xl">
+                          Oportunidade premium com retorno garantido
+                        </p>
+                      </div>
                     </div>
-                    <h1 className="text-white text-5xl font-bold leading-tight max-w-3xl">{investment.title}</h1>
-                    <p className="text-gray-100 text-lg mt-4 max-w-2xl">Oportunidade premium com retorno garantido</p>
                   </div>
                 </div>
-              </div>
-            </div>
-          </motion.div>
+              </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-12"
-          >
-            <Card className="bg-gradient-to-br from-purple-500/15 to-purple-600/10 border-purple-200/40">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">Retorno Anual</p>
-                  <p className="text-3xl font-bold text-purple-600">{investment.returnRate}%</p>
-                </div>
-              </CardContent>
-            </Card>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.1 }}
+                className="grid grid-cols-2 md:grid-cols-4 gap-4"
+              >
+                <Card className="bg-gradient-to-br from-purple-500/15 to-purple-600/10 border-purple-200/40 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <Percent className="text-purple-600 mx-auto mb-2" size={24} />
+                      <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">Retorno Anual</p>
+                      <p className="text-3xl font-bold text-purple-600">{investment.returnRate}%</p>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <Card className="bg-gradient-to-br from-blue-500/15 to-blue-600/10 border-blue-200/40">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">Mínimo</p>
-                  <p className="text-2xl font-bold text-blue-600">
-                    AOA {(investment.minInvestment / 1000).toFixed(0)}K
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                <Card className="bg-gradient-to-br from-blue-500/15 to-blue-600/10 border-blue-200/40 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <DollarSign className="text-blue-600 mx-auto mb-2" size={24} />
+                      <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">Mínimo</p>
+                      <p className="text-2xl font-bold text-blue-600">
+                        AOA {(investment.minInvestment / 1000).toFixed(0)}K
+                      </p>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <Card className="bg-gradient-to-br from-green-500/15 to-green-600/10 border-green-200/40">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">Financiado</p>
-                  <p className="text-3xl font-bold text-green-600">{progress.toFixed(0)}%</p>
-                </div>
-              </CardContent>
-            </Card>
+                <Card className="bg-gradient-to-br from-green-500/15 to-green-600/10 border-green-200/40 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <BarChart3 className="text-green-600 mx-auto mb-2" size={24} />
+                      <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">Financiado</p>
+                      <p className="text-3xl font-bold text-green-600">{progress.toFixed(0)}%</p>
+                    </div>
+                  </CardContent>
+                </Card>
 
-            <Card className="bg-gradient-to-br from-orange-500/15 to-orange-600/10 border-orange-200/40">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">Investidores</p>
-                  <p className="text-2xl font-bold text-orange-600">{numInvestors}</p>
-                </div>
-              </CardContent>
-            </Card>
+                <Card className="bg-gradient-to-br from-orange-500/15 to-orange-600/10 border-orange-200/40 hover:shadow-lg transition-shadow">
+                  <CardContent className="pt-6">
+                    <div className="text-center">
+                      <Clock className="text-orange-600 mx-auto mb-2" size={24} />
+                      <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">Prazo</p>
+                      <p className="text-2xl font-bold text-orange-600">{daysRemaining}d</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
 
-            <Card className="bg-gradient-to-br from-pink-500/15 to-pink-600/10 border-pink-200/40">
-              <CardContent className="pt-6">
-                <div className="text-center">
-                  <p className="text-xs text-muted-foreground mb-1 uppercase font-semibold">Prazo</p>
-                  <p className="text-2xl font-bold text-pink-600">{daysRemaining}d</p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-            <div className="lg:col-span-2 space-y-8">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
               >
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                  <TabsList className="grid w-full grid-cols-4">
+                  <TabsList className="grid w-full grid-cols-4 bg-muted/50 border border-border/50">
                     <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
                     <TabsTrigger value="detalhes">Detalhes</TabsTrigger>
                     <TabsTrigger value="riscos">Riscos</TabsTrigger>
@@ -363,24 +374,26 @@ const InvestmentDetail = () => {
                   </TabsList>
 
                   <TabsContent value="visao-geral" className="space-y-6">
-                    <Card>
-                      <CardHeader>
+                    <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/0">
                         <CardTitle className="text-2xl">Sobre este investimento</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-6 pt-6">
                         <p className="text-lg text-muted-foreground leading-relaxed">{investment.description}</p>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           {features.map((feature, index) => (
                             <motion.div
                               key={index}
                               initial={{ opacity: 0, x: -10 }}
                               animate={{ opacity: 1, x: 0 }}
                               transition={{ delay: index * 0.1 }}
-                              className="flex gap-4 p-4 rounded-lg bg-muted/30 border border-border/50"
+                              className="flex gap-4 p-4 rounded-xl bg-gradient-to-br from-muted/50 to-muted/20 border border-border/50 hover:border-primary/30 transition-colors"
                             >
                               <div className="flex-shrink-0">
-                                <feature.icon className="h-6 w-6 text-primary" />
+                                <div className="p-2 rounded-lg bg-primary/10">
+                                  <feature.icon className="h-6 w-6 text-primary" />
+                                </div>
                               </div>
                               <div>
                                 <h4 className="font-semibold mb-1">{feature.title}</h4>
@@ -392,29 +405,52 @@ const InvestmentDetail = () => {
                       </CardContent>
                     </Card>
 
-                    <Card>
-                      <CardHeader>
+                    <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/0">
                         <CardTitle>Progresso de Financiamento</CardTitle>
                         <CardDescription>Quanto já foi captado desta meta</CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-6 pt-6">
                         <div>
-                          <Progress value={progress} className="h-4" />
+                          <div className="mb-2 flex justify-between items-center">
+                            <h4 className="font-semibold">Meta de Captação</h4>
+                            <span className="text-sm font-bold text-primary">{progress.toFixed(1)}% concluído</span>
+                          </div>
+                          <Progress value={progress} className="h-3 rounded-full" />
                           <div className="grid grid-cols-3 gap-4 mt-6">
-                            <div className="p-4 rounded-lg bg-green-50 border border-green-200">
-                              <p className="text-sm text-muted-foreground mb-1">Captado</p>
-                              <p className="font-bold text-lg">
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.2 }}
+                              className="p-4 rounded-xl bg-gradient-to-br from-green-50 to-green-100/50 border border-green-200/50"
+                            >
+                              <p className="text-xs text-muted-foreground mb-1 font-semibold">Captado</p>
+                              <p className="font-bold text-lg text-green-700">
                                 AOA {((investment.totalFunding - investment.remaining) / 1000000).toFixed(1)}M
                               </p>
-                            </div>
-                            <div className="p-4 rounded-lg bg-blue-50 border border-blue-200 text-center">
-                              <p className="text-sm text-muted-foreground mb-1">Meta</p>
-                              <p className="font-bold text-lg">AOA {(investment.totalFunding / 1000000).toFixed(1)}M</p>
-                            </div>
-                            <div className="p-4 rounded-lg bg-orange-50 border border-orange-200 text-right">
-                              <p className="text-sm text-muted-foreground mb-1">Restante</p>
-                              <p className="font-bold text-lg">AOA {(investment.remaining / 1000000).toFixed(1)}M</p>
-                            </div>
+                            </motion.div>
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.3 }}
+                              className="p-4 rounded-xl bg-gradient-to-br from-blue-50 to-blue-100/50 border border-blue-200/50 text-center"
+                            >
+                              <p className="text-xs text-muted-foreground mb-1 font-semibold">Meta</p>
+                              <p className="font-bold text-lg text-blue-700">
+                                AOA {(investment.totalFunding / 1000000).toFixed(1)}M
+                              </p>
+                            </motion.div>
+                            <motion.div
+                              initial={{ opacity: 0, y: 10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ delay: 0.4 }}
+                              className="p-4 rounded-xl bg-gradient-to-br from-orange-50 to-orange-100/50 border border-orange-200/50 text-right"
+                            >
+                              <p className="text-xs text-muted-foreground mb-1 font-semibold">Restante</p>
+                              <p className="font-bold text-lg text-orange-700">
+                                AOA {(investment.remaining / 1000000).toFixed(1)}M
+                              </p>
+                            </motion.div>
                           </div>
                         </div>
                       </CardContent>
@@ -422,49 +458,102 @@ const InvestmentDetail = () => {
                   </TabsContent>
 
                   <TabsContent value="detalhes" className="space-y-6">
-                    <Card>
-                      <CardHeader>
+                    <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/0">
                         <CardTitle>Informações Detalhadas</CardTitle>
                       </CardHeader>
-                      <CardContent className="space-y-6">
+                      <CardContent className="space-y-6 pt-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div className="flex gap-4">
-                            <MapPin className="text-primary flex-shrink-0 mt-1" size={20} />
+                          <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0 }}
+                            className="flex gap-4 p-4 rounded-xl bg-muted/40 border border-border/50"
+                          >
+                            <MapPin className="text-primary flex-shrink-0 mt-1" size={24} />
                             <div>
-                              <h4 className="font-semibold mb-1">Localização</h4>
+                              <h4 className="font-semibold mb-1 text-lg">Localização</h4>
                               <p className="text-sm text-muted-foreground">Luanda, Angola</p>
+                              <p className="text-xs text-muted-foreground mt-1">Zona Premium com alta valorização</p>
                             </div>
-                          </div>
-                          <div className="flex gap-4">
-                            <Clock className="text-primary flex-shrink-0 mt-1" size={20} />
+                          </motion.div>
+                          <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="flex gap-4 p-4 rounded-xl bg-muted/40 border border-border/50"
+                          >
+                            <Clock className="text-primary flex-shrink-0 mt-1" size={24} />
                             <div>
-                              <h4 className="font-semibold mb-1">Duração Estimada</h4>
+                              <h4 className="font-semibold mb-1 text-lg">Duração Estimada</h4>
                               <p className="text-sm text-muted-foreground">24 meses</p>
+                              <p className="text-xs text-muted-foreground mt-1">Com retorno periódico anual</p>
                             </div>
-                          </div>
-                          <div className="flex gap-4">
-                            <Award className="text-primary flex-shrink-0 mt-1" size={20} />
+                          </motion.div>
+                          <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.2 }}
+                            className="flex gap-4 p-4 rounded-xl bg-muted/40 border border-border/50"
+                          >
+                            <Award className="text-primary flex-shrink-0 mt-1" size={24} />
                             <div>
-                              <h4 className="font-semibold mb-1">Qualidade do Projeto</h4>
+                              <h4 className="font-semibold mb-1 text-lg">Qualidade do Projeto</h4>
                               <p className="text-sm text-muted-foreground">Certificado AAA</p>
+                              <p className="text-xs text-muted-foreground mt-1">Auditado por firmas internacionais</p>
                             </div>
-                          </div>
-                          <div className="flex gap-4">
-                            <Zap className="text-primary flex-shrink-0 mt-1" size={20} />
+                          </motion.div>
+                          <motion.div
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: 0.3 }}
+                            className="flex gap-4 p-4 rounded-xl bg-muted/40 border border-border/50"
+                          >
+                            <Zap className="text-primary flex-shrink-0 mt-1" size={24} />
                             <div>
-                              <h4 className="font-semibold mb-1">Liquidez</h4>
+                              <h4 className="font-semibold mb-1 text-lg">Liquidez</h4>
                               <p className="text-sm text-muted-foreground">Anual com opções mensais</p>
+                              <p className="text-xs text-muted-foreground mt-1">
+                                Resgate flexível conforme necessidade
+                              </p>
                             </div>
-                          </div>
+                          </motion.div>
                         </div>
 
-                        <div className="p-4 rounded-lg bg-blue-50 border border-blue-200 flex gap-3">
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: 0.4 }}
+                          className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-blue-100/50 border border-blue-200/50 flex gap-3"
+                        >
                           <AlertCircle className="text-blue-600 flex-shrink-0 mt-0.5" size={20} />
                           <div>
                             <h4 className="font-semibold text-blue-900 mb-1">Informação Importante</h4>
                             <p className="text-sm text-blue-800">
                               Este investimento é auditado trimestralmente por auditores independentes certificados.
+                              Todos os documentos estão disponíveis para download.
                             </p>
+                          </div>
+                        </motion.div>
+
+                        <div className="p-4 rounded-xl bg-muted/40 border border-border/50">
+                          <h4 className="font-semibold mb-3 flex items-center gap-2">
+                            <FileText size={18} />
+                            Documentos Disponíveis
+                          </h4>
+                          <div className="space-y-2">
+                            <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
+                              <Download size={16} className="mr-2" />
+                              Prospecto do Investimento
+                            </Button>
+                            <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
+                              <Download size={16} className="mr-2" />
+                              Relatório Financeiro
+                            </Button>
+                            <Button variant="outline" size="sm" className="w-full justify-start bg-transparent">
+                              <Download size={16} className="mr-2" />
+                              Análise de Risco
+                            </Button>
                           </div>
                         </div>
                       </CardContent>
@@ -472,22 +561,22 @@ const InvestmentDetail = () => {
                   </TabsContent>
 
                   <TabsContent value="riscos" className="space-y-6">
-                    <Card>
-                      <CardHeader>
+                    <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/0">
                         <CardTitle>Análise de Riscos</CardTitle>
                         <CardDescription>Fatores de risco e mitigação</CardDescription>
                       </CardHeader>
-                      <CardContent className="space-y-4">
+                      <CardContent className="space-y-4 pt-6">
                         {riskFactors.map((risk, index) => (
                           <motion.div
                             key={index}
                             initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: index * 0.1 }}
-                            className="p-4 rounded-lg border border-border/50 bg-muted/30"
+                            className="p-4 rounded-xl border border-border/50 bg-gradient-to-r from-muted/30 to-muted/10 hover:border-primary/30 transition-colors"
                           >
-                            <div className="flex items-start justify-between mb-2">
-                              <h4 className="font-semibold">{risk.factor}</h4>
+                            <div className="flex items-start justify-between mb-3">
+                              <h4 className="font-semibold text-lg">{risk.factor}</h4>
                               <Badge
                                 variant={
                                   risk.level === "Baixo"
@@ -496,6 +585,7 @@ const InvestmentDetail = () => {
                                       ? "warning"
                                       : "destructive"
                                 }
+                                className="text-xs font-semibold"
                               >
                                 {risk.level}
                               </Badge>
@@ -508,13 +598,13 @@ const InvestmentDetail = () => {
                   </TabsContent>
 
                   <TabsContent value="timeline" className="space-y-6">
-                    <Card>
-                      <CardHeader>
+                    <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow">
+                      <CardHeader className="bg-gradient-to-r from-primary/5 to-primary/0">
                         <CardTitle>Timeline do Projeto</CardTitle>
                         <CardDescription>Cronograma de execução</CardDescription>
                       </CardHeader>
-                      <CardContent>
-                        <div className="space-y-6">
+                      <CardContent className="pt-6">
+                        <div className="space-y-8">
                           {timeline.map((item, index) => (
                             <motion.div
                               key={index}
@@ -524,16 +614,26 @@ const InvestmentDetail = () => {
                               className="flex gap-4"
                             >
                               <div className="flex flex-col items-center">
-                                <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                                <motion.div
+                                  initial={{ scale: 0 }}
+                                  animate={{ scale: 1 }}
+                                  transition={{ delay: index * 0.1 + 0.2 }}
+                                  className="w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center text-white font-bold text-lg shadow-lg"
+                                >
                                   {index + 1}
-                                </div>
-                                {index !== timeline.length - 1 && <div className="w-1 h-16 bg-border mt-2"></div>}
+                                </motion.div>
+                                {index !== timeline.length - 1 && <div className="w-1 h-20 bg-primary/20 mt-2"></div>}
                               </div>
-                              <div className="flex-1 pt-2">
-                                <h4 className="font-semibold text-lg">{item.phase}</h4>
-                                <p className="text-sm text-muted-foreground mb-1">{item.date}</p>
-                                <p className="text-sm text-foreground">{item.description}</p>
-                              </div>
+                              <motion.div
+                                initial={{ opacity: 0, x: 10 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 + 0.1 }}
+                                className="flex-1 pt-2 pb-4 px-4 rounded-lg bg-gradient-to-r from-muted/40 to-muted/10 border border-border/50 hover:border-primary/30 transition-colors"
+                              >
+                                <h4 className="font-semibold text-lg text-primary">{item.phase}</h4>
+                                <p className="text-sm text-muted-foreground mb-2">{item.date}</p>
+                                <p className="text-sm text-foreground font-medium">{item.description}</p>
+                              </motion.div>
                             </motion.div>
                           ))}
                         </div>
@@ -550,14 +650,17 @@ const InvestmentDetail = () => {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="lg:sticky lg:top-32 lg:h-fit"
             >
-              <Card className="shadow-lg border-primary/20">
-                <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5">
-                  <CardTitle className="text-xl">Investir Agora</CardTitle>
+              <Card className="shadow-xl border-primary/20 bg-gradient-to-br from-card to-card/80">
+                <CardHeader className="bg-gradient-to-r from-primary/15 to-primary/5 border-b border-primary/10">
+                  <CardTitle className="text-2xl">Investir Agora</CardTitle>
                   <CardDescription>Configure seu investimento</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6 pt-6">
                   <div>
-                    <label className="text-sm font-semibold mb-2 block">Valor a Investir</label>
+                    <label className="text-sm font-semibold mb-3 block flex items-center gap-2">
+                      <DollarSign size={16} className="text-primary" />
+                      Valor a Investir
+                    </label>
                     <div className="relative">
                       <span className="absolute left-4 top-1/2 transform -translate-y-1/2 text-muted-foreground font-semibold">
                         AOA
@@ -567,7 +670,7 @@ const InvestmentDetail = () => {
                         value={investmentAmount}
                         onChange={(e) => setInvestmentAmount(Number(e.target.value))}
                         min={investment.minInvestment}
-                        className="w-full pl-14 pr-4 py-3 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                        className="w-full pl-14 pr-4 py-3 border border-input rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-primary bg-background"
                         placeholder="Insira o valor"
                       />
                     </div>
@@ -576,18 +679,18 @@ const InvestmentDetail = () => {
                     </p>
                   </div>
 
-                  <div className="space-y-3 bg-gradient-to-br from-primary/5 to-primary/10 p-4 rounded-lg border border-primary/10">
+                  <div className="space-y-3 bg-gradient-to-br from-primary/8 to-primary/3 p-4 rounded-xl border border-primary/15">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Investimento:</span>
-                      <span className="font-semibold">AOA {investmentAmount.toLocaleString("pt-PT")}</span>
+                      <span className="font-bold text-foreground">AOA {investmentAmount.toLocaleString("pt-PT")}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Taxa anual:</span>
-                      <span className="font-semibold">{investment.returnRate}%</span>
+                      <span className="font-bold text-primary">{investment.returnRate}%</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Duração:</span>
-                      <span className="font-semibold">24 meses</span>
+                      <span className="font-bold text-foreground">24 meses</span>
                     </div>
                     <div className="border-t border-primary/20 pt-3 flex justify-between font-bold text-lg">
                       <span>Retorno anual:</span>
@@ -596,7 +699,7 @@ const InvestmentDetail = () => {
                   </div>
 
                   <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-2">Valores rápidos</p>
+                    <p className="text-xs font-semibold text-muted-foreground mb-3">Valores rápidos</p>
                     <div className="grid grid-cols-2 gap-2">
                       {[50000, 100000, 250000, 500000].map((amount) => (
                         <Button
@@ -604,7 +707,7 @@ const InvestmentDetail = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => setInvestmentAmount(amount)}
-                          className="text-xs"
+                          className="text-xs hover:bg-primary hover:text-primary-foreground transition-colors"
                         >
                           AOA {(amount / 1000).toFixed(0)}K
                         </Button>
@@ -614,36 +717,42 @@ const InvestmentDetail = () => {
 
                   <Button
                     onClick={handleInvest}
-                    className="w-full bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 h-12 text-base font-semibold"
+                    className="w-full bg-gradient-to-r from-primary via-primary to-primary/90 hover:shadow-lg transition-all h-12 text-base font-semibold"
                   >
-                    <DollarSign className="mr-2" size={20} />
+                    <CreditCard className="mr-2" size={20} />
                     Investir Agora
                   </Button>
 
-                  <div className="space-y-2 pt-2 border-t">
+                  <div className="space-y-2 pt-2 border-t border-border/50">
                     <div className="flex gap-2 text-xs">
-                      <CheckCircle size={14} className="text-green-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
                       <span className="text-muted-foreground">Investimento seguro com garantia</span>
                     </div>
                     <div className="flex gap-2 text-xs">
-                      <CheckCircle size={14} className="text-green-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
                       <span className="text-muted-foreground">Retorno garantido e documentado</span>
                     </div>
                     <div className="flex gap-2 text-xs">
-                      <CheckCircle size={14} className="text-green-600 flex-shrink-0 mt-0.5" />
+                      <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
                       <span className="text-muted-foreground">Processamento em 24 horas</span>
+                    </div>
+                    <div className="flex gap-2 text-xs">
+                      <Lock size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
+                      <span className="text-muted-foreground">Transação 100% segura</span>
                     </div>
                   </div>
 
-                  <div className="pt-4 border-t space-y-3">
-                    <p className="text-xs font-semibold text-muted-foreground">Dúvidas?</p>
-                    <div className="flex gap-2 text-xs">
-                      <Phone size={14} className="text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">+244 923 123 456</span>
-                    </div>
-                    <div className="flex gap-2 text-xs">
-                      <Mail size={14} className="text-primary flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">suporte@capitalseguro.ao</span>
+                  <div className="pt-4 border-t border-border/50 space-y-3">
+                    <p className="text-xs font-semibold text-muted-foreground">Precisa de ajuda?</p>
+                    <div className="flex gap-3 flex-col text-xs">
+                      <Button variant="ghost" size="sm" className="justify-start">
+                        <Phone size={14} className="mr-2 text-primary" />
+                        +244 923 123 456
+                      </Button>
+                      <Button variant="ghost" size="sm" className="justify-start">
+                        <Mail size={14} className="mr-2 text-primary" />
+                        suporte@capitalseguro.ao
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -656,6 +765,7 @@ const InvestmentDetail = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
+              className="mt-16"
             >
               <div className="mb-8">
                 <h2 className="text-3xl font-bold mb-2">Investimentos Similares</h2>
@@ -670,8 +780,8 @@ const InvestmentDetail = () => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
                   >
-                    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group">
-                      <div className="h-40 overflow-hidden">
+                    <Card className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer group border-border/50">
+                      <div className="h-40 overflow-hidden bg-muted">
                         <img
                           src={inv.image || "/placeholder.svg"}
                           alt={inv.title}
@@ -679,12 +789,16 @@ const InvestmentDetail = () => {
                         />
                       </div>
                       <CardContent className="pt-4">
-                        <h3 className="font-semibold line-clamp-2 mb-2">{inv.title}</h3>
-                        <div className="flex justify-between text-sm mb-3">
+                        <h3 className="font-semibold line-clamp-2 mb-3">{inv.title}</h3>
+                        <div className="flex justify-between text-sm mb-4 p-2 rounded-lg bg-muted/50">
                           <span className="text-muted-foreground">Retorno:</span>
                           <span className="font-bold text-green-600">{inv.returnRate}%</span>
                         </div>
-                        <Button onClick={() => navigate(`/investments/${inv.id}`)} size="sm" className="w-full">
+                        <Button
+                          onClick={() => navigate(`/investments/${inv.id}`)}
+                          size="sm"
+                          className="w-full hover:shadow-md transition-shadow"
+                        >
                           Ver Detalhes
                         </Button>
                       </CardContent>
