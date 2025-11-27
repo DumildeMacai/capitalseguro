@@ -132,10 +132,10 @@ const InvestorDashboard = () => {
         <Sidebar className="border-border bg-card">
           <SidebarHeader className="border-border">
             <div className="flex items-center gap-2 px-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
-                <Wallet className="h-5 w-5 text-white" />
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary/80 to-primary flex items-center justify-center">
+                <Wallet className="h-5 w-5 text-primary-foreground" />
               </div>
-              <h1 className="text-lg font-bold text-white">Capital Seguro</h1>
+              <h1 className="text-lg font-bold text-card-foreground">Capital Seguro</h1>
             </div>
           </SidebarHeader>
 
@@ -146,7 +146,7 @@ const InvestorDashboard = () => {
                   tooltip="Início"
                   isActive={activeTab === "visao-geral"}
                   onClick={() => setActiveTab("visao-geral")}
-                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
+                  className="data-[active=true]:bg-primary/20 data-[active=true]:text-primary"
                 >
                   <Home size={20} />
                   <span>Visão Geral</span>
@@ -158,7 +158,7 @@ const InvestorDashboard = () => {
                   tooltip="Meus Investimentos"
                   isActive={activeTab === "meus-investimentos"}
                   onClick={() => setActiveTab("meus-investimentos")}
-                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
+                  className="data-[active=true]:bg-primary/20 data-[active=true]:text-primary"
                 >
                   <PieChart size={20} />
                   <span>Meus Investimentos</span>
@@ -170,7 +170,7 @@ const InvestorDashboard = () => {
                   tooltip="Explorar"
                   isActive={activeTab === "explorar"}
                   onClick={() => setActiveTab("explorar")}
-                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
+                  className="data-[active=true]:bg-primary/20 data-[active=true]:text-primary"
                 >
                   <Search size={20} />
                   <span>Explorar Investimentos</span>
@@ -182,7 +182,7 @@ const InvestorDashboard = () => {
                   tooltip="Perfil"
                   isActive={activeTab === "perfil"}
                   onClick={() => setActiveTab("perfil")}
-                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
+                  className="data-[active=true]:bg-primary/20 data-[active=true]:text-primary"
                 >
                   <User size={20} />
                   <span>Perfil</span>
@@ -194,7 +194,7 @@ const InvestorDashboard = () => {
                   tooltip="Configurações"
                   isActive={activeTab === "configuracoes"}
                   onClick={() => setActiveTab("configuracoes")}
-                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
+                  className="data-[active=true]:bg-primary/20 data-[active=true]:text-primary"
                 >
                   <Settings size={20} />
                   <span>Configurações</span>
@@ -206,7 +206,7 @@ const InvestorDashboard = () => {
           <SidebarFooter className="border-border">
             <Button
               variant="outline"
-              className="w-full justify-start bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+              className="w-full justify-start bg-destructive/10 border-destructive/30 text-destructive hover:bg-destructive/20"
               onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -232,54 +232,54 @@ const InvestorDashboard = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0 }}
-                  className="bg-card rounded-xl p-6 border border-border hover:border-emerald-500/20 transition-all"
+                  className="bg-card rounded-xl p-6 border border-border hover:border-primary/20 transition-all"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <p className="text-slate-400 text-sm mb-1">Total Investido</p>
+                      <p className="text-muted-foreground text-sm mb-1">Total Investido</p>
                       <p className="text-4xl font-bold text-foreground">Kz 100.000</p>
                     </div>
-                    <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
-                      <Wallet className="text-emerald-400" size={24} />
+                    <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <Wallet className="text-primary" size={24} />
                     </div>
                   </div>
-                  <p className="text-emerald-400 text-sm font-semibold">+15% este ano</p>
+                  <p className="text-primary text-sm font-semibold">+15% este ano</p>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-card rounded-xl p-6 border border-border hover:border-blue-500/20 transition-all"
+                  className="bg-card rounded-xl p-6 border border-border hover:border-accent/20 transition-all"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <p className="text-slate-400 text-sm mb-1">Retorno Acumulado</p>
+                      <p className="text-muted-foreground text-sm mb-1">Retorno Acumulado</p>
                       <p className="text-4xl font-bold text-foreground">Kz 12.500</p>
                     </div>
-                    <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
-                      <TrendingUp className="text-blue-400" size={24} />
+                    <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center">
+                      <TrendingUp className="text-accent" size={24} />
                     </div>
                   </div>
-                  <p className="text-blue-400 text-sm font-semibold">+5% este mês</p>
+                  <p className="text-accent text-sm font-semibold">+5% este mês</p>
                 </motion.div>
 
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-card rounded-xl p-6 border border-border hover:border-purple-500/20 transition-all"
+                  className="bg-card rounded-xl p-6 border border-border hover:border-primary/20 transition-all"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <p className="text-slate-400 text-sm mb-1">Oportunidades</p>
+                      <p className="text-muted-foreground text-sm mb-1">Oportunidades</p>
                       <p className="text-4xl font-bold text-foreground">24</p>
                     </div>
-                    <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
-                      <Search className="text-purple-400" size={24} />
+                    <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
+                      <Search className="text-primary" size={24} />
                     </div>
                   </div>
-                  <p className="text-purple-400 text-sm font-semibold">6 novos esta semana</p>
+                  <p className="text-primary text-sm font-semibold">6 novos esta semana</p>
                 </motion.div>
               </div>
 
@@ -314,16 +314,16 @@ const InvestorDashboard = () => {
                               <span
                                 className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                   investment.status === "Ativo"
-                                    ? "bg-emerald-500/20 text-emerald-300"
+                                    ? "bg-primary/20 text-primary"
                                     : investment.status === "Em análise"
-                                      ? "bg-yellow-500/20 text-yellow-300"
-                                      : "bg-slate-600 text-slate-300"
+                                      ? "bg-accent/20 text-accent"
+                                      : "bg-muted text-muted-foreground"
                                 }`}
                               >
                                 {investment.status}
                               </span>
                             </TableCell>
-                            <TableCell className="text-emerald-400 font-semibold">+{investment.return}%</TableCell>
+                            <TableCell className="text-primary font-semibold">+{investment.return}%</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -399,15 +399,15 @@ const InvestorDashboard = () => {
                           <TableCell>
                             Kz {Math.round(investment.value * (1 + investment.return / 100)).toLocaleString("pt-PT")}
                           </TableCell>
-                          <TableCell className="text-success">+{investment.return}%</TableCell>
+                          <TableCell className="text-primary">+{investment.return}%</TableCell>
                           <TableCell>
                             <span
                               className={`px-2 py-1 rounded-full text-xs ${
                                 investment.status === "Ativo"
-                                  ? "bg-green-100 text-green-800"
+                                  ? "bg-primary/20 text-primary"
                                   : investment.status === "Em análise"
-                                    ? "bg-yellow-100 text-yellow-800"
-                                    : "bg-gray-100 text-gray-800"
+                                    ? "bg-accent/20 text-accent"
+                                    : "bg-muted text-muted-foreground"
                               }`}
                             >
                               {investment.status}
@@ -509,7 +509,7 @@ const InvestorDashboard = () => {
                       <div className="space-y-4 text-center">
                         <div>
                           <h3 className="text-md font-medium text-muted-foreground mb-1">Perfil de Risco</h3>
-                          <p className="text-lg font-medium px-4 py-1 bg-yellow-100 text-yellow-800 rounded-full">
+                          <p className="text-lg font-medium px-4 py-1 bg-accent/20 text-accent rounded-full">
                             Moderado
                           </p>
                         </div>
