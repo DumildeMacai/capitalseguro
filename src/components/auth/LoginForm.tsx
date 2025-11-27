@@ -41,51 +41,34 @@ export const LoginForm = () => {
 
   const onSubmit = async (values: LoginFormValues) => {
     try {
-      console.log("[v0] Tentando login para:", values.email)
-
       const { data, error } = await supabase.auth.signInWithPassword({
         email: values.email,
         password: values.password,
       })
 
       if (error) {
-        console.error("[v0] Erro no login:", error)
         throw error
       }
 
-      console.log("[v0] Login bem-sucedido para:", values.email)
-      console.log("[v0] User ID:", data.user?.id)
-
       if (data.user) {
-        // Verificar tipo de usuário usando RPC
         let userType: "admin" | "parceiro" | "investidor" | null = null
 
         try {
-          console.log("[v0] Buscando tipo de usuário para user_id:", data.user.id)
-
           const { data: userTypeData, error: userTypeError } = await supabase.rpc("get_user_type", {
             user_id: data.user.id,
           })
 
-          console.log("[v0] Resposta da RPC get_user_type:", userTypeData)
-          console.log("[v0] Erro da RPC get_user_type:", userTypeError)
-
-          if (userTypeError) {
-            console.error("[v0] Erro ao buscar tipo de usuário:", userTypeError)
-          } else if (userTypeData) {
-            // Garantir que é uma string válida
-            userType = (userTypeData as string).toLowerCase() as "admin" | "parceiro" | "investidor"
-            console.log("[v0] Tipo de usuário processado:", userType)
+          if (!userTypeError && userTypeData) {
+            userType = (userTypeData as string).toLowerCase()
+            if (!["admin", "parceiro", "investidor"].includes(userType)) {
+              userType = null
+            }
           }
         } catch (userTypeError) {
-          console.error("[v0] Exceção ao buscar tipo de usuário:", userTypeError)
+          // Silently fail if RPC not available
         }
 
-        console.log("[v0] userType final:", userType)
-
-        // Redirecionar com base no tipo de usuário
         const redirectPath = getRedirectPath(userType)
-        console.log("[v0] Redirecionando para:", redirectPath)
         navigate(redirectPath)
 
         toast({

@@ -3,7 +3,6 @@ import { PieChart, Pie, BarChart, Bar, Cell, ResponsiveContainer, XAxis, YAxis, 
 interface PortfolioData {
   name: string;
   value: number;
-  [key: string]: string | number;
 }
 
 interface InvestorPortfolioChartProps {

@@ -1,12 +1,14 @@
-import React from "react";
-import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UseFormReturn } from "react-hook-form";
-import { RegisterFormValues } from "./RegisterFormSchema";
+"use client"
+
+import type React from "react"
+import { FormField, FormItem, FormLabel, FormControl, FormMessage } from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { UseFormReturn } from "react-hook-form"
+import type { RegisterFormValues } from "./RegisterFormSchema"
 
 interface PersonalInfoFieldsProps {
-  form: UseFormReturn<RegisterFormValues>;
+  form: UseFormReturn<RegisterFormValues>
 }
 
 export const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ form }) => {
@@ -63,7 +65,12 @@ export const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ form }) 
             <FormItem>
               <FormLabel>Telefone</FormLabel>
               <FormControl>
-                <Input placeholder="9XX XXX XXX" {...field} />
+                <Input
+                  placeholder="+244 XXX XXX XXX"
+                  {...field}
+                  pattern="[+]?[0-9\s\-$$$$]+"
+                  title="Por favor, insira um número de telefone válido"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -92,5 +99,5 @@ export const PersonalInfoFields: React.FC<PersonalInfoFieldsProps> = ({ form }) 
         />
       </div>
     </>
-  );
-};
+  )
+}
