@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
-import { Home, PieChart, Search, User, Settings, LogOut, Wallet, TrendingUp } from "lucide-react"
+import { Home, PieChart, Search, User, Settings, LogOut, Wallet, TrendingUp, Bell } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import InvestmentCard from "@/components/InvestmentCard"
 import InvestorPortfolioChart from "@/components/InvestorPortfolioChart"
@@ -24,6 +24,7 @@ import InvestmentOptions from "@/components/InvestmentOptions"
 import EditProfileModal from "@/components/profile/EditProfileModal"
 import UploadAvatar from "@/components/profile/UploadAvatar"
 import Questionnaire from "@/components/profile/Questionnaire"
+import NotificationsSection from "@/components/NotificationsSection"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { motion } from "framer-motion"
 
@@ -35,6 +36,7 @@ const InvestorDashboard = () => {
   const [questionOpen, setQuestionOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [profile, setProfile] = useState<any>(null)
+  const [userId, setUserId] = useState<string>("")
 
   // load profile on mount
   useEffect(() => {
@@ -44,6 +46,7 @@ const InvestorDashboard = () => {
           data: { user },
         } = await supabase.auth.getUser()
         if (!user) return
+        setUserId(user.id)
         const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single()
         setProfile(data || null)
         if (data && "avatar_url" in data && data.avatar_url) setAvatarUrl(data.avatar_url as string)
@@ -200,6 +203,18 @@ const InvestorDashboard = () => {
                   <span>Configurações</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  tooltip="Notificações"
+                  isActive={activeTab === "notificacoes"}
+                  onClick={() => setActiveTab("notificacoes")}
+                  className="data-[active=true]:bg-primary/20 data-[active=true]:text-primary"
+                >
+                  <Bell size={20} />
+                  <span>Notificações</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
 
@@ -222,6 +237,7 @@ const InvestorDashboard = () => {
               <TabsTrigger value="meus-investimentos">Meus Investimentos</TabsTrigger>
               <TabsTrigger value="explorar">Explorar</TabsTrigger>
               <TabsTrigger value="perfil">Perfil</TabsTrigger>
+              <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
               <TabsTrigger value="configuracoes">Configurações</TabsTrigger>
             </TabsList>
 
@@ -566,6 +582,11 @@ const InvestorDashboard = () => {
                   </div>
                 )}
               </div>
+            </TabsContent>
+
+            {/* Notificações Tab */}
+            <TabsContent value="notificacoes" className="space-y-6">
+              {userId && <NotificationsSection userId={userId} />}
             </TabsContent>
 
             {/* Configurações Tab */}

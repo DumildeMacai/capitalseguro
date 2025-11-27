@@ -267,9 +267,26 @@ const AdminPartners = () => {
 
   const handleSendNotification = async () => {
     try {
-      if (!selectedPartner) return;
+      if (!selectedPartner || !notificationMessage.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Digite uma mensagem para enviar.",
+        });
+        return;
+      }
 
-      console.log("Enviando notificação para:", selectedPartner.email, notificationMessage);
+      // Save notification to database
+      const { error } = await supabase.from("notifications").insert({
+        usuario_id: selectedPartner.id,
+        tipo: "admin",
+        titulo: "Mensagem do Administrador",
+        mensagem: notificationMessage,
+        lido: false,
+        relacionada_a: "geral",
+      });
+
+      if (error) throw error;
 
       toast({
         title: "Sucesso",
@@ -279,6 +296,7 @@ const AdminPartners = () => {
       setOpenNotifyDialog(false);
       setNotificationMessage("");
     } catch (error: any) {
+      console.error("Erro ao enviar notificação:", error);
       toast({
         variant: "destructive",
         title: "Erro",

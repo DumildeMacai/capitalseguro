@@ -140,6 +140,48 @@ FROM public.profiles p;
 CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON public.user_roles(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_roles_role ON public.user_roles(role);
 
+-- =====================================================
+-- PART 6: Create notifications table
+-- =====================================================
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  usuario_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  tipo TEXT NOT NULL,
+  titulo TEXT NOT NULL,
+  mensagem TEXT,
+  lido BOOLEAN DEFAULT false,
+  relacionada_a TEXT,
+  investimento_id UUID REFERENCES public.investimentos(id) ON DELETE SET NULL,
+  data_criacao TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  data_leitura TIMESTAMP WITH TIME ZONE
+);
+
+-- Enable RLS for notifications
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- Drop old policies if they exist
+DROP POLICY IF EXISTS "Usuários podem ver suas próprias notificações" ON public.notifications;
+DROP POLICY IF EXISTS "Admin pode criar notificações" ON public.notifications;
+DROP POLICY IF EXISTS "Usuários podem atualizar suas notificações" ON public.notifications;
+
+-- RLS Policies for notifications
+CREATE POLICY "Usuários podem ver suas próprias notificações"
+  ON public.notifications FOR SELECT
+  USING (auth.uid() = usuario_id);
+
+CREATE POLICY "Admin pode criar notificações"
+  ON public.notifications FOR INSERT
+  WITH CHECK (public.has_role(auth.uid(), 'admin'));
+
+CREATE POLICY "Usuários podem atualizar suas notificações"
+  ON public.notifications FOR UPDATE
+  USING (auth.uid() = usuario_id);
+
+-- Create indexes for performance
+CREATE INDEX IF NOT EXISTS idx_notifications_usuario_id ON public.notifications(usuario_id);
+CREATE INDEX IF NOT EXISTS idx_notifications_lido ON public.notifications(lido);
+CREATE INDEX IF NOT EXISTS idx_notifications_data_criacao ON public.notifications(data_criacao DESC);
+
 COMMIT;
 
 -- Notes:
