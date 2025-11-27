@@ -40,3 +40,67 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Complete redesign with premium gradient and modern styling */
+:root {
+  --primary-color: #1a1a2e;
+  --accent-color: #16c784;
+  --secondary-color: #0f3460;
+  --text-primary: #ffffff;
+  --text-secondary: #b0b0b0;
+  --bg-dark: #0d1b2a;
+  --bg-light: #1a1a2e;
+  --border-color: #2a2a3e;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, var(--bg-dark) 0%, var(--bg-light) 100%);
+  color: var(--text-primary);
+  overflow-x: hidden;
+}
+
+/* Gradient backgrounds */
+.gradient-primary {
+  background: linear-gradient(135deg, #16c784 0%, #0f3460 100%);
+}
+
+.gradient-secondary {
+  background: linear-gradient(135deg, #1a1a2e 0%, #0d1b2a 100%);
+}
+
+/* Premium shadows */
+.shadow-premium {
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.shadow-premium-lg {
+  box-shadow: 0 30px 90px rgba(22, 199, 132, 0.15);
+}
+
+/* Smooth transitions */
+.transition-smooth {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hero gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, #16c784 0%, #64b5f6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+#root {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+}

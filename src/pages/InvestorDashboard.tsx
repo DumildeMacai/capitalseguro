@@ -16,7 +16,7 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
-import { Home, PieChart, Search, User, Settings, LogOut, Wallet } from "lucide-react"
+import { Home, PieChart, Search, User, Settings, LogOut, Wallet, TrendingUp } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import InvestmentCard from "@/components/InvestmentCard"
 import InvestorPortfolioChart from "@/components/InvestorPortfolioChart"
@@ -25,6 +25,7 @@ import EditProfileModal from "@/components/profile/EditProfileModal"
 import UploadAvatar from "@/components/profile/UploadAvatar"
 import Questionnaire from "@/components/profile/Questionnaire"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { motion } from "framer-motion"
 
 const InvestorDashboard = () => {
   const navigate = useNavigate()
@@ -127,12 +128,14 @@ const InvestorDashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
-        <Sidebar>
-          <SidebarHeader>
+      <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+        <Sidebar className="border-slate-700 bg-slate-800">
+          <SidebarHeader className="border-slate-700">
             <div className="flex items-center gap-2 px-2">
-              <Wallet className="h-6 w-6 text-primary" />
-              <h1 className="text-xl font-bold">Capital Seguro</h1>
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
+                <Wallet className="h-5 w-5 text-white" />
+              </div>
+              <h1 className="text-lg font-bold text-white">Capital Seguro</h1>
             </div>
           </SidebarHeader>
 
@@ -143,8 +146,9 @@ const InvestorDashboard = () => {
                   tooltip="Início"
                   isActive={activeTab === "visao-geral"}
                   onClick={() => setActiveTab("visao-geral")}
+                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
                 >
-                  <Home />
+                  <Home size={20} />
                   <span>Visão Geral</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -154,8 +158,9 @@ const InvestorDashboard = () => {
                   tooltip="Meus Investimentos"
                   isActive={activeTab === "meus-investimentos"}
                   onClick={() => setActiveTab("meus-investimentos")}
+                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
                 >
-                  <PieChart />
+                  <PieChart size={20} />
                   <span>Meus Investimentos</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -165,8 +170,9 @@ const InvestorDashboard = () => {
                   tooltip="Explorar"
                   isActive={activeTab === "explorar"}
                   onClick={() => setActiveTab("explorar")}
+                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
                 >
-                  <Search />
+                  <Search size={20} />
                   <span>Explorar Investimentos</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -176,8 +182,9 @@ const InvestorDashboard = () => {
                   tooltip="Perfil"
                   isActive={activeTab === "perfil"}
                   onClick={() => setActiveTab("perfil")}
+                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
                 >
-                  <User />
+                  <User size={20} />
                   <span>Perfil</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -187,149 +194,159 @@ const InvestorDashboard = () => {
                   tooltip="Configurações"
                   isActive={activeTab === "configuracoes"}
                   onClick={() => setActiveTab("configuracoes")}
+                  className="data-[active=true]:bg-emerald-500/20 data-[active=true]:text-emerald-400"
                 >
-                  <Settings />
+                  <Settings size={20} />
                   <span>Configurações</span>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
           </SidebarContent>
 
-          <SidebarFooter>
-            <Button variant="outline" className="w-full justify-start bg-transparent" onClick={handleLogout}>
+          <SidebarFooter className="border-slate-700">
+            <Button
+              variant="outline"
+              className="w-full justify-start bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
+              onClick={handleLogout}
+            >
               <LogOut className="mr-2 h-4 w-4" />
               Sair
             </Button>
           </SidebarFooter>
         </Sidebar>
 
-        <main className="flex-1 overflow-hidden p-6">
+        <main className="flex-1 overflow-auto p-6 md:p-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-6">
+            <TabsList className="mb-8 bg-slate-800 border border-slate-700">
               <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
               <TabsTrigger value="meus-investimentos">Meus Investimentos</TabsTrigger>
-              <TabsTrigger value="explorar">Explorar Investimentos</TabsTrigger>
+              <TabsTrigger value="explorar">Explorar</TabsTrigger>
               <TabsTrigger value="perfil">Perfil</TabsTrigger>
               <TabsTrigger value="configuracoes">Configurações</TabsTrigger>
             </TabsList>
 
             {/* Visão Geral Tab */}
-            <TabsContent value="visao-geral" className="space-y-6">
+            <TabsContent value="visao-geral" className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Total Investido</CardTitle>
-                    <CardDescription>Somatório de todos investimentos</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-3xl font-bold">Kz 100.000,00</p>
-                    <p className="text-sm text-success mt-1">+15% este ano</p>
-                  </CardContent>
-                </Card>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0 }}
+                  className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700 hover:border-emerald-500/50 transition-all"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-slate-400 text-sm mb-1">Total Investido</p>
+                      <p className="text-4xl font-bold text-white">Kz 100.000</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
+                      <Wallet className="text-emerald-400" size={24} />
+                    </div>
+                  </div>
+                  <p className="text-emerald-400 text-sm font-semibold">+15% este ano</p>
+                </motion.div>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Retorno Acumulado</CardTitle>
-                    <CardDescription>Ganhos totais realizados</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-3xl font-bold">Kz 12.500,00</p>
-                    <p className="text-sm text-success mt-1">+5% este mês</p>
-                  </CardContent>
-                </Card>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-slate-400 text-sm mb-1">Retorno Acumulado</p>
+                      <p className="text-4xl font-bold text-white">Kz 12.500</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                      <TrendingUp className="text-blue-400" size={24} />
+                    </div>
+                  </div>
+                  <p className="text-blue-400 text-sm font-semibold">+5% este mês</p>
+                </motion.div>
 
-                <Card>
-                  <CardHeader className="pb-2">
-                    <CardTitle className="text-lg">Oportunidades</CardTitle>
-                    <CardDescription>Investimentos disponíveis</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-3xl font-bold">24</p>
-                    <p className="text-sm text-muted-foreground mt-1">6 novos esta semana</p>
-                  </CardContent>
-                </Card>
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700 hover:border-purple-500/50 transition-all"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-slate-400 text-sm mb-1">Oportunidades</p>
+                      <p className="text-4xl font-bold text-white">24</p>
+                    </div>
+                    <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                      <Search className="text-purple-400" size={24} />
+                    </div>
+                  </div>
+                  <p className="text-purple-400 text-sm font-semibold">6 novos esta semana</p>
+                </motion.div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Card className="md:col-span-2">
-                  <CardHeader>
-                    <CardTitle>Investimentos Recentes</CardTitle>
-                    <CardDescription>Seus últimos investimentos realizados</CardDescription>
-                  </CardHeader>
-                  <CardContent className="p-0">
+              {/* Charts and Recent Investments */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Recent Investments */}
+                <div className="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
+                  <div className="p-6 border-b border-slate-700">
+                    <h3 className="text-xl font-bold text-white">Investimentos Recentes</h3>
+                    <p className="text-slate-400 text-sm mt-1">Seus últimos investimentos realizados</p>
+                  </div>
+                  <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow>
-                          <TableHead>Nome</TableHead>
-                          <TableHead>Tipo</TableHead>
-                          <TableHead>Valor</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead>Retorno</TableHead>
+                        <TableRow className="border-slate-700 hover:bg-transparent">
+                          <TableHead className="text-slate-300">Nome</TableHead>
+                          <TableHead className="text-slate-300">Tipo</TableHead>
+                          <TableHead className="text-slate-300">Valor</TableHead>
+                          <TableHead className="text-slate-300">Status</TableHead>
+                          <TableHead className="text-slate-300">Retorno</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {recentInvestments.map((investment) => (
-                          <TableRow key={investment.id}>
-                            <TableCell className="font-medium">{investment.name}</TableCell>
-                            <TableCell>{investment.type}</TableCell>
-                            <TableCell>Kz {investment.value.toLocaleString("pt-PT")}</TableCell>
+                          <TableRow key={investment.id} className="border-slate-700 hover:bg-slate-700/50">
+                            <TableCell className="font-medium text-white">{investment.name}</TableCell>
+                            <TableCell className="text-slate-300">{investment.type}</TableCell>
+                            <TableCell className="text-slate-300">
+                              Kz {investment.value.toLocaleString("pt-PT")}
+                            </TableCell>
                             <TableCell>
                               <span
-                                className={`px-2 py-1 rounded-full text-xs ${
+                                className={`px-3 py-1 rounded-full text-xs font-semibold ${
                                   investment.status === "Ativo"
-                                    ? "bg-green-100 text-green-800"
+                                    ? "bg-emerald-500/20 text-emerald-300"
                                     : investment.status === "Em análise"
-                                      ? "bg-yellow-100 text-yellow-800"
-                                      : "bg-gray-100 text-gray-800"
+                                      ? "bg-yellow-500/20 text-yellow-300"
+                                      : "bg-slate-600 text-slate-300"
                                 }`}
                               >
                                 {investment.status}
                               </span>
                             </TableCell>
-                            <TableCell className="text-success">+{investment.return}%</TableCell>
+                            <TableCell className="text-emerald-400 font-semibold">+{investment.return}%</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
                     </Table>
-                  </CardContent>
-                </Card>
+                  </div>
+                </div>
 
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Distribuição do Portfólio</CardTitle>
-                    <CardDescription>Por tipo de investimento</CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex justify-center">
-                    <InvestorPortfolioChart data={portfolioData} />
-                  </CardContent>
-                </Card>
+                {/* Portfolio Distribution */}
+                <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
+                  <h3 className="text-xl font-bold text-white mb-4">Distribuição</h3>
+                  <InvestorPortfolioChart data={portfolioData} />
+                </div>
               </div>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Oportunidades em Destaque</CardTitle>
-                  <CardDescription>Investimentos recomendados para seu perfil</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {featuredInvestments.map((investment) => (
-                      <InvestmentCard
-                        key={investment.id}
-                        id={investment.id}
-                        title={investment.title}
-                        description={investment.description}
-                        category={investment.category}
-                        returnRate={investment.returnRate}
-                        minInvestment={investment.minInvestment}
-                        remaining={investment.remaining}
-                        totalFunding={investment.totalFunding}
-                        image={investment.image}
-                        featured={investment.featured}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              {/* Featured Investments */}
+              <div>
+                <h3 className="text-2xl font-bold text-white mb-6">Investimentos em Destaque</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {featuredInvestments.map((investment) => (
+                    <InvestmentCard key={investment.id} {...investment} />
+                  ))}
+                </div>
+              </div>
             </TabsContent>
 
             {/* Meus Investimentos Tab */}
