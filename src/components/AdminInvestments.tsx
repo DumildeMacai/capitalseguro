@@ -44,7 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, Edit, Trash2, MoreVertical, Search, Plus } from "lucide-react";
+import { Eye, Edit, Trash2, MoreVertical, Search, Plus, Upload, X } from "lucide-react";
 
 interface Investment {
   id: string;
@@ -55,6 +55,7 @@ interface Investment {
   prazo_minimo: number | null;
   ativo: boolean | null;
   descricao: string | null;
+  imagem: string | null;
 }
 
 const AdminInvestments = () => {
@@ -71,6 +72,8 @@ const AdminInvestments = () => {
     retorno_estimado: "",
     prazo_minimo: "",
     descricao: "",
+      imagem: "",
+      imagemFile: null as File | null,
   });
   const { toast } = useToast();
 
@@ -114,6 +117,8 @@ const AdminInvestments = () => {
       retorno_estimado: "",
       prazo_minimo: "",
       descricao: "",
+        imagem: "",
+        imagemFile: null,
     });
     setOpenDialog(true);
   };
@@ -127,6 +132,8 @@ const AdminInvestments = () => {
       retorno_estimado: investment.retorno_estimado?.toString() || "",
       prazo_minimo: investment.prazo_minimo?.toString() || "",
       descricao: investment.descricao || "",
+        imagem: investment.imagem || "",
+        imagemFile: null,
     });
     setOpenDialog(true);
   };
@@ -142,6 +149,34 @@ const AdminInvestments = () => {
         return;
       }
 
+        let imagemUrl = formData.imagem;
+
+        // Upload de imagem se um arquivo foi selecionado
+        if (formData.imagemFile) {
+          try {
+            const fileName = `investimento-${Date.now()}-${formData.imagemFile.name}`;
+            const { data, error: uploadError } = await supabase.storage
+              .from("investimentos")
+              .upload(fileName, formData.imagemFile);
+
+            if (uploadError) throw uploadError;
+
+            // Obter URL pública da imagem
+            const { data: publicUrl } = supabase.storage
+              .from("investimentos")
+              .getPublicUrl(fileName);
+
+            imagemUrl = publicUrl.publicUrl;
+          } catch (uploadError: any) {
+            toast({
+              variant: "destructive",
+              title: "Erro",
+              description: "Não foi possível fazer upload da imagem.",
+            });
+            return;
+          }
+        }
+
       const payload = {
         titulo: formData.titulo,
         categoria: formData.categoria || null,
@@ -149,6 +184,7 @@ const AdminInvestments = () => {
         retorno_estimado: formData.retorno_estimado ? parseFloat(formData.retorno_estimado) : null,
         prazo_minimo: formData.prazo_minimo ? parseInt(formData.prazo_minimo) : null,
         descricao: formData.descricao || null,
+          imagem: imagemUrl || null,
         ativo: true,
       };
 
@@ -413,6 +449,55 @@ const AdminInvestments = () => {
                 placeholder="Descrição do investimento..."
               />
             </div>
+              <div>
+                <label className="text-sm font-medium">Imagem</label>
+                {formData.imagem && (
+                  <div className="mb-3 relative">
+                    <img 
+                      src={formData.imagem} 
+                      alt="Preview" 
+                      className="h-40 w-full object-cover rounded-md border"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-1 right-1 bg-destructive/80 hover:bg-destructive text-white"
+                      onClick={() => setFormData({ ...formData, imagem: "", imagemFile: null })}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+                <div className="flex items-center justify-center w-full">
+                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer hover:bg-muted/50">
+                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                      <Upload className="h-8 w-8 text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">
+                        Clique ou arraste imagem aqui
+                      </p>
+                    </div>
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="image/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setFormData({ ...formData, imagemFile: file });
+                          const reader = new FileReader();
+                          reader.onloadend = () => {
+                            setFormData((prev) => ({ 
+                              ...prev, 
+                              imagem: reader.result as string 
+                            }));
+                          };
+                          reader.readAsDataURL(file);
+                        }
+                      }}
+                    />
+                  </label>
+                </div>
+              </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenDialog(false)}>
