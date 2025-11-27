@@ -9,10 +9,12 @@
 -- =====================================================
 
 -- 1.1 Criar enum para roles
-CREATE TYPE IF NOT EXISTS public.app_role AS ENUM ('admin', 'parceiro', 'investidor');
+DROP TYPE IF EXISTS public.app_role CASCADE;
+CREATE TYPE public.app_role AS ENUM ('admin', 'parceiro', 'investidor');
 
 -- 1.2 Criar tabela de roles de usuário (separada de profiles)
-CREATE TABLE IF NOT EXISTS public.user_roles (
+DROP TABLE IF EXISTS public.user_roles CASCADE;
+CREATE TABLE public.user_roles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
     role app_role NOT NULL,
@@ -23,7 +25,14 @@ CREATE TABLE IF NOT EXISTS public.user_roles (
 -- 1.3 Habilitar RLS na tabela user_roles
 ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 
--- 1.4 Criar função SECURITY DEFINER para verificar roles (evita recursão)
+-- 1.4 Limpar políticas antigas de user_roles (se existir)
+DROP POLICY IF EXISTS "Usuários podem ver suas próprias roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins podem ver todas as roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins podem inserir roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins podem atualizar roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins podem deletar roles" ON public.user_roles;
+
+-- 1.5 Criar função SECURITY DEFINER para verificar roles (evita recursão)
 CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role app_role)
 RETURNS BOOLEAN
 LANGUAGE SQL
@@ -39,7 +48,7 @@ AS $$
   )
 $$;
 
--- 1.5 Políticas RLS para user_roles
+-- 1.6 Políticas RLS para user_roles
 CREATE POLICY "Usuários podem ver suas próprias roles"
   ON public.user_roles FOR SELECT
   USING (auth.uid() = user_id);
@@ -64,16 +73,27 @@ CREATE POLICY "Admins podem deletar roles"
 -- PARTE 2: ATUALIZAR TABELA PROFILES
 -- =====================================================
 
--- 2.1 Remover campo 'tipo' da tabela profiles (movido para user_roles)
--- Primeiro, migrar dados existentes para user_roles
-INSERT INTO public.user_roles (user_id, role)
-SELECT id, tipo::text::app_role
-FROM public.profiles
-WHERE tipo IS NOT NULL
-ON CONFLICT (user_id, role) DO NOTHING;
+-- 2.1 Verificar se coluna 'tipo' existe em profiles e remover com segurança
+-- Primeiro verificamos a estrutura da tabela e copiamos dados se necessário
 
--- 2.2 Agora podemos dropar a coluna 'tipo' com segurança
-ALTER TABLE public.profiles DROP COLUMN IF EXISTS tipo;
+-- Criar backup de dados tipo antes de remover coluna
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM information_schema.columns 
+    WHERE table_name='profiles' AND column_name='tipo'
+  ) THEN
+    -- Se coluna tipo existe, migrar para user_roles
+    INSERT INTO public.user_roles (user_id, role)
+    SELECT id, tipo::text::app_role
+    FROM public.profiles
+    WHERE tipo IS NOT NULL
+    ON CONFLICT (user_id, role) DO NOTHING;
+    
+    -- Agora remover a coluna
+    ALTER TABLE public.profiles DROP COLUMN tipo;
+  END IF;
+END $$;
 
 -- =====================================================
 -- PARTE 3: ATUALIZAR POLÍTICAS RLS DE PROFILES
@@ -83,6 +103,7 @@ ALTER TABLE public.profiles DROP COLUMN IF EXISTS tipo;
 DROP POLICY IF EXISTS "Usuários podem ver seu próprio perfil" ON public.profiles;
 DROP POLICY IF EXISTS "Usuários podem atualizar seu próprio perfil" ON public.profiles;
 DROP POLICY IF EXISTS "Admins podem ver todos os perfis" ON public.profiles;
+DROP POLICY IF EXISTS "Admins podem atualizar todos os perfis" ON public.profiles;
 
 -- 3.2 Criar novas políticas sem recursão
 CREATE POLICY "Usuários podem ver seu próprio perfil"
