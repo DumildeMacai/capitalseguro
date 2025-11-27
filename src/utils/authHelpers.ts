@@ -175,3 +175,89 @@ export const handleSignOut = async (navigate: NavigateFunction, toast: ReturnTyp
     handleAuthError(error, toast)
   }
 }
+
+/**
+ * Smart Admin Access: Try Sign Up first, fallback to Sign In if user exists
+ * Then upsert admin profile with full permissions
+ */
+export const handleAdminAccess = async (
+  navigate: NavigateFunction,
+  toast: ReturnType<typeof useToast>["toast"],
+) => {
+  const adminEmail = "admin@admin.com"
+  const adminPassword = "1dumilde1@A"
+  
+  try {
+    console.log("[Admin Access] Starting smart admin sign-up/sign-in flow...")
+    
+    // Step 1: Try to sign up
+    let user = null
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: adminEmail,
+      password: adminPassword,
+      options: {
+        data: {
+          tipo: "admin",
+          nome: "Administrador",
+        },
+      },
+    })
+    
+    if (signUpError) {
+      if (signUpError.message.includes("already registered") || signUpError.message.includes("User already exists")) {
+        console.log("[Admin Access] User exists, attempting sign-in...")
+        
+        const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
+          email: adminEmail,
+          password: adminPassword,
+        })
+        
+        if (signInError) {
+          throw new Error(`Sign-in falhou: ${signInError.message}`)
+        }
+        
+        user = signInData.user
+      } else {
+        throw signUpError
+      }
+    } else {
+      user = signUpData.user
+    }
+    
+    if (!user) throw new Error("Falha ao autenticar admin")
+    
+    // Step 2: Upsert admin profile
+    console.log("[Admin Access] Upserting admin profile...")
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .upsert(
+        {
+          id: user.id,
+          tipo: "admin",
+          nome_completo: "Administrador",
+          bio: "Conta administrativa",
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: "id" }
+      )
+    
+    if (profileError) {
+      console.warn("[Admin Access] Profile upsert warning:", profileError.message)
+    }
+    
+    // Step 3: Verify and redirect
+    const userType = await fetchUserType(user.id)
+    navigate("/admin")
+    toast({
+      title: "Acesso Admin Concedido",
+      description: `Bem-vindo! (${userType || "admin"})`,
+    })
+  } catch (error: any) {
+    console.error("[Admin Access] Error:", error)
+    handleAuthError(
+      { message: error.message || "Erro ao acessar admin" },
+      toast
+    )
+  }
+}
