@@ -141,10 +141,20 @@ CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON public.user_roles(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_roles_role ON public.user_roles(role);
 
 -- Ensure investimentos has a 'featured' flag for highlighting
+-- Add an explicit placement enum for investments instead of a boolean 'featured'
+CREATE TYPE IF NOT EXISTS public.colocacao_investimento AS ENUM ('oportunidades', 'destaque', 'pagina_inicial');
+
+-- Add colocacao column (placement) and keep 'featured' for backward compatibility
+ALTER TABLE public.investimentos
+  ADD COLUMN IF NOT EXISTS colocacao public.colocacao_investimento DEFAULT 'oportunidades';
+
+-- If older 'featured' column exists, migrate its true values to colocacao = 'destaque'
 ALTER TABLE public.investimentos
   ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT false;
 
-CREATE INDEX IF NOT EXISTS idx_investimentos_featured ON public.investimentos(featured);
+UPDATE public.investimentos SET colocacao = 'destaque' WHERE featured = true;
+
+CREATE INDEX IF NOT EXISTS idx_investimentos_colocacao ON public.investimentos(colocacao);
 
 -- =====================================================
 -- PART 6: Create notifications table

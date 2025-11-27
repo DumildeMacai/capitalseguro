@@ -56,6 +56,7 @@ interface Investment {
   ativo: boolean | null;
   descricao: string | null;
   imagem: string | null;
+  colocacao?: string | null;
 }
 
 const AdminInvestments = () => {
@@ -75,7 +76,7 @@ const AdminInvestments = () => {
       imagem: "",
       imagemFile: null as File | null,
     ativo: true,
-    featured: false,
+    colocacao: "oportunidades",
   });
   const { toast } = useToast();
 
@@ -122,7 +123,7 @@ const AdminInvestments = () => {
         imagem: "",
         imagemFile: null,
       ativo: true,
-      featured: false,
+      colocacao: "oportunidades",
     });
     setOpenDialog(true);
   };
@@ -139,7 +140,7 @@ const AdminInvestments = () => {
         imagem: investment.imagem || "",
         imagemFile: null,
       ativo: investment.ativo ?? true,
-      featured: (investment as any).featured ?? false,
+      colocacao: (investment as any).colocacao ?? ((investment as any).featured ? 'destaque' : 'oportunidades'),
     });
     setOpenDialog(true);
   };
@@ -192,7 +193,7 @@ const AdminInvestments = () => {
         descricao: formData.descricao || null,
           imagem: imagemUrl || null,
         ativo: !!formData.ativo,
-        featured: !!formData.featured,
+        colocacao: formData.colocacao || 'oportunidades',
       };
 
       if (selectedInvestment) {
@@ -470,7 +471,7 @@ const AdminInvestments = () => {
                 placeholder="Descrição do investimento..."
               />
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-col gap-3">
               <label className="flex items-center gap-2">
                 <input
                   type="checkbox"
@@ -480,14 +481,16 @@ const AdminInvestments = () => {
                 <span className="text-sm">Visível (Ativo)</span>
               </label>
 
-              <label className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={!!formData.featured}
-                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
-                />
-                <span className="text-sm">Em destaque</span>
-              </label>
+              <label className="text-sm">Colocação</label>
+              <select
+                className="w-full border rounded-md px-3 py-2"
+                value={formData.colocacao}
+                onChange={(e) => setFormData({ ...formData, colocacao: e.target.value })}
+              >
+                <option value="oportunidades">Oportunidades</option>
+                <option value="destaque">Destaque</option>
+                <option value="pagina_inicial">Página Inicial</option>
+              </select>
             </div>
               <div>
                 <label className="text-sm font-medium">Imagem</label>
