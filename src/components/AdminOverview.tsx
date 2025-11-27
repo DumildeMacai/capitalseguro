@@ -32,15 +32,15 @@ const AdminOverview = () => {
     try {
       setLoading(true);
 
-      // Total Investors
+      // Total Investors (use users_by_role view)
       const { count: investorsCount } = await supabase
-        .from("profiles")
+        .from("users_by_role")
         .select("*", { count: "exact", head: true })
         .eq("tipo", "investidor");
 
-      // Total Partners
+      // Total Partners (use users_by_role view)
       const { count: partnersCount } = await supabase
-        .from("profiles")
+        .from("users_by_role")
         .select("*", { count: "exact", head: true })
         .eq("tipo", "parceiro");
 

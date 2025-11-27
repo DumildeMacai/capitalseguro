@@ -79,8 +79,9 @@ const AdminInvestors = () => {
   const fetchInvestors = async () => {
     try {
       setLoading(true);
+      // Use users_by_role view to get investors (tipo = 'investidor')
       const { data, error } = await supabase
-        .from("profiles")
+        .from("users_by_role")
         .select("*")
         .eq("tipo", "investidor")
         .order("data_criacao", { ascending: false });

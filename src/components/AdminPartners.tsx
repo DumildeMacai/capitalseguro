@@ -84,8 +84,9 @@ const AdminPartners = () => {
   const fetchPartners = async () => {
     try {
       setLoading(true);
+      // Use users_by_role view to get partners (tipo = 'parceiro')
       const { data, error } = await supabase
-        .from("profiles")
+        .from("users_by_role")
         .select("*")
         .eq("tipo", "parceiro")
         .order("data_criacao", { ascending: false });
