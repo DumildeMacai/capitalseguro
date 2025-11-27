@@ -24,6 +24,13 @@ CREATE TABLE IF NOT EXISTS public.investimentos (
 -- Enable RLS for investimentos
 ALTER TABLE public.investimentos ENABLE ROW LEVEL SECURITY;
 
+-- Drop old policies if they exist
+DROP POLICY IF EXISTS "Admin pode ver todos os investimentos" ON public.investimentos;
+DROP POLICY IF EXISTS "Admin pode criar investimentos" ON public.investimentos;
+DROP POLICY IF EXISTS "Admin pode atualizar investimentos" ON public.investimentos;
+DROP POLICY IF EXISTS "Admin pode deletar investimentos" ON public.investimentos;
+DROP POLICY IF EXISTS "Usuários podem ver investimentos ativos" ON public.investimentos;
+
 -- RLS Policies for investimentos
 CREATE POLICY "Admin pode ver todos os investimentos"
   ON public.investimentos FOR SELECT
@@ -66,6 +73,11 @@ CREATE TABLE IF NOT EXISTS public.inscricoes_investimentos (
 
 -- Enable RLS for inscricoes_investimentos
 ALTER TABLE public.inscricoes_investimentos ENABLE ROW LEVEL SECURITY;
+
+-- Drop old policies if they exist
+DROP POLICY IF EXISTS "Usuários podem ver suas próprias inscrições" ON public.inscricoes_investimentos;
+DROP POLICY IF EXISTS "Admin pode ver todas as inscrições" ON public.inscricoes_investimentos;
+DROP POLICY IF EXISTS "Usuários podem criar inscrições" ON public.inscricoes_investimentos;
 
 -- RLS Policies
 CREATE POLICY "Usuários podem ver suas próprias inscrições"
