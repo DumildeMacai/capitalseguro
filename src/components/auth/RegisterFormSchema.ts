@@ -25,8 +25,8 @@ export const registerFormSchema = z.object({
   bio: z.string().max(160, {
     message: "Bio deve ter no máximo 160 caracteres.",
   }).optional(),
-  userType: z.enum(["investidor", "parceiro"], {
-    required_error: "Por favor, selecione um tipo de usuário.",
+  userType: z.union([z.literal("investidor"), z.literal("parceiro")], {
+    errorMap: () => ({ message: "Por favor, selecione um tipo de usuário." }),
   }),
 });
 
