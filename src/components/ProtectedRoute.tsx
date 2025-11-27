@@ -26,8 +26,12 @@ const ProtectedRoute = ({
     return <Navigate to="/login" />;
   }
 
+  // Debug logs
+  console.log(`[ProtectedRoute] User: ${user.email}, UserType: ${userType}, Required: ${requiredUserType}`);
+
   // Se houver um tipo de usuário requerido e não corresponder, redirecionar
   if (requiredUserType && userType !== requiredUserType) {
+    console.log(`[ProtectedRoute] Type mismatch - redirecting ${userType} to appropriate route`);
     switch (userType) {
       case 'admin':
         return <Navigate to="/admin" />;

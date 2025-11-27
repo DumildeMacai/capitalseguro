@@ -233,7 +233,6 @@ export const handleAdminAccess = async (
       .upsert(
         {
           id: user.id,
-          tipo: "admin",
           nome_completo: "Administrador",
           bio: "Conta administrativa",
           created_at: new Date().toISOString(),
@@ -244,6 +243,22 @@ export const handleAdminAccess = async (
     
     if (profileError) {
       console.warn("[Admin Access] Profile upsert warning:", profileError.message)
+    }
+    
+    // Step 2.5: Create admin role in user_roles table
+    console.log("[Admin Access] Creating admin role in user_roles...")
+    const { error: roleError } = await supabase
+      .from("user_roles")
+      .upsert(
+        {
+          user_id: user.id,
+          role: "admin",
+        },
+        { onConflict: "user_id" }
+      )
+    
+    if (roleError) {
+      console.warn("[Admin Access] Role upsert warning:", roleError.message)
     }
     
     // Step 3: Verify and redirect
