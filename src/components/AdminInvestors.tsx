@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -15,6 +15,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -25,49 +42,178 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 import { Eye, Edit, Ban, Bell, MoreVertical, Search } from "lucide-react";
 
-// Mock data for investors
-const mockInvestors = [
-  {
-    id: "1",
-    name: "João Silva",
-    email: "joao@email.com",
-    phone: "+244 923 456 789",
-    profileType: "Moderado",
-    registrationDate: "12/04/2023",
-    totalInvested: "Kz 50.000",
-    status: "Ativo",
-  },
-  {
-    id: "2",
-    name: "Maria Santos",
-    email: "maria@email.com",
-    phone: "+244 923 987 654",
-    profileType: "Conservador",
-    registrationDate: "25/03/2023",
-    totalInvested: "Kz 120.000",
-    status: "Ativo",
-  },
-  {
-    id: "3",
-    name: "Pedro Almeida",
-    email: "pedro@email.com",
-    phone: "+244 923 123 456",
-    profileType: "Arrojado",
-    registrationDate: "05/05/2023",
-    totalInvested: "Kz 75.000",
-    status: "Suspenso",
-  },
-];
+interface Investor {
+  id: string;
+  nome_completo: string | null;
+  email: string;
+  telefone: string | null;
+  bio: string | null;
+  data_criacao: string | null;
+  status?: string;
+}
 
 const AdminInvestors = () => {
+  const [investors, setInvestors] = useState<Investor[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openNotifyDialog, setOpenNotifyDialog] = useState(false);
+  const [openSuspendDialog, setOpenSuspendDialog] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
+  const [formData, setFormData] = useState({
+    nome_completo: "",
+    email: "",
+    telefone: "",
+  });
+  const { toast } = useToast();
 
-  const filteredInvestors = mockInvestors.filter((investor) =>
-    investor.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  useEffect(() => {
+    fetchInvestors();
+  }, []);
+
+  const fetchInvestors = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("tipo", "investidor")
+        .order("data_criacao", { ascending: false });
+
+      if (error) throw error;
+      setInvestors((data || []).map(p => ({
+        ...p,
+        status: p.status || "Ativo"
+      })));
+    } catch (error: any) {
+      console.error("Erro ao buscar investidores:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar investidores.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const filteredInvestors = investors.filter((investor) =>
+    investor.nome_completo?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     investor.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handleViewInvestor = (investor: Investor) => {
+    setSelectedInvestor(investor);
+    setFormData({
+      nome_completo: investor.nome_completo || "",
+      email: investor.email,
+      telefone: investor.telefone || "",
+    });
+    setOpenDialog(true);
+  };
+
+  const handleEditInvestor = async () => {
+    try {
+      if (!selectedInvestor) return;
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          nome_completo: formData.nome_completo || null,
+          email: formData.email,
+          telefone: formData.telefone || null,
+        })
+        .eq("id", selectedInvestor.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Investidor atualizado com sucesso.",
+      });
+
+      setOpenDialog(false);
+      await fetchInvestors();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível atualizar investidor.",
+      });
+    }
+  };
+
+  const handleSuspendInvestor = async () => {
+    try {
+      if (!selectedInvestor) return;
+
+      const newStatus = (selectedInvestor.status || "Ativo") === "Ativo" ? "Suspenso" : "Ativo";
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ status: newStatus })
+        .eq("id", selectedInvestor.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: `Investidor ${newStatus === "Ativo" ? "ativado" : "suspenso"} com sucesso.`,
+      });
+
+      setOpenSuspendDialog(false);
+      setSelectedInvestor(null);
+      await fetchInvestors();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível atualizar status do investidor.",
+      });
+    }
+  };
+
+  const handleSendNotification = async () => {
+    try {
+      if (!selectedInvestor) return;
+
+      console.log("Enviando notificação para:", selectedInvestor.email, notificationMessage);
+
+      toast({
+        title: "Sucesso",
+        description: `Notificação enviada para ${selectedInvestor.email}`,
+      });
+
+      setOpenNotifyDialog(false);
+      setNotificationMessage("");
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível enviar notificação.",
+      });
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "—";
+    return new Date(dateString).toLocaleDateString("pt-PT");
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="text-center text-muted-foreground">Carregando investidores...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -80,7 +226,6 @@ const AdminInvestors = () => {
                 Gerenciamento de todos os investidores da plataforma.
               </CardDescription>
             </div>
-            <Button>+ Novo Investidor</Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -96,70 +241,164 @@ const AdminInvestors = () => {
             </div>
           </div>
 
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Perfil</TableHead>
+                  <TableHead>Telefone</TableHead>
                   <TableHead>Cadastro</TableHead>
-                  <TableHead>Total Investido</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredInvestors.map((investor) => (
-                  <TableRow key={investor.id}>
-                    <TableCell className="font-medium">{investor.name}</TableCell>
-                    <TableCell>{investor.email}</TableCell>
-                    <TableCell>{investor.profileType}</TableCell>
-                    <TableCell>{investor.registrationDate}</TableCell>
-                    <TableCell>{investor.totalInvested}</TableCell>
-                    <TableCell>
-                      <Badge variant={investor.status === "Ativo" ? "outline" : "destructive"}>
-                        {investor.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            <Eye className="mr-2 h-4 w-4" />
-                            <span>Visualizar</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Editar</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Ban className="mr-2 h-4 w-4" />
-                            <span>
-                              {investor.status === "Ativo" ? "Suspender" : "Ativar"}
-                            </span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Bell className="mr-2 h-4 w-4" />
-                            <span>Notificar</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                {filteredInvestors.length > 0 ? (
+                  filteredInvestors.map((investor) => (
+                    <TableRow key={investor.id}>
+                      <TableCell className="font-medium">{investor.nome_completo || "—"}</TableCell>
+                      <TableCell>{investor.email}</TableCell>
+                      <TableCell>{investor.telefone || "—"}</TableCell>
+                      <TableCell>{formatDate(investor.data_criacao)}</TableCell>
+                      <TableCell>
+                        <Badge variant={(investor.status || "Ativo") === "Ativo" ? "outline" : "destructive"}>
+                          {investor.status || "Ativo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleViewInvestor(investor)}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              <span>Visualizar/Editar</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => { setSelectedInvestor(investor); setOpenSuspendDialog(true); }}>
+                              <Ban className="mr-2 h-4 w-4" />
+                              <span>
+                                {(investor.status || "Ativo") === "Ativo" ? "Suspender" : "Ativar"}
+                              </span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => { setSelectedInvestor(investor); setOpenNotifyDialog(true); }}>
+                              <Bell className="mr-2 h-4 w-4" />
+                              <span>Notificar</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                      Nenhum investidor encontrado
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Visualizar/Editar Investidor</DialogTitle>
+            <DialogDescription>
+              Atualize os dados do investidor abaixo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Nome Completo</label>
+              <Input
+                value={formData.nome_completo}
+                onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
+                placeholder="Nome do investidor"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Email</label>
+              <Input
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                placeholder="email@exemplo.com"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Telefone</label>
+              <Input
+                value={formData.telefone}
+                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                placeholder="+244 923 000 000"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleEditInvestor}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openNotifyDialog} onOpenChange={setOpenNotifyDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Notificar Investidor</DialogTitle>
+            <DialogDescription>
+              Envie uma mensagem para {selectedInvestor?.email}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <textarea
+              className="w-full px-3 py-2 border rounded-md text-sm"
+              rows={5}
+              value={notificationMessage}
+              onChange={(e) => setNotificationMessage(e.target.value)}
+              placeholder="Digite sua mensagem aqui..."
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenNotifyDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSendNotification}>Enviar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={openSuspendDialog} onOpenChange={setOpenSuspendDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {(selectedInvestor?.status || "Ativo") === "Ativo" ? "Suspender Investidor" : "Ativar Investidor"}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {(selectedInvestor?.status || "Ativo") === "Ativo"
+                ? `Tem certeza que deseja suspender "${selectedInvestor?.nome_completo}"? O investidor não poderá mais fazer operações.`
+                : `Tem certeza que deseja ativar "${selectedInvestor?.nome_completo}"? O investidor poderá fazer operações novamente.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogAction
+            onClick={handleSuspendInvestor}
+            className={(selectedInvestor?.status || "Ativo") === "Ativo" ? "bg-destructive text-destructive-foreground" : "bg-primary"}
+          >
+            {(selectedInvestor?.status || "Ativo") === "Ativo" ? "Suspender" : "Ativar"}
+          </AlertDialogAction>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

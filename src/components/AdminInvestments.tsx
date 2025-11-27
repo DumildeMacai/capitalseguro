@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -15,6 +15,23 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -25,62 +42,196 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Eye, Edit, Trash2, MoreVertical, Search } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { Eye, Edit, Trash2, MoreVertical, Search, Plus } from "lucide-react";
 
-// Mock data for investments
-const mockInvestments = [
-  {
-    id: "1",
-    name: "Edifício Miramar - 10º Andar",
-    category: "Imóveis",
-    partner: "Imobiliária Premium",
-    minInvestment: "Kz 10.000",
-    expectedReturn: "12% a.a.",
-    lockupPeriod: "24 meses",
-    risk: "Médio",
-    status: "Ativo",
-  },
-  {
-    id: "2",
-    name: "Startup TechAngola - Série A",
-    category: "Startups",
-    partner: "TechInvest Angola",
-    minInvestment: "Kz 5.000",
-    expectedReturn: "25% a.a.",
-    lockupPeriod: "36 meses",
-    risk: "Alto",
-    status: "Ativo",
-  },
-  {
-    id: "3",
-    name: "Fazenda Girassol - Cultivo de Soja",
-    category: "Agronegócio",
-    partner: "Agro Capital",
-    minInvestment: "Kz 15.000",
-    expectedReturn: "18% a.a.",
-    lockupPeriod: "12 meses",
-    risk: "Baixo",
-    status: "Encerrado",
-  },
-];
+interface Investment {
+  id: string;
+  titulo: string;
+  categoria: string | null;
+  valor_minimo: number | null;
+  retorno_estimado: number | null;
+  prazo_minimo: number | null;
+  ativo: boolean | null;
+  descricao: string | null;
+}
 
 const AdminInvestments = () => {
+  const [investments, setInvestments] = useState<Investment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [formData, setFormData] = useState({
+    titulo: "",
+    categoria: "",
+    valor_minimo: "",
+    retorno_estimado: "",
+    prazo_minimo: "",
+    descricao: "",
+  });
+  const { toast } = useToast();
 
-  const filteredInvestments = mockInvestments.filter((investment) =>
-    investment.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    investment.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    investment.partner.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  useEffect(() => {
+    fetchInvestments();
+  }, []);
 
-  const getRiskBadgeVariant = (risk: string) => {
-    switch (risk) {
-      case "Baixo": return "outline";
-      case "Médio": return "secondary";
-      case "Alto": return "destructive";
-      default: return "outline";
+  const fetchInvestments = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from("investimentos")
+        .select("*")
+        .order("data_criacao", { ascending: false });
+
+      if (error) throw error;
+      setInvestments(data || []);
+    } catch (error: any) {
+      console.error("Erro ao buscar investimentos:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível carregar investimentos.",
+      });
+    } finally {
+      setLoading(false);
     }
   };
+
+  const filteredInvestments = investments.filter((inv) =>
+    inv.titulo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    inv.categoria?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleNewInvestment = () => {
+    setSelectedInvestment(null);
+    setFormData({
+      titulo: "",
+      categoria: "",
+      valor_minimo: "",
+      retorno_estimado: "",
+      prazo_minimo: "",
+      descricao: "",
+    });
+    setOpenDialog(true);
+  };
+
+  const handleEditInvestment = (investment: Investment) => {
+    setSelectedInvestment(investment);
+    setFormData({
+      titulo: investment.titulo,
+      categoria: investment.categoria || "",
+      valor_minimo: investment.valor_minimo?.toString() || "",
+      retorno_estimado: investment.retorno_estimado?.toString() || "",
+      prazo_minimo: investment.prazo_minimo?.toString() || "",
+      descricao: investment.descricao || "",
+    });
+    setOpenDialog(true);
+  };
+
+  const handleSaveInvestment = async () => {
+    try {
+      if (!formData.titulo.trim()) {
+        toast({
+          variant: "destructive",
+          title: "Validação",
+          description: "Título é obrigatório.",
+        });
+        return;
+      }
+
+      const payload = {
+        titulo: formData.titulo,
+        categoria: formData.categoria || null,
+        valor_minimo: formData.valor_minimo ? parseFloat(formData.valor_minimo) : null,
+        retorno_estimado: formData.retorno_estimado ? parseFloat(formData.retorno_estimado) : null,
+        prazo_minimo: formData.prazo_minimo ? parseInt(formData.prazo_minimo) : null,
+        descricao: formData.descricao || null,
+        ativo: true,
+      };
+
+      if (selectedInvestment) {
+        const { error } = await supabase
+          .from("investimentos")
+          .update(payload)
+          .eq("id", selectedInvestment.id);
+
+        if (error) throw error;
+        toast({
+          title: "Sucesso",
+          description: "Investimento atualizado com sucesso.",
+        });
+      } else {
+        const { error } = await supabase
+          .from("investimentos")
+          .insert([payload]);
+
+        if (error) throw error;
+        toast({
+          title: "Sucesso",
+          description: "Investimento criado com sucesso.",
+        });
+      }
+
+      setOpenDialog(false);
+      await fetchInvestments();
+    } catch (error: any) {
+      console.error("Erro ao salvar investimento:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: error.message || "Não foi possível salvar investimento.",
+      });
+    }
+  };
+
+  const handleDeleteInvestment = async () => {
+    try {
+      if (!selectedInvestment) return;
+
+      const { error } = await supabase
+        .from("investimentos")
+        .delete()
+        .eq("id", selectedInvestment.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: "Investimento excluído com sucesso.",
+      });
+
+      setOpenDeleteDialog(false);
+      setSelectedInvestment(null);
+      await fetchInvestments();
+    } catch (error: any) {
+      console.error("Erro ao excluir investimento:", error);
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível excluir investimento.",
+      });
+    }
+  };
+
+  const getRiskBadgeVariant = (retorno: number | null | undefined) => {
+    if (!retorno) return "outline";
+    if (retorno < 10) return "outline";
+    if (retorno < 20) return "secondary";
+    return "destructive";
+  };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="p-8">
+          <div className="text-center text-muted-foreground">Carregando investimentos...</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -93,7 +244,10 @@ const AdminInvestments = () => {
                 Gerenciamento de todas as oportunidades de investimento.
               </CardDescription>
             </div>
-            <Button>+ Novo Investimento</Button>
+            <Button onClick={handleNewInvestment}>
+              <Plus className="mr-2 h-4 w-4" />
+              Novo Investimento
+            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -101,7 +255,7 @@ const AdminInvestments = () => {
             <div className="relative flex-1">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Buscar por nome, categoria, parceiro..."
+                placeholder="Buscar por nome, categoria..."
                 className="pl-8"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -113,68 +267,178 @@ const AdminInvestments = () => {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
+                  <TableHead>Título</TableHead>
                   <TableHead>Categoria</TableHead>
-                  <TableHead>Parceiro</TableHead>
                   <TableHead>Valor Mínimo</TableHead>
                   <TableHead>Retorno</TableHead>
-                  <TableHead>Risco</TableHead>
+                  <TableHead>Prazo</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredInvestments.map((investment) => (
-                  <TableRow key={investment.id}>
-                    <TableCell className="font-medium">{investment.name}</TableCell>
-                    <TableCell>{investment.category}</TableCell>
-                    <TableCell>{investment.partner}</TableCell>
-                    <TableCell>{investment.minInvestment}</TableCell>
-                    <TableCell>{investment.expectedReturn}</TableCell>
-                    <TableCell>
-                      <Badge variant={getRiskBadgeVariant(investment.risk)}>
-                        {investment.risk}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={investment.status === "Ativo" ? "outline" : "secondary"}
-                      >
-                        {investment.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem>
-                            <Eye className="mr-2 h-4 w-4" />
-                            <span>Visualizar</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Edit className="mr-2 h-4 w-4" />
-                            <span>Editar</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            <span>Excluir</span>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                {filteredInvestments.length > 0 ? (
+                  filteredInvestments.map((investment) => (
+                    <TableRow key={investment.id}>
+                      <TableCell className="font-medium">{investment.titulo}</TableCell>
+                      <TableCell>{investment.categoria || "—"}</TableCell>
+                      <TableCell>
+                        {investment.valor_minimo
+                          ? `Kz ${investment.valor_minimo.toLocaleString()}`
+                          : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {investment.retorno_estimado
+                          ? `${investment.retorno_estimado}% a.a.`
+                          : "—"}
+                      </TableCell>
+                      <TableCell>
+                        {investment.prazo_minimo
+                          ? `${investment.prazo_minimo} meses`
+                          : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={
+                            investment.ativo ? "outline" : "secondary"
+                          }
+                        >
+                          {investment.ativo ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Ações</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem onClick={() => handleEditInvestment(investment)}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              <span>Editar</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedInvestment(investment);
+                                setOpenDeleteDialog(true);
+                              }}
+                              className="text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              <span>Excluir</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Nenhum investimento encontrado
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
+
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {selectedInvestment ? "Editar Investimento" : "Novo Investimento"}
+            </DialogTitle>
+            <DialogDescription>
+              Preencha os dados do investimento abaixo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Título *</label>
+              <Input
+                value={formData.titulo}
+                onChange={(e) => setFormData({ ...formData, titulo: e.target.value })}
+                placeholder="Ex: Edifício Miramar"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Categoria</label>
+              <Input
+                value={formData.categoria}
+                onChange={(e) => setFormData({ ...formData, categoria: e.target.value })}
+                placeholder="Ex: Imóveis, Startups..."
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Valor Mínimo (Kz)</label>
+              <Input
+                type="number"
+                value={formData.valor_minimo}
+                onChange={(e) => setFormData({ ...formData, valor_minimo: e.target.value })}
+                placeholder="10000"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Retorno Estimado (%)</label>
+              <Input
+                type="number"
+                value={formData.retorno_estimado}
+                onChange={(e) => setFormData({ ...formData, retorno_estimado: e.target.value })}
+                placeholder="12"
+                step="0.1"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Prazo Mínimo (meses)</label>
+              <Input
+                type="number"
+                value={formData.prazo_minimo}
+                onChange={(e) => setFormData({ ...formData, prazo_minimo: e.target.value })}
+                placeholder="24"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Descrição</label>
+              <textarea
+                className="w-full px-3 py-2 border rounded-md text-sm"
+                rows={3}
+                value={formData.descricao}
+                onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
+                placeholder="Descrição do investimento..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveInvestment}>
+              {selectedInvestment ? "Atualizar" : "Criar"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir "{selectedInvestment?.titulo}"? Esta ação é irreversível.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogAction onClick={handleDeleteInvestment} className="bg-destructive text-destructive-foreground">
+            Excluir
+          </AlertDialogAction>
+          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
