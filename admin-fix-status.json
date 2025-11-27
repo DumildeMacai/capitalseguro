@@ -1,0 +1,154 @@
+{
+  "issue": "Admin redirected to /investidor instead of /admin after login",
+  "root_cause": "user_roles table not populated with admin role - RPC get_user_type() returns null, defaults to investidor",
+  "status": "FIXED - Awaiting SQL execution",
+  "changes": {
+    "code_changes": [
+      {
+        "file": "src/utils/authHelpers.ts",
+        "function": "handleAdminAccess()",
+        "change": "Added user_roles.upsert() after profiles.upsert()",
+        "lines_added": 13,
+        "reason": "Create admin role entry so RPC can find it"
+      }
+    ],
+    "documentation": [
+      {
+        "file": "supabase/fix-admin-user.sql",
+        "type": "SQL Script",
+        "action": "Execute once in Supabase SQL Editor",
+        "purpose": "Fix existing admin user data"
+      },
+      {
+        "file": "FIX-ADMIN-ROUTING.md",
+        "type": "Implementation Guide",
+        "action": "Follow steps for correction"
+      },
+      {
+        "file": "ADMIN-FIX-SUMMARY.md",
+        "type": "Root Cause Analysis",
+        "action": "Understand the issue and solution"
+      }
+    ]
+  },
+  "implementation_steps": [
+    {
+      "step": 1,
+      "title": "Execute SQL",
+      "actions": [
+        "Open Supabase Dashboard > SQL Editor > Create new query",
+        "Copy content from supabase/fix-admin-user.sql",
+        "Click Run",
+        "Verify role='admin' appears in results"
+      ],
+      "critical": true,
+      "time_estimate": "2 minutes"
+    },
+    {
+      "step": 2,
+      "title": "Clear Browser Cache",
+      "actions": [
+        "Close browser completely",
+        "Or: Press Ctrl+Shift+Del > Select 'Cookies and cached images'",
+        "Or: Open app in Incognito/Private mode"
+      ],
+      "critical": true,
+      "time_estimate": "1 minute"
+    },
+    {
+      "step": 3,
+      "title": "Test Admin Login",
+      "actions": [
+        "Navigate to /login",
+        "Click '🔐 Acesso Admin (Demo)' button",
+        "Verify redirect to /admin (not /investidor)",
+        "Check browser console (F12) for success logs"
+      ],
+      "critical": true,
+      "time_estimate": "2 minutes"
+    },
+    {
+      "step": 4,
+      "title": "Verify in Supabase",
+      "actions": [
+        "Dashboard > Database > user_roles table",
+        "Filter by user_id matching admin@admin.com",
+        "Confirm role = 'admin'"
+      ],
+      "critical": false,
+      "time_estimate": "1 minute"
+    }
+  ],
+  "code_review": {
+    "before": {
+      "description": "Only updates profiles table",
+      "issue": "user_roles table not populated"
+    },
+    "after": {
+      "description": "Updates both profiles and user_roles tables",
+      "benefit": "RPC get_user_type() can find admin role"
+    }
+  },
+  "testing_checklist": {
+    "developer_testing": [
+      {
+        "test": "Admin button appears on login page",
+        "expected": "Orange button with '🔐 Acesso Admin (Demo)' text",
+        "command": "Visit /login in browser"
+      },
+      {
+        "test": "Click admin button",
+        "expected": "Button shows 'Acessando...' while loading",
+        "command": "Click button and observe"
+      },
+      {
+        "test": "Redirect to admin dashboard",
+        "expected": "URL changes to /admin, AdminDashboard component renders",
+        "command": "Check URL bar and page content"
+      },
+      {
+        "test": "Console logs show correct flow",
+        "expected": "See 'Creating admin role in user_roles' log",
+        "command": "Open F12 > Console tab > clear cookies > retry"
+      }
+    ],
+    "supabase_verification": [
+      {
+        "check": "Admin profile exists",
+        "query": "SELECT * FROM public.profiles WHERE id = (SELECT id FROM auth.users WHERE email='admin@admin.com')",
+        "expected": "One row with nome_completo='Administrador'"
+      },
+      {
+        "check": "Admin role exists",
+        "query": "SELECT * FROM public.user_roles WHERE user_id = (SELECT id FROM auth.users WHERE email='admin@admin.com')",
+        "expected": "One row with role='admin'"
+      },
+      {
+        "check": "RPC returns admin role",
+        "query": "SELECT public.get_user_type('USER_ID_HERE')",
+        "expected": "Result: admin"
+      }
+    ]
+  },
+  "git_info": {
+    "branch": "main",
+    "commit": "3ad94df",
+    "message": "fix: ensure admin role is created in user_roles table during admin access",
+    "pushed_to": "origin/main"
+  },
+  "timeline": {
+    "issue_reported": "Admin redirected to /investidor instead of /admin",
+    "root_cause_identified": "user_roles table not populated",
+    "code_fixed": "Added user_roles.upsert() in handleAdminAccess()",
+    "sql_provided": "fix-admin-user.sql script created",
+    "documentation": "Multiple guides created for implementation",
+    "status": "READY FOR TESTING - Awaiting manual SQL execution"
+  },
+  "next_steps": [
+    "1. Execute SQL in Supabase (critical path item)",
+    "2. Clear browser cache/cookies",
+    "3. Test admin login flow",
+    "4. Verify /admin page loads correctly",
+    "5. Test other user types (investidor, parceiro) still work"
+  ]
+}
