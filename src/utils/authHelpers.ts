@@ -249,13 +249,22 @@ export const handleAdminAccess = async (
     }
     
     // Step 2.5: Create admin role using RPC (bypasses RLS)
-    console.log("[Admin Access] Creating admin role via RPC...")
-    const { error: roleError } = await supabase.rpc("set_user_as_admin", {
-      target_user_id: user.id,
-    })
-    
-    if (roleError) {
-      console.warn("[Admin Access] Role creation warning:", roleError.message)
+    console.log("[Admin Access] Attempting to set admin role via RPC...")
+    try {
+      // Try to call RPC with UUID parameter
+      const { error: roleError } = await supabase.rpc("set_user_as_admin_by_email", {
+        admin_email: adminEmail,
+      })
+      
+      if (roleError) {
+        console.warn("[Admin Access] RPC call warning:", roleError)
+        // Continue anyway - role might have been set by trigger or SQL
+      } else {
+        console.log("[Admin Access] Admin role set successfully via RPC")
+      }
+    } catch (e) {
+      console.warn("[Admin Access] RPC call failed (may need manual SQL):", e)
+      // Continue anyway
     }
     
     // Step 3: Verify and redirect
