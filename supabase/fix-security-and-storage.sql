@@ -177,6 +177,10 @@ CREATE POLICY "Admins podem gerenciar todos os documentos"
 -- PARTE 5: ATUALIZAR FUNÇÕES
 -- =====================================================
 
+-- 5.0 Dropar funções antigas para poder recriá-las com novos tipos
+DROP FUNCTION IF EXISTS public.get_user_type(UUID) CASCADE;
+DROP FUNCTION IF EXISTS public.get_user_roles(UUID) CASCADE;
+
 -- 5.1 Função para obter roles do usuário (substitui get_user_type)
 CREATE OR REPLACE FUNCTION public.get_user_roles(user_id UUID)
 RETURNS SETOF app_role
