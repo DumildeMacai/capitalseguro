@@ -1,18 +1,41 @@
 -- ==================================================
--- CORREÇÃO CRÍTICA DE SEGURANÇA E STORAGE
--- ==================================================
+-- CORREÇÃO CRÍTICA DE SEGURANÇA E STORAGE (VERSÃO REVISADA)
 -- Execute este script no SQL Editor do Supabase
--- Este script corrige recursão infinita e implementa sistema seguro de roles
+-- Implementações: migração segura, RLS sem recursão, hardening
+-- ==================================================
 
--- =====================================================
--- PARTE 1: CRIAR SISTEMA SEGURO DE ROLES
--- =====================================================
+/* -------------------------
+   PARTE 0: LIMPEZAS INICIAIS
+   ------------------------- */
+-- (Remover antigas funções/policies que possam causar conflito)
+DROP POLICY IF EXISTS "Usuários podem ver suas próprias roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins podem ver todas as roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins podem inserir roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins podem atualizar roles" ON public.user_roles;
+DROP POLICY IF EXISTS "Admins podem deletar roles" ON public.user_roles;
 
--- 1.1 Criar enum para roles
+DROP POLICY IF EXISTS "Usuários podem ver seu próprio perfil" ON public.profiles;
+DROP POLICY IF EXISTS "Usuários podem atualizar seu próprio perfil" ON public.profiles;
+DROP POLICY IF EXISTS "Admins podem ver todos os perfis" ON public.profiles;
+DROP POLICY IF EXISTS "Admins podem atualizar todos os perfis" ON public.profiles;
+DROP POLICY IF EXISTS "Usuários podem deletar seu próprio perfil" ON public.profiles;
+
+DROP POLICY IF EXISTS "Usuários podem visualizar seus próprios documentos" ON storage.objects;
+DROP POLICY IF EXISTS "Usuários podem fazer upload de seus documentos" ON storage.objects;
+DROP POLICY IF EXISTS "Usuários podem atualizar seus próprios documentos" ON storage.objects;
+DROP POLICY IF EXISTS "Usuários podem deletar seus próprios documentos" ON storage.objects;
+DROP POLICY IF EXISTS "Admins podem gerenciar todos os documentos" ON storage.objects;
+
+-- Garantir que funções antigas que mudam tipo de retorno sejam removidas
+DROP FUNCTION IF EXISTS public.get_user_type(UUID) CASCADE;
+DROP FUNCTION IF EXISTS public.get_user_roles(UUID) CASCADE;
+
+-- -----------------------------------------------------
+-- PARTE 1: CRIAR SISTEMA SEGURO DE ROLES (ENUM + TABELA)
+-- -----------------------------------------------------
 DROP TYPE IF EXISTS public.app_role CASCADE;
 CREATE TYPE public.app_role AS ENUM ('admin', 'parceiro', 'investidor');
 
--- 1.2 Criar tabela de roles de usuário (separada de profiles)
 DROP TABLE IF EXISTS public.user_roles CASCADE;
 CREATE TABLE public.user_roles (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -22,17 +45,20 @@ CREATE TABLE public.user_roles (
     UNIQUE (user_id, role)
 );
 
--- 1.3 Habilitar RLS na tabela user_roles
+-- Habilitar RLS
 ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
 
--- 1.4 Limpar políticas antigas de user_roles (se existir)
-DROP POLICY IF EXISTS "Usuários podem ver suas próprias roles" ON public.user_roles;
-DROP POLICY IF EXISTS "Admins podem ver todas as roles" ON public.user_roles;
-DROP POLICY IF EXISTS "Admins podem inserir roles" ON public.user_roles;
-DROP POLICY IF EXISTS "Admins podem atualizar roles" ON public.user_roles;
-DROP POLICY IF EXISTS "Admins podem deletar roles" ON public.user_roles;
+-- Constraint adicional (hardening) - garante que role está no enum
+ALTER TABLE public.user_roles
+  ADD CONSTRAINT user_roles_role_valid CHECK (role = ANY(enum_range(NULL::public.app_role)));
 
--- 1.5 Criar função SECURITY DEFINER para verificar roles (evita recursão)
+-- Indexes para performance
+CREATE INDEX IF NOT EXISTS idx_user_roles_user ON public.user_roles(user_id);
+CREATE INDEX IF NOT EXISTS idx_user_roles_role ON public.user_roles(role);
+
+-- -----------------------------------------------------
+-- PARTE 1.5: Função segura para verificar roles (no recursion)
+-- -----------------------------------------------------
 CREATE OR REPLACE FUNCTION public.has_role(_user_id UUID, _role app_role)
 RETURNS BOOLEAN
 LANGUAGE SQL
@@ -45,10 +71,12 @@ AS $$
     FROM public.user_roles
     WHERE user_id = _user_id
       AND role = _role
-  )
+  );
 $$;
 
--- 1.6 Políticas RLS para user_roles
+-- -----------------------------------------------------
+-- PARTE 1.6: Policies RLS para user_roles
+-- -----------------------------------------------------
 CREATE POLICY "Usuários podem ver suas próprias roles"
   ON public.user_roles FOR SELECT
   USING (auth.uid() = user_id);
@@ -70,51 +98,48 @@ CREATE POLICY "Admins podem deletar roles"
   USING (public.has_role(auth.uid(), 'admin'));
 
 -- =====================================================
--- PARTE 2: ATUALIZAR TABELA PROFILES
+-- PARTE 2: ATUALIZAR TABELA PROFILES (migrar coluna 'tipo')
 -- =====================================================
+-- Garantir que policies dependentes de 'tipo' foram droppadas (feito no topo)
 
--- 2.0 Dropar TODAS as políticas que dependem de 'tipo' ANTES de remover a coluna
-DROP POLICY IF EXISTS "Usuários podem ver seu próprio perfil" ON public.profiles;
-DROP POLICY IF EXISTS "Usuários podem atualizar seu próprio perfil" ON public.profiles;
-DROP POLICY IF EXISTS "Admins podem ver todos os perfis" ON public.profiles;
-DROP POLICY IF EXISTS "Admins podem atualizar todos os perfis" ON public.profiles;
-DROP POLICY IF EXISTS "Admins podem visualizar todos os documentos" ON storage.objects;
-
--- 2.1 Verificar se coluna 'tipo' existe em profiles e remover com segurança
--- Primeiro verificamos a estrutura da tabela e copiamos dados se necessário
-
--- Criar backup de dados tipo antes de remover coluna
 DO $$
 BEGIN
   IF EXISTS (
     SELECT 1 FROM information_schema.columns 
-    WHERE table_name='profiles' AND column_name='tipo'
+    WHERE table_schema = 'public' AND table_name='profiles' AND column_name='tipo'
   ) THEN
-    -- Se coluna tipo existe, migrar para user_roles
+    -- Migrar somente valores válidos do enum para evitar erros de cast
     INSERT INTO public.user_roles (user_id, role)
     SELECT id, tipo::text::app_role
     FROM public.profiles
     WHERE tipo IS NOT NULL
+      AND tipo::text = ANY(enum_range(NULL::public.app_role)::text[])
     ON CONFLICT (user_id, role) DO NOTHING;
-    
-    -- Agora remover a coluna
+
+    -- (Opcional) Registar rows inválidas para análise — não aborta a migração
+    -- Se quiseres inspecionar, podes gravar num log ou SELECT posteriormente:
+    -- SELECT id, tipo FROM public.profiles WHERE tipo IS NOT NULL AND tipo::text NOT = ANY(enum_range(NULL::public.app_role)::text[]);
+
+    -- Agora remover a coluna tipo
     ALTER TABLE public.profiles DROP COLUMN tipo CASCADE;
   END IF;
 END $$;
 
 -- =====================================================
--- PARTE 3: ATUALIZAR POLÍTICAS RLS DE PROFILES
+-- PARTE 3: POLÍTICAS RLS PARA PROFILES (sem recursão)
 -- =====================================================
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
 
--- 3.1 Políticas já foram dropadas na Parte 2 (antes de remover coluna tipo)
-
--- 3.2 Criar novas políticas sem recursão
 CREATE POLICY "Usuários podem ver seu próprio perfil"
   ON public.profiles FOR SELECT
   USING (auth.uid() = id);
 
 CREATE POLICY "Usuários podem atualizar seu próprio perfil"
   ON public.profiles FOR UPDATE
+  USING (auth.uid() = id);
+
+CREATE POLICY "Usuários podem deletar seu próprio perfil"
+  ON public.profiles FOR DELETE
   USING (auth.uid() = id);
 
 CREATE POLICY "Admins podem ver todos os perfis"
@@ -126,17 +151,11 @@ CREATE POLICY "Admins podem atualizar todos os perfis"
   USING (public.has_role(auth.uid(), 'admin'));
 
 -- =====================================================
--- PARTE 4: CORRIGIR POLÍTICAS DE STORAGE
+-- PARTE 4: POLÍTICAS DE STORAGE (sem recursão) - corrigido
 -- =====================================================
+-- Assegura que storage schema exista e habilita RLS se aplicável (storage.objects já tem RLS controlado pelo Supabase)
+-- Criar policies seguras de acesso por pasta (foldername)
 
--- 4.1 Dropar todas as políticas antigas de storage (foram dropadas parcialmente na Parte 2)
-DROP POLICY IF EXISTS "Usuários podem visualizar seus próprios documentos" ON storage.objects;
-DROP POLICY IF EXISTS "Usuários podem fazer upload de seus documentos" ON storage.objects;
-DROP POLICY IF EXISTS "Usuários podem atualizar seus próprios documentos" ON storage.objects;
-DROP POLICY IF EXISTS "Usuários podem deletar seus próprios documentos" ON storage.objects;
-DROP POLICY IF EXISTS "Admins podem gerenciar todos os documentos" ON storage.objects;
-
--- 4.2 Criar políticas de storage SEM RECURSÃO
 CREATE POLICY "Usuários podem visualizar seus próprios documentos"
   ON storage.objects FOR SELECT
   USING (
@@ -165,23 +184,24 @@ CREATE POLICY "Usuários podem deletar seus próprios documentos"
     auth.uid()::text = (storage.foldername(name))[1]
   );
 
--- Política para admins (usa função segura)
+-- Política para admins (FOR ALL) agora com USING + WITH CHECK para proteção completa
 CREATE POLICY "Admins podem gerenciar todos os documentos"
   ON storage.objects FOR ALL
   USING (
     bucket_id = 'documentos' AND
     public.has_role(auth.uid(), 'admin')
+  )
+  WITH CHECK (
+    bucket_id = 'documentos' AND
+    public.has_role(auth.uid(), 'admin')
   );
 
 -- =====================================================
--- PARTE 5: ATUALIZAR FUNÇÕES
+-- PARTE 5: FUNÇÕES (get_user_roles, get_user_type, update_user_profile)
 -- =====================================================
+-- 5.0 Funções antigas já droppadas no topo do script
 
--- 5.0 Dropar funções antigas para poder recriá-las com novos tipos
-DROP FUNCTION IF EXISTS public.get_user_type(UUID) CASCADE;
-DROP FUNCTION IF EXISTS public.get_user_roles(UUID) CASCADE;
-
--- 5.1 Função para obter roles do usuário (substitui get_user_type)
+-- 5.1 Função para obter roles do usuário (SETOF)
 CREATE OR REPLACE FUNCTION public.get_user_roles(user_id UUID)
 RETURNS SETOF app_role
 LANGUAGE SQL
@@ -194,7 +214,7 @@ AS $$
   WHERE user_roles.user_id = $1;
 $$;
 
--- 5.2 Função para obter role primária (para compatibilidade)
+-- 5.2 Função para obter role primária (compatibilidade)
 CREATE OR REPLACE FUNCTION public.get_user_type(user_id UUID)
 RETURNS app_role
 LANGUAGE plpgsql
@@ -221,7 +241,7 @@ BEGIN
 END;
 $$;
 
--- 5.3 Atualizar função update_user_profile (remover campo tipo)
+-- 5.3 Atualizar função update_user_profile (remover campo tipo) - idempotente
 CREATE OR REPLACE FUNCTION public.update_user_profile(
   user_id UUID,
   nome_completo TEXT DEFAULT NULL,
@@ -283,10 +303,8 @@ END;
 $$;
 
 -- =====================================================
--- PARTE 6: ATUALIZAR TRIGGER DE NOVO USUÁRIO
+-- PARTE 6: TRIGGER DE NOVO USUÁRIO (idempotente + seguro)
 -- =====================================================
-
--- 6.1 Atualizar trigger para usar user_roles
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -296,30 +314,43 @@ AS $$
 DECLARE
   v_role app_role;
 BEGIN
-  -- Criar perfil
+  -- Criar perfil de forma idempotente
   INSERT INTO public.profiles (id, nome_completo, telefone)
   VALUES (
     NEW.id,
     NEW.raw_user_meta_data->>'nome',
     NEW.raw_user_meta_data->>'telefone'
-  );
-  
-  -- Determinar e inserir role
-  v_role := COALESCE((NEW.raw_user_meta_data->>'tipo')::app_role, 'investidor'::app_role);
-  
+  )
+  ON CONFLICT (id) DO NOTHING;
+
+  -- Determinar e inserir role (só se valor for válido)
+  IF NEW.raw_user_meta_data->>'tipo' IS NOT NULL
+     AND (NEW.raw_user_meta_data->>'tipo') = ANY(enum_range(NULL::public.app_role)::text[])
+  THEN
+    v_role := (NEW.raw_user_meta_data->>'tipo')::app_role;
+  ELSE
+    v_role := 'investidor'::app_role;
+  END IF;
+
   INSERT INTO public.user_roles (user_id, role)
   VALUES (NEW.id, v_role)
   ON CONFLICT (user_id, role) DO NOTHING;
-  
+
   RETURN NEW;
 END;
 $$;
 
+-- (Se tens um trigger que chama handle_new_user, não te esqueças de criar/atualizar o trigger binding:
+-- Exemplo:)
+-- DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+-- CREATE TRIGGER on_auth_user_created
+--   AFTER INSERT ON auth.users
+--   FOR EACH ROW
+--   EXECUTE FUNCTION public.handle_new_user();
+
 -- =====================================================
 -- PARTE 7: FUNÇÃO PARA DEFINIR ADMIN
 -- =====================================================
-
--- Função para promover usuário a admin (somente via SQL)
 CREATE OR REPLACE FUNCTION public.set_user_as_admin(target_user_id UUID)
 RETURNS void
 LANGUAGE plpgsql
@@ -334,12 +365,13 @@ END;
 $$;
 
 -- =====================================================
--- CONFIGURAÇÃO CONCLUÍDA!
+-- FINAL: INSTRUÇÕES RÁPIDAS
 -- =====================================================
--- Próximos passos no SQL Editor:
--- 
--- Para tornar seu usuário admin, execute:
--- SELECT public.set_user_as_admin('SEU-USER-ID-AQUI');
---
--- Para verificar suas roles:
--- SELECT * FROM public.user_roles WHERE user_id = auth.uid();
+-- 1) Executa todo este bloco no SQL Editor do Supabase.
+-- 2) Para promover um user a admin:
+--    SELECT public.set_user_as_admin('SEU-USER-ID-AQUI');
+-- 3) Para verificar as roles do user atual:
+--    SELECT * FROM public.user_roles WHERE user_id = auth.uid();
+-- 4) Se precisares auditar valores antigos de "tipo" que não casaram com o enum:
+--    SELECT id, tipo FROM public.profiles WHERE tipo IS NOT NULL
+--      AND tipo::text NOT = ANY(enum_range(NULL::public.app_role)::text[]);
