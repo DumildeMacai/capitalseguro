@@ -128,9 +128,9 @@ const InvestorDashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-        <Sidebar className="border-slate-700 bg-slate-800">
-          <SidebarHeader className="border-slate-700">
+      <div className="flex min-h-screen w-full bg-background">
+        <Sidebar className="border-border bg-card">
+          <SidebarHeader className="border-border">
             <div className="flex items-center gap-2 px-2">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center">
                 <Wallet className="h-5 w-5 text-white" />
@@ -203,7 +203,7 @@ const InvestorDashboard = () => {
             </SidebarMenu>
           </SidebarContent>
 
-          <SidebarFooter className="border-slate-700">
+          <SidebarFooter className="border-border">
             <Button
               variant="outline"
               className="w-full justify-start bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20"
@@ -217,7 +217,7 @@ const InvestorDashboard = () => {
 
         <main className="flex-1 overflow-auto p-6 md:p-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-8 bg-slate-800 border border-slate-700">
+            <TabsList className="mb-8 bg-card border border-border">
               <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
               <TabsTrigger value="meus-investimentos">Meus Investimentos</TabsTrigger>
               <TabsTrigger value="explorar">Explorar</TabsTrigger>
@@ -232,12 +232,12 @@ const InvestorDashboard = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0 }}
-                  className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700 hover:border-emerald-500/50 transition-all"
+                  className="bg-card rounded-xl p-6 border border-border hover:border-emerald-500/20 transition-all"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <p className="text-slate-400 text-sm mb-1">Total Investido</p>
-                      <p className="text-4xl font-bold text-white">Kz 100.000</p>
+                      <p className="text-4xl font-bold text-foreground">Kz 100.000</p>
                     </div>
                     <div className="w-12 h-12 rounded-lg bg-emerald-500/20 flex items-center justify-center">
                       <Wallet className="text-emerald-400" size={24} />
@@ -250,12 +250,12 @@ const InvestorDashboard = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700 hover:border-blue-500/50 transition-all"
+                  className="bg-card rounded-xl p-6 border border-border hover:border-blue-500/20 transition-all"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <p className="text-slate-400 text-sm mb-1">Retorno Acumulado</p>
-                      <p className="text-4xl font-bold text-white">Kz 12.500</p>
+                      <p className="text-4xl font-bold text-foreground">Kz 12.500</p>
                     </div>
                     <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
                       <TrendingUp className="text-blue-400" size={24} />
@@ -268,12 +268,12 @@ const InvestorDashboard = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700 hover:border-purple-500/50 transition-all"
+                  className="bg-card rounded-xl p-6 border border-border hover:border-purple-500/20 transition-all"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <p className="text-slate-400 text-sm mb-1">Oportunidades</p>
-                      <p className="text-4xl font-bold text-white">24</p>
+                      <p className="text-4xl font-bold text-foreground">24</p>
                     </div>
                     <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
                       <Search className="text-purple-400" size={24} />
@@ -286,28 +286,28 @@ const InvestorDashboard = () => {
               {/* Charts and Recent Investments */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Recent Investments */}
-                <div className="lg:col-span-2 bg-slate-800 rounded-xl border border-slate-700 overflow-hidden">
-                  <div className="p-6 border-b border-slate-700">
-                    <h3 className="text-xl font-bold text-white">Investimentos Recentes</h3>
-                    <p className="text-slate-400 text-sm mt-1">Seus últimos investimentos realizados</p>
+                <div className="lg:col-span-2 bg-card rounded-xl border border-border overflow-hidden">
+                  <div className="p-6 border-b border-border">
+                    <h3 className="text-xl font-bold text-foreground">Investimentos Recentes</h3>
+                    <p className="text-muted-foreground text-sm mt-1">Seus últimos investimentos realizados</p>
                   </div>
                   <div className="overflow-x-auto">
                     <Table>
                       <TableHeader>
-                        <TableRow className="border-slate-700 hover:bg-transparent">
-                          <TableHead className="text-slate-300">Nome</TableHead>
-                          <TableHead className="text-slate-300">Tipo</TableHead>
-                          <TableHead className="text-slate-300">Valor</TableHead>
-                          <TableHead className="text-slate-300">Status</TableHead>
-                          <TableHead className="text-slate-300">Retorno</TableHead>
+                        <TableRow className="border-border hover:bg-transparent">
+                          <TableHead className="text-muted-foreground">Nome</TableHead>
+                          <TableHead className="text-muted-foreground">Tipo</TableHead>
+                          <TableHead className="text-muted-foreground">Valor</TableHead>
+                          <TableHead className="text-muted-foreground">Status</TableHead>
+                          <TableHead className="text-muted-foreground">Retorno</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {recentInvestments.map((investment) => (
-                          <TableRow key={investment.id} className="border-slate-700 hover:bg-slate-700/50">
-                            <TableCell className="font-medium text-white">{investment.name}</TableCell>
-                            <TableCell className="text-slate-300">{investment.type}</TableCell>
-                            <TableCell className="text-slate-300">
+                          <TableRow key={investment.id} className="border-border hover:bg-muted/50">
+                            <TableCell className="font-medium text-foreground">{investment.name}</TableCell>
+                            <TableCell className="text-muted-foreground">{investment.type}</TableCell>
+                            <TableCell className="text-muted-foreground">
                               Kz {investment.value.toLocaleString("pt-PT")}
                             </TableCell>
                             <TableCell>
@@ -332,15 +332,15 @@ const InvestorDashboard = () => {
                 </div>
 
                 {/* Portfolio Distribution */}
-                <div className="bg-slate-800 rounded-xl border border-slate-700 p-6">
-                  <h3 className="text-xl font-bold text-white mb-4">Distribuição</h3>
+                <div className="bg-card rounded-xl border border-border p-6">
+                  <h3 className="text-xl font-bold text-foreground mb-4">Distribuição</h3>
                   <InvestorPortfolioChart data={portfolioData} />
                 </div>
               </div>
 
               {/* Featured Investments */}
               <div>
-                <h3 className="text-2xl font-bold text-white mb-6">Investimentos em Destaque</h3>
+                <h3 className="text-2xl font-bold text-foreground mb-6">Investimentos em Destaque</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {featuredInvestments.map((investment) => (
                     <InvestmentCard key={investment.id} {...investment} />
