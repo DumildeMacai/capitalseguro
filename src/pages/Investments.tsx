@@ -51,7 +51,7 @@ const Investments = () => {
           remaining: row.remaining || 0,
           totalFunding: row.total_funding || 0,
           image: row.imagem || "",
-          featured: false,
+          featured: !!row.featured,
           risk: "Médio",
         }))
 

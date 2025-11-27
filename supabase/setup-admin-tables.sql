@@ -140,6 +140,12 @@ FROM public.profiles p;
 CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON public.user_roles(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_roles_role ON public.user_roles(role);
 
+-- Ensure investimentos has a 'featured' flag for highlighting
+ALTER TABLE public.investimentos
+  ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT false;
+
+CREATE INDEX IF NOT EXISTS idx_investimentos_featured ON public.investimentos(featured);
+
 -- =====================================================
 -- PART 6: Create notifications table
 -- =====================================================

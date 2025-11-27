@@ -44,7 +44,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, Edit, Trash2, MoreVertical, Search, Plus, Upload, X } from "lucide-react";
+import { Eye, Edit, Trash2, MoreVertical, Search, Plus, Upload, X, Star } from "lucide-react";
 
 interface Investment {
   id: string;
@@ -74,6 +74,8 @@ const AdminInvestments = () => {
     descricao: "",
       imagem: "",
       imagemFile: null as File | null,
+    ativo: true,
+    featured: false,
   });
   const { toast } = useToast();
 
@@ -119,6 +121,8 @@ const AdminInvestments = () => {
       descricao: "",
         imagem: "",
         imagemFile: null,
+      ativo: true,
+      featured: false,
     });
     setOpenDialog(true);
   };
@@ -134,6 +138,8 @@ const AdminInvestments = () => {
       descricao: investment.descricao || "",
         imagem: investment.imagem || "",
         imagemFile: null,
+      ativo: investment.ativo ?? true,
+      featured: (investment as any).featured ?? false,
     });
     setOpenDialog(true);
   };
@@ -185,7 +191,8 @@ const AdminInvestments = () => {
         prazo_minimo: formData.prazo_minimo ? parseInt(formData.prazo_minimo) : null,
         descricao: formData.descricao || null,
           imagem: imagemUrl || null,
-        ativo: true,
+        ativo: !!formData.ativo,
+        featured: !!formData.featured,
       };
 
       if (selectedInvestment) {
@@ -309,6 +316,7 @@ const AdminInvestments = () => {
                   <TableHead>Retorno</TableHead>
                   <TableHead>Prazo</TableHead>
                   <TableHead>Status</TableHead>
+                      <TableHead>Destaque</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -341,6 +349,19 @@ const AdminInvestments = () => {
                         >
                           {investment.ativo ? "Ativo" : "Inativo"}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {investment.imagem ? (
+                          <span className="inline-flex items-center gap-2">
+                            {investment.imagem && (investment as any).featured ? (
+                              <Star className="text-yellow-400" />
+                            ) : (
+                              <span className="text-muted-foreground">—</span>
+                            )}
+                          </span>
+                        ) : (
+                          (investment as any).featured ? <Star className="text-yellow-400" /> : <span className="text-muted-foreground">—</span>
+                        )}
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -448,6 +469,25 @@ const AdminInvestments = () => {
                 onChange={(e) => setFormData({ ...formData, descricao: e.target.value })}
                 placeholder="Descrição do investimento..."
               />
+            </div>
+            <div className="flex items-center gap-4">
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={!!formData.ativo}
+                  onChange={(e) => setFormData({ ...formData, ativo: e.target.checked })}
+                />
+                <span className="text-sm">Visível (Ativo)</span>
+              </label>
+
+              <label className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={!!formData.featured}
+                  onChange={(e) => setFormData({ ...formData, featured: e.target.checked })}
+                />
+                <span className="text-sm">Em destaque</span>
+              </label>
             </div>
               <div>
                 <label className="text-sm font-medium">Imagem</label>
