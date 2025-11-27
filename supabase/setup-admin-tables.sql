@@ -140,9 +140,17 @@ FROM public.profiles p;
 CREATE INDEX IF NOT EXISTS idx_user_roles_user_id ON public.user_roles(user_id);
 CREATE INDEX IF NOT EXISTS idx_user_roles_role ON public.user_roles(role);
 
--- Ensure investimentos has a 'featured' flag for highlighting
--- Add an explicit placement enum for investments instead of a boolean 'featured'
-CREATE TYPE IF NOT EXISTS public.colocacao_investimento AS ENUM ('oportunidades', 'destaque', 'pagina_inicial');
+-- =====================================================
+-- PART 5: Create ENUM for colocação dos investimentos
+-- =====================================================
+-- Corrigir criação do ENUM (Postgres não tem IF NOT EXISTS para TYPE)
+DROP TYPE IF EXISTS public.colocacao_investimento CASCADE;
+
+CREATE TYPE public.colocacao_investimento AS ENUM (
+  'oportunidades',
+  'destaque',
+  'pagina_inicial'
+);
 
 -- Add colocacao column (placement) and keep 'featured' for backward compatibility
 ALTER TABLE public.investimentos
