@@ -197,14 +197,17 @@ export const handleAdminAccess = async (
       password: adminPassword,
       options: {
         data: {
-          tipo: "admin",
           nome: "Administrador",
         },
       },
     })
     
     if (signUpError) {
-      if (signUpError.message.includes("already registered") || signUpError.message.includes("User already exists")) {
+      if (
+        signUpError.message.includes("already registered") || 
+        signUpError.message.includes("User already exists") ||
+        signUpError.status === 422
+      ) {
         console.log("[Admin Access] User exists, attempting sign-in...")
         
         const { data: signInData, error: signInError } = await supabase.auth.signInWithPassword({
@@ -245,20 +248,14 @@ export const handleAdminAccess = async (
       console.warn("[Admin Access] Profile upsert warning:", profileError.message)
     }
     
-    // Step 2.5: Create admin role in user_roles table
-    console.log("[Admin Access] Creating admin role in user_roles...")
-    const { error: roleError } = await supabase
-      .from("user_roles")
-      .upsert(
-        {
-          user_id: user.id,
-          role: "admin",
-        },
-        { onConflict: "user_id" }
-      )
+    // Step 2.5: Create admin role using RPC (bypasses RLS)
+    console.log("[Admin Access] Creating admin role via RPC...")
+    const { error: roleError } = await supabase.rpc("set_user_as_admin", {
+      target_user_id: user.id,
+    })
     
     if (roleError) {
-      console.warn("[Admin Access] Role upsert warning:", roleError.message)
+      console.warn("[Admin Access] Role creation warning:", roleError.message)
     }
     
     // Step 3: Verify and redirect
