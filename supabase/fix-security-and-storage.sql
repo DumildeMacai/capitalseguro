@@ -73,6 +73,13 @@ CREATE POLICY "Admins podem deletar roles"
 -- PARTE 2: ATUALIZAR TABELA PROFILES
 -- =====================================================
 
+-- 2.0 Dropar TODAS as políticas que dependem de 'tipo' ANTES de remover a coluna
+DROP POLICY IF EXISTS "Usuários podem ver seu próprio perfil" ON public.profiles;
+DROP POLICY IF EXISTS "Usuários podem atualizar seu próprio perfil" ON public.profiles;
+DROP POLICY IF EXISTS "Admins podem ver todos os perfis" ON public.profiles;
+DROP POLICY IF EXISTS "Admins podem atualizar todos os perfis" ON public.profiles;
+DROP POLICY IF EXISTS "Admins podem visualizar todos os documentos" ON storage.objects;
+
 -- 2.1 Verificar se coluna 'tipo' existe em profiles e remover com segurança
 -- Primeiro verificamos a estrutura da tabela e copiamos dados se necessário
 
@@ -91,7 +98,7 @@ BEGIN
     ON CONFLICT (user_id, role) DO NOTHING;
     
     -- Agora remover a coluna
-    ALTER TABLE public.profiles DROP COLUMN tipo;
+    ALTER TABLE public.profiles DROP COLUMN tipo CASCADE;
   END IF;
 END $$;
 
@@ -99,11 +106,7 @@ END $$;
 -- PARTE 3: ATUALIZAR POLÍTICAS RLS DE PROFILES
 -- =====================================================
 
--- 3.1 Dropar políticas antigas que causam recursão
-DROP POLICY IF EXISTS "Usuários podem ver seu próprio perfil" ON public.profiles;
-DROP POLICY IF EXISTS "Usuários podem atualizar seu próprio perfil" ON public.profiles;
-DROP POLICY IF EXISTS "Admins podem ver todos os perfis" ON public.profiles;
-DROP POLICY IF EXISTS "Admins podem atualizar todos os perfis" ON public.profiles;
+-- 3.1 Políticas já foram dropadas na Parte 2 (antes de remover coluna tipo)
 
 -- 3.2 Criar novas políticas sem recursão
 CREATE POLICY "Usuários podem ver seu próprio perfil"
@@ -126,10 +129,12 @@ CREATE POLICY "Admins podem atualizar todos os perfis"
 -- PARTE 4: CORRIGIR POLÍTICAS DE STORAGE
 -- =====================================================
 
--- 4.1 Dropar políticas antigas que causam recursão infinita
+-- 4.1 Dropar todas as políticas antigas de storage (foram dropadas parcialmente na Parte 2)
 DROP POLICY IF EXISTS "Usuários podem visualizar seus próprios documentos" ON storage.objects;
 DROP POLICY IF EXISTS "Usuários podem fazer upload de seus documentos" ON storage.objects;
-DROP POLICY IF EXISTS "Admins podem visualizar todos os documentos" ON storage.objects;
+DROP POLICY IF EXISTS "Usuários podem atualizar seus próprios documentos" ON storage.objects;
+DROP POLICY IF EXISTS "Usuários podem deletar seus próprios documentos" ON storage.objects;
+DROP POLICY IF EXISTS "Admins podem gerenciar todos os documentos" ON storage.objects;
 
 -- 4.2 Criar políticas de storage SEM RECURSÃO
 CREATE POLICY "Usuários podem visualizar seus próprios documentos"
