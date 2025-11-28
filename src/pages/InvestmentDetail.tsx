@@ -53,7 +53,7 @@ const InvestmentDetail = () => {
       description:
         "Investimento em edifício comercial premium na zona sul da cidade. Alto potencial de valorização e renda por aluguel.",
       category: "Imóveis",
-      icon: <Building className="text-purple-600" />,
+      icon: <Building className="text-primary" />,
       returnRate: 100,
       minInvestment: 50000,
       remaining: 2500000,
@@ -113,7 +113,7 @@ const InvestmentDetail = () => {
       title: "Condomínio Residencial Miramar",
       description: "Investimento em desenvolvimento de condomínio residencial de luxo com 50 apartamentos.",
       category: "Imóveis",
-      icon: <Building className="text-purple-600" />,
+      icon: <Building className="text-primary" />,
       returnRate: 100,
       minInvestment: 75000,
       remaining: 4000000,

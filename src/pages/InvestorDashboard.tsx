@@ -133,7 +133,7 @@ const InvestorDashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-gray-100 dark:bg-gray-900">
+      <div className="flex min-h-screen w-full bg-background">
         <Sidebar className="border-border bg-card">
           <SidebarHeader className="border-border">
             <div className="flex items-center gap-2 px-2">

@@ -27,9 +27,9 @@ const StatsSection = () => {
   ]
 
   return (
-    <section className="py-20 bg-gradient-to-b from-slate-900 to-slate-800 relative overflow-hidden">
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-emerald-500/5 rounded-full blur-3xl"></div>
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-500/5 rounded-full blur-3xl"></div>
+    <section className="py-20 bg-background relative overflow-hidden">
+      <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
+      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -39,8 +39,8 @@ const StatsSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Números que Falam</h2>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">Números que Falam</h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Confie em dados reais. A Capital Seguro tem um histórico comprovado de excelência e transparência.
           </p>
         </motion.div>
@@ -55,11 +55,11 @@ const StatsSection = () => {
               viewport={{ once: true }}
               className="relative group"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 rounded-xl blur group-hover:blur-md group-hover:from-emerald-500/20 transition-all duration-300"></div>
-              <div className="relative bg-slate-800/80 backdrop-blur rounded-xl p-8 border border-slate-700 group-hover:border-emerald-500/50 transition-all">
-                <h3 className="text-4xl md:text-5xl font-bold mb-2 text-emerald-400">{stat.value}</h3>
-                <p className="text-lg font-semibold text-white mb-2">{stat.label}</p>
-                <p className="text-slate-400">{stat.description}</p>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl blur group-hover:blur-md group-hover:from-primary/20 transition-all duration-300"></div>
+              <div className="relative bg-card/80 backdrop-blur rounded-xl p-8 border border-border group-hover:border-primary/50 transition-all">
+                <h3 className="text-4xl md:text-5xl font-bold mb-2 text-primary">{stat.value}</h3>
+                <p className="text-lg font-semibold text-foreground mb-2">{stat.label}</p>
+                <p className="text-muted-foreground">{stat.description}</p>
               </div>
             </motion.div>
           ))}

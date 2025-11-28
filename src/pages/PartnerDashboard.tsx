@@ -71,11 +71,11 @@ const PartnerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-800 shadow-sm py-4">
+      <header className="bg-card shadow-sm py-4 border-b border-border">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200">Painel do Parceiro</h1>
+          <h1 className="text-xl font-bold text-foreground">Painel do Parceiro</h1>
           <Button variant="outline" size="sm" onClick={handleLogout} className="flex items-center">
             <LogOut className="mr-2 h-4 w-4" />
             Sair
@@ -116,8 +116,8 @@ const PartnerDashboard = () => {
                       <p className="text-sm font-medium text-muted-foreground">Total de Oportunidades</p>
                       <p className="text-2xl font-bold">{mockData.investmentsSummary.totalOpportunities}</p>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
-                      <Building className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                    <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Building className="h-6 w-6 text-primary" />
                     </div>
                   </div>
                 </CardContent>
@@ -192,9 +192,9 @@ const PartnerDashboard = () => {
                           <p className="text-sm text-muted-foreground">{opportunity.investors} investidores</p>
                         </div>
                       </div>
-                      <div className="w-full bg-gray-200 dark:bg-gray-700 h-2 rounded-full">
+                      <div className="w-full bg-muted h-2 rounded-full">
                         <div 
-                          className="bg-purple-600 h-2 rounded-full" 
+                          className="bg-primary h-2 rounded-full" 
                           style={{ width: `${opportunity.progress}%` }}
                         ></div>
                       </div>
@@ -225,7 +225,7 @@ const PartnerDashboard = () => {
                   {mockData.notifications.map(notification => (
                     <div key={notification.id} className="flex gap-4 border-b pb-4 last:border-b-0 last:pb-0">
                       <div className="h-10 w-10 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center shrink-0">
-                        <MessageCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        <MessageCircle className="h-5 w-5 text-primary" />
                       </div>
                       <div>
                         <h4 className="font-medium">{notification.title}</h4>

@@ -45,7 +45,7 @@ const Investments = () => {
           title: row.titulo || "",
           description: row.descricao || "",
           category: row.categoria || "Outros",
-          icon: <Building className="text-purple-600" />,
+          icon: <Building className="text-primary" />,
           returnRate: row.retorno_estimado || 0,
           minInvestment: row.valor_minimo || 0,
           remaining: row.remaining || 0,

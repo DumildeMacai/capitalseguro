@@ -108,9 +108,9 @@ const steps = [
 
 const HowItWorksSection = () => {
   return (
-    <section className="py-20 bg-slate-900 relative overflow-hidden">
-      <div className="absolute -top-40 -right-40 w-80 h-80 bg-emerald-500/5 rounded-full blur-3xl"></div>
-      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-blue-500/5 rounded-full blur-3xl"></div>
+    <section className="py-20 bg-background relative overflow-hidden">
+      <div className="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
+      <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl"></div>
 
       <div className="container mx-auto px-4 relative z-10">
         <motion.div
@@ -120,8 +120,8 @@ const HowItWorksSection = () => {
           viewport={{ once: true }}
           className="text-center mb-16"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-white">Como Funciona</h2>
-          <p className="text-slate-400 text-lg max-w-2xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-6 text-foreground">Como Funciona</h2>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Quatro passos simples para começar a construir riqueza passiva com investimentos imobiliários seguros.
           </p>
         </motion.div>
@@ -136,22 +136,22 @@ const HowItWorksSection = () => {
               viewport={{ once: true }}
               className="relative group"
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-              <div className="relative bg-slate-800 rounded-xl p-8 border border-slate-700 group-hover:border-emerald-500/50 transition-all">
-                <div className="absolute -top-4 -left-4 text-5xl font-extrabold text-slate-700 group-hover:text-slate-600 transition-colors">
+              <div className="relative bg-card rounded-xl p-8 border border-border group-hover:border-primary/50 transition-all">
+                <div className="absolute -top-4 -left-4 text-5xl font-extrabold text-muted/50 group-hover:text-muted transition-colors">
                   {step.number}
                 </div>
 
-                <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center mb-5 text-white">
+                <div className="h-12 w-12 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center mb-5 text-white">
                   {step.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-white">{step.title}</h3>
-                <p className="text-slate-400">{step.description}</p>
+                <h3 className="text-xl font-semibold mb-3 text-foreground">{step.title}</h3>
+                <p className="text-muted-foreground">{step.description}</p>
               </div>
 
               {index < steps.length - 1 && (
-                <div className="hidden lg:block absolute top-1/2 left-full w-8 h-0.5 bg-gradient-to-r from-emerald-500/50 to-transparent"></div>
+                <div className="hidden lg:block absolute top-1/2 left-full w-8 h-0.5 bg-gradient-to-r from-primary/50 to-transparent"></div>
               )}
             </motion.div>
           ))}
@@ -167,7 +167,7 @@ const HowItWorksSection = () => {
           <Button
             asChild
             size="lg"
-            className="bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold"
+            className="bg-gradient-primary hover:opacity-90 text-white font-semibold"
           >
             <Link to="/register">Criar Conta Grátis</Link>
           </Button>
