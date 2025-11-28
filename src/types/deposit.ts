@@ -8,6 +8,7 @@ export interface Deposit {
     iban: string;
   };
   multicaixaNumber?: string;
+  receiptUrl?: string;
   status: 'pending' | 'approved' | 'rejected';
   createdAt: string;
   approvedAt?: string;

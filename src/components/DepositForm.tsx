@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useToast } from "@/hooks/use-toast"
-import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react"
+import { AlertCircle, CheckCircle2, Loader2, Upload } from "lucide-react"
 
 export const DepositForm = () => {
   const navigate = useNavigate()
@@ -17,13 +17,37 @@ export const DepositForm = () => {
   const [loading, setLoading] = useState(false)
   const [amount, setAmount] = useState("")
   const [paymentMethod, setPaymentMethod] = useState<"bank_transfer" | "multicaixa">("bank_transfer")
+  const [receipt, setReceipt] = useState<string | null>(null)
+  const [receiptFileName, setReceiptFileName] = useState("")
   const [submitted, setSubmitted] = useState(false)
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast({ title: "Erro", description: "Arquivo deve ser menor que 5MB", variant: "destructive" })
+      return
+    }
+
+    setReceiptFileName(file.name)
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      setReceipt(event.target?.result as string)
+    }
+    reader.readAsDataURL(file)
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!amount || parseFloat(amount) <= 0) {
       toast({ title: "Erro", description: "Valor deve ser maior que 0", variant: "destructive" })
+      return
+    }
+
+    if (!receipt) {
+      toast({ title: "Erro", description: "Comprovante de transferência é obrigatório", variant: "destructive" })
       return
     }
 
@@ -39,13 +63,12 @@ export const DepositForm = () => {
         userId: user.id,
         amount: parseFloat(amount),
         paymentMethod,
+        receiptUrl: receipt,
         status: "pending",
         createdAt: new Date().toISOString(),
       }
       deposits.push(newDeposit)
       localStorage.setItem("deposits", JSON.stringify(deposits))
-      
-      // TODO: Criar tabela "deposits" no Supabase e migrar dados
 
       setSubmitted(true)
       toast({ title: "Sucesso", description: "Depósito solicitado! Aguardando aprovação do admin." })
@@ -154,6 +177,32 @@ export const DepositForm = () => {
             </RadioGroup>
           </div>
 
+          {/* Upload Comprovante */}
+          <div className="space-y-2">
+            <Label htmlFor="receipt">Comprovante de Transferência *</Label>
+            <div className="relative">
+              <Input
+                id="receipt"
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                disabled={loading}
+                className="cursor-pointer"
+                data-testid="input-receipt-upload"
+              />
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <Upload className="h-4 w-4 text-muted-foreground" />
+              </div>
+            </div>
+            {receipt && (
+              <div className="flex items-center gap-2 p-2 bg-emerald-50 dark:bg-emerald-950 border border-emerald-200 dark:border-emerald-800 rounded text-sm text-emerald-900 dark:text-emerald-100">
+                <CheckCircle2 className="h-4 w-4" />
+                <span>{receiptFileName}</span>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">Máximo 5MB - Formatos: PNG, JPG, JPEG</p>
+          </div>
+
           {/* Aviso Importante */}
           <div className="flex gap-3 p-4 bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800 rounded-lg">
             <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
@@ -161,6 +210,7 @@ export const DepositForm = () => {
               <p className="font-semibold mb-1">Instruções Importantes:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Complete a transferência conforme os dados acima</li>
+                <li>Faça upload da foto do comprovante</li>
                 <li>O admin aprovará seu depósito após verificação</li>
                 <li>Seu saldo será atualizado imediatamente após aprovação</li>
               </ul>
@@ -171,7 +221,7 @@ export const DepositForm = () => {
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              disabled={loading || !amount}
+              disabled={loading || !amount || !receipt}
               className="flex-1"
               data-testid="button-submit-deposit"
             >

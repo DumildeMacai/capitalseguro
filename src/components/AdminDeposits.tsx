@@ -7,13 +7,21 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle2, XCircle, Loader2, Clock } from "lucide-react"
+import { CheckCircle2, XCircle, Loader2, Clock, Eye } from "lucide-react"
 import { Deposit } from "@/types/deposit"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 
 export const AdminDeposits = () => {
   const [deposits, setDeposits] = useState<Deposit[]>([])
   const [loading, setLoading] = useState(true)
   const [approvingId, setApprovingId] = useState<string | null>(null)
+  const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
@@ -138,6 +146,7 @@ export const AdminDeposits = () => {
                 <TableHead className="text-right">Valor</TableHead>
                 <TableHead>Método</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Comprovante</TableHead>
                 <TableHead>Data</TableHead>
                 <TableHead className="text-right">Ação</TableHead>
               </TableRow>
@@ -179,6 +188,20 @@ export const AdminDeposits = () => {
                         </Badge>
                       )}
                     </TableCell>
+                    <TableCell>
+                      {deposit.receiptUrl ? (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => setSelectedReceipt(deposit.receiptUrl || null)}
+                          data-testid={`button-view-receipt-${deposit.id}`}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
+                      )}
+                    </TableCell>
                     <TableCell className="text-sm text-muted-foreground">
                       {new Date(deposit.createdAt).toLocaleDateString("pt-PT")}
                     </TableCell>
@@ -216,6 +239,25 @@ export const AdminDeposits = () => {
             </TableBody>
           </Table>
         </div>
+
+        {/* Receipt Modal */}
+        <Dialog open={!!selectedReceipt} onOpenChange={() => setSelectedReceipt(null)}>
+          <DialogContent className="max-w-2xl">
+            <DialogHeader>
+              <DialogTitle>Comprovante de Transferência</DialogTitle>
+              <DialogDescription>Foto do comprovante enviado pelo investidor</DialogDescription>
+            </DialogHeader>
+            {selectedReceipt && (
+              <div className="flex justify-center">
+                <img 
+                  src={selectedReceipt} 
+                  alt="Comprovante" 
+                  className="max-w-full max-h-96 rounded-lg border border-border"
+                />
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </CardContent>
     </Card>
   )
