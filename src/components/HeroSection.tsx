@@ -28,8 +28,11 @@ const HeroSection = () => {
               <br />
               Construa o Seu Legado Financeiro
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg">
+            <p className="text-lg md:text-xl text-muted-foreground mb-4 max-w-lg">
               Rendimento passivo que transforma sonhos em património real. Retornos que criam renda. Renda que constrói património.
+            </p>
+            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg">
+              Invista em oportunidades de alto rendimento com a Capital Seguro. Obtenha rendimento passivo com retornos anuais de 100% e transforme o seu futuro financeiro.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
