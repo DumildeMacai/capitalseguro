@@ -172,6 +172,18 @@ const InvestorDashboard = () => {
 
               <SidebarMenuItem>
                 <SidebarMenuButton
+                  tooltip="Depositar"
+                  onClick={() => navigate("/depositar")}
+                  className="data-[active=false]:text-muted-foreground hover:text-primary"
+                  data-testid="button-sidebar-deposit"
+                >
+                  <Wallet size={20} />
+                  <span>Depositar</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+
+              <SidebarMenuItem>
+                <SidebarMenuButton
                   tooltip="Explorar"
                   isActive={activeTab === "explorar"}
                   onClick={() => setActiveTab("explorar")}
