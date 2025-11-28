@@ -111,7 +111,8 @@ const InvestmentCard = ({
 
         <Button
           asChild
-          className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold"
+          variant="outline"
+          className="w-full"
         >
           <Link to={`/investments/${id}`}>Investir Agora</Link>
         </Button>
