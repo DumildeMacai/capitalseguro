@@ -66,10 +66,10 @@ const AdminInvestors = () => {
   const fetchInvestors = async () => {
     try {
       setLoading(true);
+      // Fetch all profiles - the actual database doesn't have 'tipo' column
       const { data, error } = await supabase
         .from("profiles")
         .select("id, nome_completo, email, telefone, bio, data_criacao")
-        .eq("tipo", "investidor")
         .order("data_criacao", { ascending: false });
 
       if (error) throw error;
@@ -117,7 +117,7 @@ const AdminInvestors = () => {
 
       toast({
         title: "Sucesso",
-        description: "Investidor atualizado com sucesso.",
+        description: "Usuário atualizado com sucesso.",
       });
 
       setOpenDialog(false);
@@ -126,7 +126,7 @@ const AdminInvestors = () => {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Não foi possível atualizar investidor.",
+        description: "Não foi possível atualizar usuário.",
       });
     }
   };
@@ -140,7 +140,7 @@ const AdminInvestors = () => {
     return (
       <Card>
         <CardContent className="p-8">
-          <div className="text-center text-muted-foreground">Carregando investidores...</div>
+          <div className="text-center text-muted-foreground">Carregando usuários...</div>
         </CardContent>
       </Card>
     );
@@ -152,9 +152,9 @@ const AdminInvestors = () => {
         <CardHeader>
           <div className="flex justify-between items-center">
             <div>
-              <CardTitle>Investidores Cadastrados</CardTitle>
+              <CardTitle>Usuários Cadastrados</CardTitle>
               <CardDescription>
-                Gerenciamento de todos os investidores da plataforma.
+                Gerenciamento de todos os usuários da plataforma.
               </CardDescription>
             </div>
           </div>
@@ -217,7 +217,7 @@ const AdminInvestors = () => {
                 ) : (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                      Nenhum investidor encontrado
+                      Nenhum usuário encontrado
                     </TableCell>
                   </TableRow>
                 )}
@@ -230,9 +230,9 @@ const AdminInvestors = () => {
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Visualizar/Editar Investidor</DialogTitle>
+            <DialogTitle>Visualizar/Editar Usuário</DialogTitle>
             <DialogDescription>
-              Atualize os dados do investidor abaixo.
+              Atualize os dados do usuário abaixo.
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4">
@@ -241,7 +241,7 @@ const AdminInvestors = () => {
               <Input
                 value={formData.nome_completo}
                 onChange={(e) => setFormData({ ...formData, nome_completo: e.target.value })}
-                placeholder="Nome do investidor"
+                placeholder="Nome do usuário"
               />
             </div>
             <div>
