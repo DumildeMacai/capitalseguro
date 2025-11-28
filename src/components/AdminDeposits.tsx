@@ -48,7 +48,7 @@ export const AdminDeposits = () => {
       const deposit = deposits.find((d) => d.id === depositId)
       if (!deposit) throw new Error("Depósito não encontrado")
 
-      // Atualizar localStorage
+      // Atualizar depósitos
       const updatedDeposits = deposits.map((d: any) =>
         d.id === depositId
           ? { ...d, status: "approved", approvedAt: new Date().toISOString() }
@@ -56,11 +56,33 @@ export const AdminDeposits = () => {
       )
       localStorage.setItem("deposits", JSON.stringify(updatedDeposits))
 
+      // Atualizar saldo do investidor
+      const userBalances = JSON.parse(localStorage.getItem("userBalances") || "{}")
+      const currentBalance = userBalances[deposit.userId] || 0
+      userBalances[deposit.userId] = currentBalance + deposit.amount
+      localStorage.setItem("userBalances", JSON.stringify(userBalances))
+
+      // Criar histórico de transação
+      const transactions = JSON.parse(localStorage.getItem("transactions") || "[]")
+      transactions.push({
+        id: `tx-${Date.now()}`,
+        userId: deposit.userId,
+        type: "deposit",
+        amount: deposit.amount,
+        status: "approved",
+        description: `Depósito aprovado - ${deposit.paymentMethod === 'bank_transfer' ? 'Banco BAI' : 'Multicaixa'}`,
+        createdAt: deposit.createdAt,
+        approvedAt: new Date().toISOString(),
+        relatedDepositId: depositId
+      })
+      localStorage.setItem("transactions", JSON.stringify(transactions))
+
       toast({ title: "Sucesso", description: `Depósito de Kz ${deposit.amount} aprovado! Saldo atualizado.` })
       loadDeposits()
       
       // Disparar evento customizado para atualizar dashboard
       window.dispatchEvent(new Event("depositApproved"))
+      window.dispatchEvent(new Event("balanceUpdated"))
     } catch (error: any) {
       console.error("Erro ao aprovar depósito:", error)
       toast({ title: "Erro", description: error.message, variant: "destructive" })

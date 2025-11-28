@@ -24,3 +24,15 @@ export interface DepositRequest {
   };
   multicaixaNumber?: string;
 }
+
+export interface Transaction {
+  id: string;
+  userId: string;
+  type: 'deposit' | 'withdrawal' | 'investment' | 'return';
+  amount: number;
+  status: 'pending' | 'approved' | 'rejected' | 'completed';
+  description: string;
+  createdAt: string;
+  approvedAt?: string;
+  relatedDepositId?: string;
+}

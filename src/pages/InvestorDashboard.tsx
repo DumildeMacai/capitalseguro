@@ -28,6 +28,7 @@ import NotificationsSection from "@/components/NotificationsSection"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
+import { TransactionHistory } from "@/components/TransactionHistory"
 
 const InvestorDashboard = () => {
   const navigate = useNavigate()
@@ -39,6 +40,7 @@ const InvestorDashboard = () => {
   const [profile, setProfile] = useState<any>(null)
   const [userId, setUserId] = useState<string>("")
   const [unreadNotifications, setUnreadNotifications] = useState(3)
+  const [saldo, setSaldo] = useState(0)
 
   // load profile on mount
   useEffect(() => {
@@ -57,6 +59,24 @@ const InvestorDashboard = () => {
       }
     })()
   }, [])
+
+  // Load saldo e listen para atualizações
+  useEffect(() => {
+    const loadSaldo = () => {
+      const userBalances = JSON.parse(localStorage.getItem("userBalances") || "{}")
+      setSaldo(userBalances[userId] || 0)
+    }
+    
+    loadSaldo()
+    
+    window.addEventListener("balanceUpdated", loadSaldo)
+    window.addEventListener("depositApproved", loadSaldo)
+    
+    return () => {
+      window.removeEventListener("balanceUpdated", loadSaldo)
+      window.removeEventListener("depositApproved", loadSaldo)
+    }
+  }, [userId])
 
   const handleLogout = async () => {
     await supabase.auth.signOut()
@@ -261,6 +281,7 @@ const InvestorDashboard = () => {
             <TabsList className="mb-8 bg-card border border-border">
               <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
               <TabsTrigger value="meus-investimentos">Meus Investimentos</TabsTrigger>
+              <TabsTrigger value="historico">Histórico</TabsTrigger>
               <TabsTrigger value="explorar">Explorar</TabsTrigger>
               <TabsTrigger value="perfil">Perfil</TabsTrigger>
               <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
@@ -310,18 +331,18 @@ const InvestorDashboard = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
-                  className="bg-card rounded-xl p-6 border border-border hover:border-primary/20 transition-all"
+                  className="bg-card rounded-xl p-6 border border-border hover:border-accent/20 transition-all"
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <p className="text-muted-foreground text-sm mb-1">Oportunidades</p>
-                      <p className="text-4xl font-bold text-foreground">24</p>
+                      <p className="text-muted-foreground text-sm mb-1">Saldo Disponível</p>
+                      <p className="text-4xl font-bold text-foreground">Kz {saldo.toFixed(2)}</p>
                     </div>
-                    <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
-                      <Search className="text-primary" size={24} />
+                    <div className="w-12 h-12 rounded-lg bg-success/20 flex items-center justify-center">
+                      <Wallet className="text-success" size={24} />
                     </div>
                   </div>
-                  <p className="text-primary text-sm font-semibold">6 novos esta semana</p>
+                  <p className="text-success text-sm font-semibold">Pronto para investir</p>
                 </motion.div>
               </div>
 
@@ -487,6 +508,11 @@ const InvestorDashboard = () => {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            {/* Histórico Tab */}
+            <TabsContent value="historico" className="space-y-6">
+              <TransactionHistory userId={userId} />
             </TabsContent>
 
             {/* Explorar Tab */}
