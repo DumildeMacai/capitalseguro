@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { 
   LayoutDashboard, Users, Building2, BarChart3, 
-  Settings, LogOut, ChevronLeft, ChevronRight, UserCog 
+  Settings, LogOut, ChevronLeft, ChevronRight, UserCog, Wallet
 } from "lucide-react";
 
 interface AdminSidebarProps {
@@ -17,6 +17,7 @@ const AdminSidebar = ({ activeTab, setActiveTab, onLogout }: AdminSidebarProps) 
 
   const menuItems = [
     { id: "overview", name: "Visão Geral", icon: LayoutDashboard },
+    { id: "deposits", name: "Depósitos", icon: Wallet },
     { id: "investors", name: "Investidores", icon: Users },
     { id: "partners", name: "Parceiros", icon: Building2 },
     { id: "investments", name: "Investimentos", icon: BarChart3 },
