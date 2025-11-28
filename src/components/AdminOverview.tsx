@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ResponsiveContainer } from "recharts";
 import InvestorPortfolioChart from "./InvestorPortfolioChart";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -32,15 +31,15 @@ const AdminOverview = () => {
     try {
       setLoading(true);
 
-      // Total Investors (use users_by_role view)
+      // Total Investors
       const { count: investorsCount } = await supabase
-        .from("users_by_role")
+        .from("profiles")
         .select("*", { count: "exact", head: true })
         .eq("tipo", "investidor");
 
-      // Total Partners (use users_by_role view)
+      // Total Partners
       const { count: partnersCount } = await supabase
-        .from("users_by_role")
+        .from("profiles")
         .select("*", { count: "exact", head: true })
         .eq("tipo", "parceiro");
 

@@ -11,7 +11,8 @@ export interface Investment {
   remaining: number;
   totalFunding: number;
   image: string;
-  featured: boolean;
+  featured?: boolean;
+  colocacao?: string;
   risk: "Baixo" | "Médio" | "Alto";
 }
 

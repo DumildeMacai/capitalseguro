@@ -1,6 +1,4 @@
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -16,125 +14,32 @@ interface Notification {
   relacionada_a?: string;
 }
 
+// Mock notifications until table is created
+const mockNotifications: Notification[] = [
+  {
+    id: "1",
+    titulo: "Bem-vindo à plataforma",
+    mensagem: "Obrigado por se registrar. Explore as oportunidades de investimento disponíveis.",
+    tipo: "sistema",
+    lido: false,
+    data_criacao: new Date().toISOString(),
+  }
+];
+
 const NotificationsSection = ({ userId }: { userId: string }) => {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { toast } = useToast();
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
 
-  useEffect(() => {
-    fetchNotifications();
-    
-    // Subscribe to real-time updates
-    const subscription = supabase
-      .channel(`notifications:${userId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "notifications",
-          filter: `usuario_id=eq.${userId}`,
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            setNotifications((prev) => [payload.new as Notification, ...prev]);
-          } else if (payload.eventType === "UPDATE") {
-            setNotifications((prev) =>
-              prev.map((n) => (n.id === payload.new.id ? (payload.new as Notification) : n))
-            );
-          } else if (payload.eventType === "DELETE") {
-            setNotifications((prev) => prev.filter((n) => n.id !== payload.old.id));
-          }
-        }
-      )
-      .subscribe();
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [userId]);
-
-  const fetchNotifications = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("notifications")
-        .select("*")
-        .eq("usuario_id", userId)
-        .order("data_criacao", { ascending: false });
-
-      if (error) throw error;
-      setNotifications((data || []) as Notification[]);
-    } catch (error: any) {
-      console.error("Erro ao buscar notificações:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível carregar notificações.",
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleMarkAsRead = (notificationId: string) => {
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, lido: true } : n))
+    );
   };
 
-  const handleMarkAsRead = async (notificationId: string) => {
-    try {
-      const { error } = await supabase
-        .from("notifications")
-        .update({ lido: true, data_leitura: new Date().toISOString() })
-        .eq("id", notificationId);
-
-      if (error) throw error;
-
-      setNotifications((prev) =>
-        prev.map((n) => (n.id === notificationId ? { ...n, lido: true } : n))
-      );
-    } catch (error: any) {
-      console.error("Erro ao marcar como lida:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível marcar notificação como lida.",
-      });
-    }
-  };
-
-  const handleDeleteNotification = async (notificationId: string) => {
-    try {
-      const { error } = await supabase
-        .from("notifications")
-        .delete()
-        .eq("id", notificationId);
-
-      if (error) throw error;
-
-      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
-      
-      toast({
-        title: "Sucesso",
-        description: "Notificação deletada.",
-      });
-    } catch (error: any) {
-      console.error("Erro ao deletar notificação:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível deletar notificação.",
-      });
-    }
+  const handleDeleteNotification = (notificationId: string) => {
+    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
   };
 
   const unreadCount = notifications.filter((n) => !n.lido).length;
-
-  if (loading) {
-    return (
-      <Card>
-        <CardContent className="p-8">
-          <div className="text-center text-muted-foreground">Carregando notificações...</div>
-        </CardContent>
-      </Card>
-    );
-  }
 
   return (
     <div className="space-y-6">

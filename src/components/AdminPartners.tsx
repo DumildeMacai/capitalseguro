@@ -23,15 +23,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -44,9 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Eye, Edit, Check, X, Bell, MoreVertical, Search, FileCheck, Plus 
-} from "lucide-react";
+import { Eye, Edit, MoreVertical, Search, FileCheck } from "lucide-react";
 
 interface Partner {
   id: string;
@@ -55,7 +44,7 @@ interface Partner {
   telefone: string | null;
   empresa_nome: string | null;
   ramo_negocio: string | null;
-  status?: string;
+  data_criacao: string | null;
 }
 
 const AdminPartners = () => {
@@ -64,10 +53,6 @@ const AdminPartners = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedPartner, setSelectedPartner] = useState<Partner | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
-  const [openNotifyDialog, setOpenNotifyDialog] = useState(false);
-  const [actionType, setActionType] = useState<"approve" | "reject" | null>(null);
-  const [notificationMessage, setNotificationMessage] = useState("");
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
@@ -84,18 +69,14 @@ const AdminPartners = () => {
   const fetchPartners = async () => {
     try {
       setLoading(true);
-      // Use users_by_role view to get partners (tipo = 'parceiro')
       const { data, error } = await supabase
-        .from("users_by_role")
-        .select("*")
+        .from("profiles")
+        .select("id, nome_completo, email, telefone, empresa_nome, ramo_negocio, data_criacao")
         .eq("tipo", "parceiro")
         .order("data_criacao", { ascending: false });
 
       if (error) throw error;
-      setPartners((data || []).map(p => ({
-        ...p,
-        status: p.status || "Pendente"
-      })));
+      setPartners(data || []);
     } catch (error: any) {
       console.error("Erro ao buscar parceiros:", error);
       toast({
@@ -114,18 +95,6 @@ const AdminPartners = () => {
     partner.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handleNewPartner = () => {
-    setSelectedPartner(null);
-    setFormData({
-      nome_completo: "",
-      email: "",
-      telefone: "",
-      empresa_nome: "",
-      ramo_negocio: "",
-    });
-    setOpenDialog(true);
-  };
-
   const handleEditPartner = (partner: Partner) => {
     setSelectedPartner(partner);
     setFormData({
@@ -140,40 +109,24 @@ const AdminPartners = () => {
 
   const handleSavePartner = async () => {
     try {
-      if (!formData.email.trim()) {
-        toast({
-          variant: "destructive",
-          title: "Validação",
-          description: "Email é obrigatório.",
-        });
-        return;
-      }
+      if (!selectedPartner) return;
 
-      const payload = {
-        nome_completo: formData.nome_completo || null,
-        email: formData.email,
-        telefone: formData.telefone || null,
-        empresa_nome: formData.empresa_nome || null,
-        ramo_negocio: formData.ramo_negocio || null,
-      };
+      const { error } = await supabase
+        .from("profiles")
+        .update({
+          nome_completo: formData.nome_completo || null,
+          telefone: formData.telefone || null,
+          empresa_nome: formData.empresa_nome || null,
+          ramo_negocio: formData.ramo_negocio || null,
+        })
+        .eq("id", selectedPartner.id);
 
-      if (selectedPartner) {
-        const { error } = await supabase
-          .from("profiles")
-          .update(payload)
-          .eq("id", selectedPartner.id);
-
-        if (error) throw error;
-        toast({
-          title: "Sucesso",
-          description: "Parceiro atualizado com sucesso.",
-        });
-      } else {
-        toast({
-          title: "Atenção",
-          description: "Parceiros devem ser criados através do registro.",
-        });
-      }
+      if (error) throw error;
+      
+      toast({
+        title: "Sucesso",
+        description: "Parceiro atualizado com sucesso.",
+      });
 
       setOpenDialog(false);
       await fetchPartners();
@@ -187,131 +140,9 @@ const AdminPartners = () => {
     }
   };
 
-  const handleApprovePartner = async () => {
-    try {
-      if (!selectedPartner) return;
-
-      await supabase
-        .from("profiles")
-        .update({ status: "Aprovado" })
-        .eq("id", selectedPartner.id);
-
-      toast({
-        title: "Sucesso",
-        description: "Parceiro aprovado com sucesso.",
-      });
-
-      setActionType(null);
-      await fetchPartners();
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível aprovar parceiro.",
-      });
-    }
-  };
-
-  const handleRejectPartner = async () => {
-    try {
-      if (!selectedPartner) return;
-
-      await supabase
-        .from("profiles")
-        .update({ status: "Rejeitado" })
-        .eq("id", selectedPartner.id);
-
-      toast({
-        title: "Sucesso",
-        description: "Parceiro rejeitado com sucesso.",
-      });
-
-      setActionType(null);
-      await fetchPartners();
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível rejeitar parceiro.",
-      });
-    }
-  };
-
-  const handleDeletePartner = async () => {
-    try {
-      if (!selectedPartner) return;
-
-      const { error } = await supabase
-        .from("profiles")
-        .delete()
-        .eq("id", selectedPartner.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: "Parceiro excluído com sucesso.",
-      });
-
-      setOpenDeleteDialog(false);
-      setSelectedPartner(null);
-      await fetchPartners();
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível excluir parceiro.",
-      });
-    }
-  };
-
-  const handleSendNotification = async () => {
-    try {
-      if (!selectedPartner || !notificationMessage.trim()) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: "Digite uma mensagem para enviar.",
-        });
-        return;
-      }
-
-      // Save notification to database
-      const { error } = await supabase.from("notifications").insert({
-        usuario_id: selectedPartner.id,
-        tipo: "admin",
-        titulo: "Mensagem do Administrador",
-        mensagem: notificationMessage,
-        lido: false,
-        relacionada_a: "geral",
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: `Notificação enviada para ${selectedPartner.email}`,
-      });
-
-      setOpenNotifyDialog(false);
-      setNotificationMessage("");
-    } catch (error: any) {
-      console.error("Erro ao enviar notificação:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível enviar notificação.",
-      });
-    }
-  };
-
-  const getStatusVariant = (status: string) => {
-    switch (status) {
-      case "Aprovado": return "outline";
-      case "Pendente": return "secondary";
-      case "Rejeitado": return "destructive";
-      default: return "outline";
-    }
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "—";
+    return new Date(dateString).toLocaleDateString("pt-PT");
   };
 
   if (loading) {
@@ -335,10 +166,6 @@ const AdminPartners = () => {
                 Gerenciamento de todos os parceiros da plataforma.
               </CardDescription>
             </div>
-            <Button onClick={handleNewPartner}>
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Parceiro
-            </Button>
           </div>
         </CardHeader>
         <CardContent>
@@ -362,7 +189,7 @@ const AdminPartners = () => {
                   <TableHead>Empresa</TableHead>
                   <TableHead>Ramo</TableHead>
                   <TableHead>Email</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Cadastro</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
               </TableHeader>
@@ -374,11 +201,7 @@ const AdminPartners = () => {
                       <TableCell>{partner.empresa_nome || "—"}</TableCell>
                       <TableCell>{partner.ramo_negocio || "—"}</TableCell>
                       <TableCell>{partner.email}</TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusVariant(partner.status || "Pendente")}>
-                          {partner.status || "Pendente"}
-                        </Badge>
-                      </TableCell>
+                      <TableCell>{formatDate(partner.data_criacao)}</TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -396,35 +219,6 @@ const AdminPartners = () => {
                             <DropdownMenuItem>
                               <FileCheck className="mr-2 h-4 w-4" />
                               <span>Validar Documentos</span>
-                            </DropdownMenuItem>
-                            {(partner.status || "Pendente") === "Pendente" && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem onClick={() => { setSelectedPartner(partner); setActionType("approve"); }}>
-                                  <Check className="mr-2 h-4 w-4" />
-                                  <span>Aprovar</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { setSelectedPartner(partner); setActionType("reject"); }} className="text-destructive">
-                                  <X className="mr-2 h-4 w-4" />
-                                  <span>Rejeitar</span>
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => { setSelectedPartner(partner); setOpenNotifyDialog(true); }}>
-                              <Bell className="mr-2 h-4 w-4" />
-                              <span>Notificar</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setSelectedPartner(partner);
-                                setOpenDeleteDialog(true);
-                              }}
-                              className="text-destructive"
-                            >
-                              <X className="mr-2 h-4 w-4" />
-                              <span>Excluir</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -462,10 +256,10 @@ const AdminPartners = () => {
               />
             </div>
             <div>
-              <label className="text-sm font-medium">Email *</label>
+              <label className="text-sm font-medium">Email</label>
               <Input
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled
                 placeholder="email@empresa.com"
               />
             </div>
@@ -502,77 +296,6 @@ const AdminPartners = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Dialog open={openNotifyDialog} onOpenChange={setOpenNotifyDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Notificar Parceiro</DialogTitle>
-            <DialogDescription>
-              Envie uma mensagem para {selectedPartner?.email}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <textarea
-              className="w-full px-3 py-2 border rounded-md text-sm"
-              rows={5}
-              value={notificationMessage}
-              onChange={(e) => setNotificationMessage(e.target.value)}
-              placeholder="Digite sua mensagem aqui..."
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenNotifyDialog(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSendNotification}>Enviar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog open={actionType === "approve"} onOpenChange={(open) => !open && setActionType(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Aprovar Parceiro</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja aprovar "{selectedPartner?.empresa_nome}"? O parceiro receberá uma notificação.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogAction onClick={handleApprovePartner} className="bg-primary">
-            Aprovar
-          </AlertDialogAction>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={actionType === "reject"} onOpenChange={(open) => !open && setActionType(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Rejeitar Parceiro</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja rejeitar "{selectedPartner?.empresa_nome}"? O parceiro receberá uma notificação.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogAction onClick={handleRejectPartner} className="bg-destructive text-destructive-foreground">
-            Rejeitar
-          </AlertDialogAction>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      <AlertDialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
-            <AlertDialogDescription>
-              Tem certeza que deseja excluir "{selectedPartner?.empresa_nome}"? Esta ação é irreversível.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogAction onClick={handleDeletePartner} className="bg-destructive text-destructive-foreground">
-            Excluir
-          </AlertDialogAction>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

@@ -229,42 +229,35 @@ export const handleAdminAccess = async (
     
     if (!user) throw new Error("Falha ao autenticar admin")
     
-    // Step 2: Upsert admin profile
-    console.log("[Admin Access] Upserting admin profile...")
+    // Step 2: Update admin profile using direct update (trigger creates profile on signup)
+    console.log("[Admin Access] Updating admin profile...")
     const { error: profileError } = await supabase
       .from("profiles")
-      .upsert(
-        {
-          id: user.id,
-          nome_completo: "Administrador",
-          bio: "Conta administrativa",
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "id" }
-      )
+      .update({
+        nome_completo: "Administrador",
+        bio: "Conta administrativa",
+        tipo: "admin" as const,
+      })
+      .eq("id", user.id)
     
     if (profileError) {
-      console.warn("[Admin Access] Profile upsert warning:", profileError.message)
+      console.warn("[Admin Access] Profile update warning:", profileError.message)
     }
     
-    // Step 2.5: Create admin role using RPC (bypasses RLS)
+    // Step 2.5: Try to set admin role using RPC
     console.log("[Admin Access] Attempting to set admin role via RPC...")
     try {
-      // Try to call RPC with UUID parameter
-      const { error: roleError } = await supabase.rpc("set_user_as_admin_by_email", {
-        admin_email: adminEmail,
+      const { error: roleError } = await supabase.rpc("set_user_as_admin", {
+        user_email: adminEmail,
       })
       
       if (roleError) {
         console.warn("[Admin Access] RPC call warning:", roleError)
-        // Continue anyway - role might have been set by trigger or SQL
       } else {
         console.log("[Admin Access] Admin role set successfully via RPC")
       }
     } catch (e) {
       console.warn("[Admin Access] RPC call failed (may need manual SQL):", e)
-      // Continue anyway
     }
     
     // Step 3: Verify and redirect
@@ -276,9 +269,7 @@ export const handleAdminAccess = async (
     })
   } catch (error: any) {
     console.error("[Admin Access] Error:", error)
-    handleAuthError(
-      { message: error.message || "Erro ao acessar admin" },
-      toast
-    )
+    const err = new Error(error.message || "Erro ao acessar admin")
+    handleAuthError(err, toast)
   }
 }
