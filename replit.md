@@ -5,7 +5,15 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 
 ## Recent Changes (November 28, 2025)
 
-### InvestmentCard Dark Theme Standardization (LATEST)
+### Favicon e Open Graph Meta Tags (LATEST - COMPLETED)
+- **Logo favicon configurado**: Uso do logo CS em `public/logo.png`
+- **Open Graph tags** para WhatsApp, Facebook, Telegram e LinkedIn
+- **Twitter Cards** para compartilhamento em redes sociais
+- **Theme color**: `#7E69AB` (purple brand color)
+- Configuração de titulo e descrição otimizados para SEO social sharing
+- Meta tags apontam para `/logo.png` (favicon + og:image)
+
+### InvestmentCard Dark Theme Standardization (Completed)
 - **Forced dark mode styling for investment cards** to maintain consistency with design mockups
 - Changed cards to use `bg-slate-900` (very dark background) in all modes
 - Updated card borders to `border-slate-700`
@@ -34,11 +42,6 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 
 ### Return Rate Updates (Completed)
 - Changed all return rates from 50% to 100% throughout the application
-
-### Investments Page Light Theme (Completed)
-- Updated card backgrounds with light theme support
-- Changed filter section styling to light theme (bg-white dark:bg-card)
-- Removed all dark gradients from background
 
 ### Hero Section Copy Updates (Completed)
 - Updated main headline: "Comece a Investir" + "Construa o Seu Legado Financeiro"
@@ -71,6 +74,7 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 - `/src/components/` - Reusable UI components (all using design tokens)
 - `/src/integrations/supabase/` - Supabase client configuration
 - `/src/contexts/` - React contexts (Auth)
+- `/public/` - Static assets including logo.png for favicon and social sharing
 
 ### Known Issues
 - Storage bucket creation fails due to RLS policies - requires manual SQL scripts in Supabase SQL Editor
@@ -80,3 +84,11 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 npm run dev
 ```
 The application runs on port 5000.
+
+## Social Sharing Configuration
+The site is now properly configured for social media sharing:
+- **WhatsApp**: Shows CS logo, "Capital Seguro | Gestão de Ativos" title
+- **Facebook**: Shows preview with custom logo and description
+- **Telegram**: Shows complete preview card
+- **LinkedIn**: Professional sharing with full metadata
+- All platforms use `/public/logo.png` as the preview image
