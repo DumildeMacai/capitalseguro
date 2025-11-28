@@ -50,6 +50,9 @@ export const DepositForm = () => {
       setSubmitted(true)
       toast({ title: "Sucesso", description: "Depósito solicitado! Aguardando aprovação do admin." })
       
+      // Disparar evento para notificar admin em tempo real
+      window.dispatchEvent(new Event("newDepositRequest"))
+      
       setTimeout(() => {
         navigate("/investidor")
       }, 2000)

@@ -18,19 +18,27 @@ export const AdminDeposits = () => {
 
   useEffect(() => {
     loadDeposits()
+    
+    // Polling automático a cada 3 segundos
+    const interval = setInterval(() => {
+      loadDeposits()
+    }, 3000)
+    
+    return () => clearInterval(interval)
   }, [])
 
   const loadDeposits = async () => {
     try {
-      // Carregar de localStorage (MockData)
-      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]")
+      // Carregar de localStorage (MockData) - com reload forçado
+      const depositsRaw = localStorage.getItem("deposits") || "[]"
+      const deposits = JSON.parse(depositsRaw)
       setDeposits(deposits)
+      setLoading(false)
       // TODO: Integrar com Supabase quando tabela existir
     } catch (error: any) {
       console.error("Erro ao carregar depósitos:", error)
-      toast({ title: "Erro", description: error.message, variant: "destructive" })
-    } finally {
       setLoading(false)
+      // Não mostrar toast em polling para não irritar o user
     }
   }
 
@@ -48,8 +56,11 @@ export const AdminDeposits = () => {
       )
       localStorage.setItem("deposits", JSON.stringify(updatedDeposits))
 
-      toast({ title: "Sucesso", description: `Depósito de Kz ${deposit.amount} aprovado!` })
+      toast({ title: "Sucesso", description: `Depósito de Kz ${deposit.amount} aprovado! Saldo atualizado.` })
       loadDeposits()
+      
+      // Disparar evento customizado para atualizar dashboard
+      window.dispatchEvent(new Event("depositApproved"))
     } catch (error: any) {
       console.error("Erro ao aprovar depósito:", error)
       toast({ title: "Erro", description: error.message, variant: "destructive" })
@@ -69,6 +80,9 @@ export const AdminDeposits = () => {
 
       toast({ title: "Sucesso", description: "Depósito rejeitado" })
       loadDeposits()
+      
+      // Disparar evento customizado
+      window.dispatchEvent(new Event("depositRejected"))
     } catch (error: any) {
       console.error("Erro ao rejeitar depósito:", error)
       toast({ title: "Erro", description: error.message, variant: "destructive" })
