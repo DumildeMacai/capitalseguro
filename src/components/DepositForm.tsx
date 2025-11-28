@@ -51,7 +51,7 @@ export const DepositForm = () => {
       toast({ title: "Sucesso", description: "Depósito solicitado! Aguardando aprovação do admin." })
       
       setTimeout(() => {
-        navigate("/investor/dashboard")
+        navigate("/investidor")
       }, 2000)
     } catch (error: any) {
       console.error("Erro ao submeter depósito:", error)
@@ -178,7 +178,7 @@ export const DepositForm = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => navigate("/investor/dashboard")}
+              onClick={() => navigate("/investidor")}
               disabled={loading}
               data-testid="button-cancel-deposit"
             >
