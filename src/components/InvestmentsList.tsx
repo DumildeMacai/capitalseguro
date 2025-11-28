@@ -25,7 +25,7 @@ const InvestmentsList = ({ investments, onInvest, className }: InvestmentsListPr
             transition={{ duration: 0.5, delay: index * 0.1 }}
             className={`relative overflow-hidden rounded-xl border ${
               investment.featured ? "border-purple" : "border-border"
-            } bg-card shadow-sm hover-scale card-hover`}
+            } bg-white dark:bg-card shadow-sm hover-scale card-hover`}
           >
             {investment.featured && (
               <div className="absolute top-4 right-4 z-10">
@@ -39,7 +39,7 @@ const InvestmentsList = ({ investments, onInvest, className }: InvestmentsListPr
                 alt={investment.title} 
                 className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
               />
-              <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/60 to-transparent"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/30 to-transparent"></div>
               <div className="absolute bottom-3 left-3 flex gap-2">
                 <Badge variant="secondary" className="bg-white/90 text-secondary font-medium flex items-center gap-1">
                   {investment.icon} {investment.category}

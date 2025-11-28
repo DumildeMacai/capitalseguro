@@ -241,10 +241,10 @@ const InvestmentDetail = () => {
   const similarInvestments = availableInvestments.filter((inv) => inv.id !== id && inv.category === investment.category)
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/30">
+    <div className="min-h-screen bg-white dark:bg-background">
       <Navbar />
 
-      <main className="pt-28 pb-20">
+      <main className="pt-28 pb-20 bg-white dark:bg-background">
         <div className="container mx-auto px-4">
           <motion.button
             onClick={() => navigate("/investments")}
@@ -297,12 +297,12 @@ const InvestmentDetail = () => {
                           >
                             Risco {investment.risk}
                           </Badge>
-                          <Badge className="bg-cyan-500/90 text-white text-sm py-2 px-4 font-semibold">
+                          <Badge className="bg-primary/90 text-white text-sm py-2 px-4 font-semibold">
                             {numInvestors} investidores
                           </Badge>
                         </div>
-                        <h1 className="text-white text-5xl font-bold leading-tight max-w-3xl">{investment.title}</h1>
-                        <p className="text-gray-100 text-lg mt-4 max-w-2xl">
+                        <h1 className="text-foreground text-5xl font-bold leading-tight max-w-3xl">{investment.title}</h1>
+                        <p className="text-foreground/80 text-lg mt-4 max-w-2xl">
                           Oportunidade premium com retorno garantido
                         </p>
                       </div>

@@ -40,20 +40,20 @@ const InvestmentFilters = ({
       transition={{ duration: 0.3 }}
       className="mb-8"
     >
-      <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl p-6 border border-slate-700">
+      <div className="bg-white dark:bg-card rounded-xl p-6 border border-border">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="space-y-2">
-            <Label htmlFor="category" className="text-slate-300">
+            <Label htmlFor="category" className="text-foreground">
               Categoria
             </Label>
             <Select
               value={selectedCategory || "all"}
               onValueChange={(value) => setSelectedCategory(value === "all" ? null : value)}
             >
-              <SelectTrigger className="bg-slate-700 border-slate-600 text-white">
+              <SelectTrigger className="bg-background border-border text-foreground">
                 <SelectValue placeholder="Todas as Categorias" />
               </SelectTrigger>
-              <SelectContent className="bg-slate-800 border-slate-700">
+              <SelectContent className="bg-background border-border">
                 <SelectItem value="all">Todas Categorias</SelectItem>
                 {categories.map((category) => (
                   <SelectItem key={category} value={category}>
@@ -66,10 +66,10 @@ const InvestmentFilters = ({
 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <Label htmlFor="minValue" className="text-slate-300">
+              <Label htmlFor="minValue" className="text-foreground">
                 Investimento Mín.
               </Label>
-              <span className="text-sm font-medium text-emerald-400">
+              <span className="text-sm font-medium text-primary">
                 {minValue ? `Kz ${minValue.toLocaleString()}` : "Qualquer"}
               </span>
             </div>
@@ -85,10 +85,10 @@ const InvestmentFilters = ({
 
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <Label htmlFor="maxReturn" className="text-slate-300">
+              <Label htmlFor="maxReturn" className="text-foreground">
                 Retorno Máx.
               </Label>
-              <span className="text-sm font-medium text-emerald-400">
+              <span className="text-sm font-medium text-primary">
                 {maxReturn ? `Até ${maxReturn}%` : "Qualquer"}
               </span>
             </div>
@@ -106,7 +106,7 @@ const InvestmentFilters = ({
             <Button
               onClick={resetFilters}
               variant="outline"
-              className="w-full border-slate-600 text-slate-300 hover:bg-slate-700 bg-transparent"
+              className="w-full"
             >
               <X size={16} className="mr-2" />
               Limpar

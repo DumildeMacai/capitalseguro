@@ -139,7 +139,7 @@ const Investments = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
 
-      <main className="pt-28 pb-20 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
+      <main className="pt-28 pb-20 bg-white dark:bg-background">
         <div className="container mx-auto px-4">
           <motion.div
             initial={{ opacity: 0 }}
@@ -147,8 +147,8 @@ const Investments = () => {
             transition={{ duration: 0.5 }}
             className="text-center mb-16"
           >
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white">Oportunidades de Investimento</h1>
-            <p className="text-slate-400 text-lg max-w-3xl mx-auto leading-relaxed">
+            <h1 className="text-5xl md:text-6xl font-bold mb-6 text-foreground">Oportunidades de Investimento</h1>
+            <p className="text-muted-foreground text-lg max-w-3xl mx-auto leading-relaxed">
               Explore uma carteira diversificada de oportunidades imobiliárias e empresariais com retornos competitivos,
               respaldadas por ativos reais e gestão profissional. Comece a construir sua riqueza hoje.
             </p>
