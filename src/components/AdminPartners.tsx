@@ -32,10 +32,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, Edit, MoreVertical, Search, FileCheck } from "lucide-react";
+import { Edit, MoreVertical, Search, FileCheck } from "lucide-react";
 
 interface Partner {
   id: string;
@@ -69,10 +68,11 @@ const AdminPartners = () => {
   const fetchPartners = async () => {
     try {
       setLoading(true);
+      // Fetch profiles that have empresa_nome (likely partners)
       const { data, error } = await supabase
         .from("profiles")
         .select("id, nome_completo, email, telefone, empresa_nome, ramo_negocio, data_criacao")
-        .eq("tipo", "parceiro")
+        .not("empresa_nome", "is", null)
         .order("data_criacao", { ascending: false });
 
       if (error) throw error;

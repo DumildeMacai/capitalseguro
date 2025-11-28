@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Users, Building2, Percent, TrendingUp } from "lucide-react";
 
 interface Stats {
-  totalInvestors: number;
+  totalUsers: number;
   totalPartners: number;
   totalInvested: number;
   activeInvestments: number;
@@ -14,7 +14,7 @@ interface Stats {
 
 const AdminOverview = () => {
   const [stats, setStats] = useState<Stats>({
-    totalInvestors: 0,
+    totalUsers: 0,
     totalPartners: 0,
     totalInvested: 0,
     activeInvestments: 0,
@@ -31,17 +31,16 @@ const AdminOverview = () => {
     try {
       setLoading(true);
 
-      // Total Investors
-      const { count: investorsCount } = await supabase
+      // Total Users (all profiles)
+      const { count: usersCount } = await supabase
         .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("tipo", "investidor");
+        .select("*", { count: "exact", head: true });
 
-      // Total Partners
+      // Total Partners (profiles with empresa_nome)
       const { count: partnersCount } = await supabase
         .from("profiles")
         .select("*", { count: "exact", head: true })
-        .eq("tipo", "parceiro");
+        .not("empresa_nome", "is", null);
 
       // Total Invested (sum of all investments)
       const { data: inscricoes } = await supabase
@@ -73,7 +72,7 @@ const AdminOverview = () => {
       }, []) || [];
 
       setStats({
-        totalInvestors: investorsCount || 0,
+        totalUsers: usersCount || 0,
         totalPartners: partnersCount || 0,
         totalInvested,
         activeInvestments: activeInvsCount || 0,
@@ -119,12 +118,12 @@ const AdminOverview = () => {
     <div className="space-y-6">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Investors */}
+        {/* Total Users */}
         <Card>
           <CardContent className="p-6 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Investidores</p>
-              <h3 className="text-2xl font-bold">{stats.totalInvestors}</h3>
+              <p className="text-sm font-medium text-muted-foreground">Usuários</p>
+              <h3 className="text-2xl font-bold">{stats.totalUsers}</h3>
             </div>
             <div className="bg-primary/10 p-3 rounded-full">
               <Users className="h-6 w-6 text-primary" />
@@ -204,11 +203,11 @@ const AdminOverview = () => {
                 <span className="text-lg font-bold">{formatCurrency(stats.totalInvested)}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-muted rounded">
-                <span className="font-medium">Investidores Ativos</span>
-                <span className="text-lg font-bold">{stats.totalInvestors}</span>
+                <span className="font-medium">Usuários Cadastrados</span>
+                <span className="text-lg font-bold">{stats.totalUsers}</span>
               </div>
               <div className="flex justify-between items-center p-3 bg-muted rounded">
-                <span className="font-medium">Parceiros Aprovados</span>
+                <span className="font-medium">Parceiros</span>
                 <span className="text-lg font-bold">{stats.totalPartners}</span>
               </div>
             </div>
@@ -228,8 +227,8 @@ const AdminOverview = () => {
                 <Users className="h-4 w-4 text-primary" />
               </div>
               <div>
-                <p className="font-medium">Investidores Cadastrados</p>
-                <p className="text-sm text-muted-foreground">{stats.totalInvestors} investidores na plataforma</p>
+                <p className="font-medium">Usuários Cadastrados</p>
+                <p className="text-sm text-muted-foreground">{stats.totalUsers} usuários na plataforma</p>
               </div>
             </div>
             <div className="flex items-start pb-4 border-b">
@@ -237,7 +236,7 @@ const AdminOverview = () => {
                 <Building2 className="h-4 w-4 text-blue-600" />
               </div>
               <div>
-                <p className="font-medium">Parceiros Aprovados</p>
+                <p className="font-medium">Parceiros</p>
                 <p className="text-sm text-muted-foreground">{stats.totalPartners} parceiros na plataforma</p>
               </div>
             </div>
