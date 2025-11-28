@@ -23,20 +23,54 @@ const mockNotifications: Notification[] = [
     tipo: "sistema",
     lido: false,
     data_criacao: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    titulo: "Novo investimento disponível",
+    mensagem: "Uma nova oportunidade de investimento em imóveis está disponível com retorno de 100%.",
+    tipo: "investimento",
+    lido: false,
+    data_criacao: new Date(Date.now() - 86400000).toISOString(),
+  },
+  {
+    id: "3",
+    titulo: "Atualização de rendimento",
+    mensagem: "Seus investimentos acumularam Kz 5.000 em rendimentos este mês.",
+    tipo: "rendimento",
+    lido: false,
+    data_criacao: new Date(Date.now() - 172800000).toISOString(),
   }
 ];
 
-const NotificationsSection = ({ userId }: { userId: string }) => {
+interface NotificationsSectionProps {
+  userId: string;
+  onUnreadCountChange?: (count: number) => void;
+}
+
+const NotificationsSection = ({ userId, onUnreadCountChange }: NotificationsSectionProps) => {
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
 
+  const updateUnreadCount = (notifs: Notification[]) => {
+    const count = notifs.filter((n) => !n.lido).length;
+    if (onUnreadCountChange) {
+      onUnreadCountChange(count);
+    }
+  };
+
   const handleMarkAsRead = (notificationId: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notificationId ? { ...n, lido: true } : n))
-    );
+    setNotifications((prev) => {
+      const updated = prev.map((n) => (n.id === notificationId ? { ...n, lido: true } : n));
+      updateUnreadCount(updated);
+      return updated;
+    });
   };
 
   const handleDeleteNotification = (notificationId: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+    setNotifications((prev) => {
+      const updated = prev.filter((n) => n.id !== notificationId);
+      updateUnreadCount(updated);
+      return updated;
+    });
   };
 
   const unreadCount = notifications.filter((n) => !n.lido).length;

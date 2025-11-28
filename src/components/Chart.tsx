@@ -16,7 +16,7 @@ interface ChartProps {
 
 // Generate sample investment growth data
 const generateGrowthData = (initialAmount: number, years: number) => {
-  const annualReturnRate = 0.5; // 50% annual return
+  const annualReturnRate = 1.0; // 100% annual return
   const data = [];
   
   for (let i = 0; i <= years; i++) {

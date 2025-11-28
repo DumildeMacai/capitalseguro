@@ -23,7 +23,7 @@ const CTASection = () => {
               Start Building Your <span className="text-gold">Passive Income</span> Today
             </h2>
             <p className="text-lg md:text-xl opacity-90 max-w-3xl mx-auto mb-10">
-              Join thousands of satisfied investors earning 50% annual returns. 
+              Join thousands of satisfied investors earning 100% annual returns. 
               Our investment platform makes it easy to build wealth with secured, high-yield opportunities.
             </p>
             
@@ -47,7 +47,7 @@ const CTASection = () => {
                     <path d="M14.5 8v7.5" />
                   </svg>
                 </div>
-                <h3 className="text-xl font-bold mb-2">50% Annual Returns</h3>
+                <h3 className="text-xl font-bold mb-2">100% Annual Returns</h3>
                 <p className="opacity-80">Guaranteed returns that outperform traditional investments</p>
               </div>
               

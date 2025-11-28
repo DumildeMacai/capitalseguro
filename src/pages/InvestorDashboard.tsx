@@ -26,6 +26,7 @@ import UploadAvatar from "@/components/profile/UploadAvatar"
 import Questionnaire from "@/components/profile/Questionnaire"
 import NotificationsSection from "@/components/NotificationsSection"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 
 const InvestorDashboard = () => {
@@ -37,6 +38,7 @@ const InvestorDashboard = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [profile, setProfile] = useState<any>(null)
   const [userId, setUserId] = useState<string>("")
+  const [unreadNotifications, setUnreadNotifications] = useState(3)
 
   // load profile on mount
   useEffect(() => {
@@ -105,7 +107,7 @@ const InvestorDashboard = () => {
       description:
         "Portfólio diversificado de propriedades comerciais em localizações privilegiadas com renda estável de aluguel.",
       category: "Imóveis",
-      returnRate: 50,
+      returnRate: 100,
       minInvestment: 5000,
       remaining: 1250000,
       totalFunding: 5000000,
@@ -119,7 +121,7 @@ const InvestorDashboard = () => {
       description:
         "Novo desenvolvimento de plaza comercial em área urbana de alto tráfego com acordos de locação pré-assinados.",
       category: "Imóveis",
-      returnRate: 50,
+      returnRate: 100,
       minInvestment: 15000,
       remaining: 2000000,
       totalFunding: 6000000,
@@ -131,7 +133,7 @@ const InvestorDashboard = () => {
 
   return (
     <SidebarProvider>
-      <div className="flex min-h-screen w-full bg-background">
+      <div className="flex min-h-screen w-full bg-gray-100 dark:bg-gray-900">
         <Sidebar className="border-border bg-card">
           <SidebarHeader className="border-border">
             <div className="flex items-center gap-2 px-2">
@@ -211,8 +213,20 @@ const InvestorDashboard = () => {
                   onClick={() => setActiveTab("notificacoes")}
                   className="data-[active=true]:bg-primary/20 data-[active=true]:text-primary"
                 >
-                  <Bell size={20} />
+                  <div className="relative">
+                    <Bell size={20} />
+                    {unreadNotifications > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[10px] font-bold text-destructive-foreground">
+                        {unreadNotifications}
+                      </span>
+                    )}
+                  </div>
                   <span>Notificações</span>
+                  {unreadNotifications > 0 && (
+                    <Badge variant="destructive" className="ml-auto text-[10px] px-1.5 py-0">
+                      {unreadNotifications}
+                    </Badge>
+                  )}
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
@@ -586,7 +600,12 @@ const InvestorDashboard = () => {
 
             {/* Notificações Tab */}
             <TabsContent value="notificacoes" className="space-y-6">
-              {userId && <NotificationsSection userId={userId} />}
+              {userId && (
+                <NotificationsSection 
+                  userId={userId} 
+                  onUnreadCountChange={(count) => setUnreadNotifications(count)}
+                />
+              )}
             </TabsContent>
 
             {/* Configurações Tab */}

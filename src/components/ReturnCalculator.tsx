@@ -10,7 +10,7 @@ import { Link } from "react-router-dom";
 const ReturnCalculator = () => {
   const [investment, setInvestment] = useState(10000);
   const [years, setYears] = useState(1);
-  const annualReturnRate = 50; // 50% annual return
+  const annualReturnRate = 100; // 100% annual return
 
   const calculateReturn = (principal: number, rate: number, time: number) => {
     // Calculate compound interest over time
@@ -32,7 +32,7 @@ const ReturnCalculator = () => {
       <div className="bg-gradient-primary text-white p-6">
         <h3 className="text-2xl font-bold mb-2">Investment Return Calculator</h3>
         <p className="opacity-90">
-          See how your money grows with our 50% annual returns. Principal available after 1 year.
+          See how your money grows with our 100% annual returns. Principal available after 1 year.
         </p>
       </div>
 
@@ -118,7 +118,7 @@ const ReturnCalculator = () => {
           </Button>
           
           <p className="text-sm text-muted-foreground text-center">
-            Investments have a 1-year lock period. Annual returns of 50% are calculated at the end of each year.
+            Investments have a 1-year lock period. Annual returns of 100% are calculated at the end of each year.
           </p>
         </div>
       </div>

@@ -16,7 +16,7 @@ const mockData = {
     totalOpportunities: 5,
     totalAmount: "AOA 15.000.000",
     totalInvestors: 28,
-    avgReturn: "50%"
+    avgReturn: "100%"
   },
   recentOpportunities: [
     {

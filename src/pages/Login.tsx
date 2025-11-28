@@ -52,7 +52,7 @@ const Login = () => {
             <div className="mb-8">
               <div className="flex items-center gap-2 mb-8">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20">
-                  <span className="text-white text-lg font-bold">F</span>
+                  <span className="text-white text-lg font-bold">CS</span>
                 </span>
                 <span className="text-white text-3xl font-extrabold">Capital Seguro</span>
               </div>
@@ -63,7 +63,7 @@ const Login = () => {
               <p className="text-white/80 text-lg mb-8">
                 {activeTab === "login"
                   ? "Entre para acessar seu painel de investimentos e acompanhar seus rendimentos."
-                  : "Crie uma conta para começar sua jornada rumo à liberdade financeira com 50% de retorno anual."}
+                  : "Crie uma conta para começar sua jornada rumo à liberdade financeira com 100% de retorno anual."}
               </p>
             </div>
             
@@ -74,7 +74,7 @@ const Login = () => {
                   <svg className="h-6 w-6 mr-2 text-gold flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>50% de retorno anual garantido em todos os investimentos</span>
+                  <span>100% de retorno anual garantido em todos os investimentos</span>
                 </li>
                 <li className="flex items-start">
                   <svg className="h-6 w-6 mr-2 text-gold flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -107,7 +107,7 @@ const Login = () => {
             <Link to="/" className="inline-block mb-8">
               <div className="flex items-center justify-center gap-2">
                 <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-primary">
-                  <span className="text-white text-lg font-bold">F</span>
+                  <span className="text-white text-sm font-bold">CS</span>
                 </span>
                 <span className="text-gradient text-3xl font-extrabold">Capital Seguro</span>
               </div>
