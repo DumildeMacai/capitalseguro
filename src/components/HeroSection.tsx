@@ -24,10 +24,12 @@ const HeroSection = () => {
               Retornos Anuais de 100%
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-6">
-              <span className="text-gradient">À Prova de Futuro</span> da sua Riqueza com Rendimento Passivo
+              <span className="text-gradient">Comece a Investir</span>
+              <br />
+              Construa o Seu Legado Financeiro
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg">
-              Invista em oportunidades de alto rendimento com a Capital Seguro. Obtenha rendimento passivo com retornos anuais de 100% e transforme o seu futuro financeiro.
+              Rendimento passivo que transforma sonhos em património real. Retornos que criam renda. Renda que constrói património.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">

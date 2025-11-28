@@ -27,6 +27,17 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 - All buttons now use `variant="outline"` for consistency
 - Removed custom color classes from logout button and other buttons
 
+### Investments Page Light Theme
+- Removed all dark gradients and slate colors from Investments.tsx
+- Updated card backgrounds: bg-white in light mode, dark:bg-card in dark mode
+- Changed filter section styling to light theme (bg-white dark:bg-card)
+- Updated InvestmentDetail.tsx with light backgrounds
+- Changed image gradient overlay from black/60 to black/30 for lighter appearance
+
+### Hero Section Copy Updates
+- Updated main headline: "Comece a Investir" + "Construa o Seu Legado Financeiro"
+- New hero description: "Rendimento passivo que transforma sonhos em património real. Retornos que criam renda. Renda que constrói património."
+
 ## Project Architecture
 
 ### Frontend Stack
