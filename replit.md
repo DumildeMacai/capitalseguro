@@ -5,19 +5,28 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 
 ## Recent Changes (November 28, 2025)
 
-### Comprehensive Color Standardization (NEW)
+### InvestmentCard Dark Theme Standardization (LATEST)
+- **Forced dark mode styling for investment cards** to maintain consistency with design mockups
+- Changed cards to use `bg-slate-900` (very dark background) in all modes
+- Updated card borders to `border-slate-700`
+- Set category badges to `bg-slate-600` with text-white
+- Return rates display in `text-emerald-400` (green success color)
+- Button gradient uses `bg-gradient-primary` (purple to navy gradient)
+- Progress bars use emerald-green for visual consistency
+- Text hierarchy: white headings, slate-400 descriptions, emerald accents
+
+### Comprehensive Color Standardization (Completed)
 - **Complete color palette migration to design system tokens** from hardcoded colors
 - Replaced 44+ instances of hardcoded colors across 12 files with semantic design tokens
 - **Color Token Mapping:**
-  - `purple-600/700` → `primary` (brand color)
-  - `slate-800/900` → `card` (card backgrounds)
-  - `slate-700` → `border` (borders)
-  - `slate-400` → `muted-foreground` (secondary text)
-  - `gray-100/50` → `background` (light backgrounds)
-  - `emerald-500/600` → `primary` (accent/success actions)
-  - `text-white` → `text-foreground` (primary text)
+  - `primary` - purple/magenta brand color (#7E69AB)
+  - `card` - light/dark card backgrounds
+  - `border` - border colors (slate-700 dark)
+  - `muted-foreground` - secondary text (slate-400)
+  - `background` - page backgrounds
+  - `emerald-400` - success/accent actions (100% return rates)
+  - `text-white` - primary text on dark backgrounds
 - **Files Updated:** FeatureCard, HowItWorksSection, InvestmentCard, StatsSection, AdminDashboard, InvestorDashboard, PartnerDashboard, NotFound, Investments, InvestmentDetail, ReturnCalculator, About
-- **Benefits:** Unified light/dark mode support, consistent visual hierarchy, easier theme customization
 
 ### Branding Updates (Completed)
 - Changed logo from "F"/"C" to "CS" across all components
@@ -25,18 +34,15 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 
 ### Return Rate Updates (Completed)
 - Changed all return rates from 50% to 100% throughout the application
-- Updated files: HeroSection, HowItWorksSection, CTASection, FAQSection, TestimonialsSection, ReturnCalculator, Chart, Dashboard, InvestorDashboard, PartnerDashboard, Investments, InvestmentDetail, InvestmentOptions
 
 ### Investments Page Light Theme (Completed)
-- Removed all dark gradients and slate colors from Investments.tsx
-- Updated card backgrounds: bg-white in light mode, dark:bg-card in dark mode
+- Updated card backgrounds with light theme support
 - Changed filter section styling to light theme (bg-white dark:bg-card)
-- Updated InvestmentDetail.tsx with light backgrounds
-- Changed image gradient overlay from black/60 to black/30 for lighter appearance
+- Removed all dark gradients from background
 
 ### Hero Section Copy Updates (Completed)
 - Updated main headline: "Comece a Investir" + "Construa o Seu Legado Financeiro"
-- New hero description: "Rendimento passivo que transforma sonhos em património real. Retornos que criam renda. Renda que constrói património."
+- New hero description focused on passive income and wealth building
 
 ## Project Architecture
 
@@ -50,9 +56,11 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 
 ### Design System
 - **Color Tokens:** Defined in `tailwind.config.ts` and `src/index.css`
-- **Semantic Variables:** primary, success, accent, muted-foreground, border, background, card
+- **Custom Colors:** navy, purple, gold, success palettes
+- **Gradient Utility:** `bg-gradient-primary` (purple → navy)
 - **All components use design system tokens** - No hardcoded colors
 - Supports automatic light/dark mode switching
+- Investment cards styled for dark theme consistency
 
 ### Backend
 - Supabase (PostgreSQL database, authentication, storage)
