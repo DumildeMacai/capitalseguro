@@ -20,6 +20,12 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 - Added notification badge with unread count to InvestorDashboard sidebar
 - Badge disappears when user clicks on Notifications tab
 - Uses destructive variant for visibility
+- Added 3 mock notifications with different types
+
+### Button Colors Harmonization
+- Updated InvestorDashboard buttons to match AdminDashboard styles
+- All buttons now use `variant="outline"` for consistency
+- Removed custom color classes from logout button and other buttons
 
 ## Project Architecture
 

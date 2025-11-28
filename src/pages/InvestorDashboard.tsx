@@ -235,7 +235,7 @@ const InvestorDashboard = () => {
           <SidebarFooter className="border-border">
             <Button
               variant="outline"
-              className="w-full justify-start bg-destructive/10 border-destructive/30 text-destructive hover:bg-destructive/20"
+              className="w-full justify-start"
               onClick={handleLogout}
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -520,7 +520,7 @@ const InvestorDashboard = () => {
                       </div>
 
                       <div className="mt-6">
-                        <Button onClick={() => setEditOpen(true)}>Editar Informações</Button>
+                        <Button variant="outline" onClick={() => setEditOpen(true)}>Editar Informações</Button>
                       </div>
                     </div>
 
@@ -564,7 +564,7 @@ const InvestorDashboard = () => {
                   <CardDescription>Refaça o teste para atualizar seu perfil de risco</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Button onClick={() => setQuestionOpen(true)}>Iniciar Questionário</Button>
+                  <Button variant="outline" onClick={() => setQuestionOpen(true)}>Iniciar Questionário</Button>
                 </CardContent>
               </Card>
 
