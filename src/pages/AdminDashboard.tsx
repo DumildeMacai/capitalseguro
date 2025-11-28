@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { 
   Users, UserCheck, Building, BarChart3, Settings, LogOut, 
-  Bell
+  Bell, Wallet
 } from "lucide-react";
 import AdminSidebar from "@/components/AdminSidebar";
 import AdminOverview from "@/components/AdminOverview";
@@ -13,12 +13,23 @@ import AdminInvestors from "@/components/AdminInvestors";
 import AdminPartners from "@/components/AdminPartners";
 import AdminInvestments from "@/components/AdminInvestments";
 import AdminUsers from "@/components/AdminUsers";
+import AdminDeposits from "@/components/AdminDeposits";
 import { useAuth } from "@/contexts/AuthContext";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState("overview");
   const { signOut } = useAuth();
+
+  const tabs = [
+    { id: "overview", label: "Visão Geral", icon: BarChart3 },
+    { id: "deposits", label: "Depósitos", icon: Wallet },
+    { id: "investors", label: "Investidores", icon: UserCheck },
+    { id: "partners", label: "Parceiros", icon: Users },
+    { id: "investments", label: "Investimentos", icon: Building },
+    { id: "users", label: "Usuários", icon: Users },
+    { id: "settings", label: "Configurações", icon: Settings },
+  ];
 
   const handleLogout = async () => {
     await signOut();
@@ -34,6 +45,7 @@ const AdminDashboard = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl md:text-3xl font-bold">
             {activeTab === "overview" && "Painel Administrativo"}
+            {activeTab === "deposits" && "Gerenciamento de Depósitos"}
             {activeTab === "investors" && "Gerenciamento de Investidores"}
             {activeTab === "partners" && "Gerenciamento de Parceiros"}
             {activeTab === "investments" && "Gerenciamento de Investimentos"}
@@ -53,6 +65,7 @@ const AdminDashboard = () => {
         {/* Tab content */}
         <div className="mt-6">
           {activeTab === "overview" && <AdminOverview />}
+          {activeTab === "deposits" && <AdminDeposits />}
           {activeTab === "investors" && <AdminInvestors />}
           {activeTab === "partners" && <AdminPartners />}
           {activeTab === "investments" && <AdminInvestments />}

@@ -19,6 +19,7 @@ import Privacy from "./pages/Privacy"
 import AdminDashboard from "./pages/AdminDashboard"
 import PartnerDashboard from "./pages/PartnerDashboard"
 import InvestorDashboard from "./pages/InvestorDashboard"
+import DepositPage from "./pages/DepositPage"
 import NotFound from "./pages/NotFound"
 import ProtectedRoute from "./components/ProtectedRoute"
 
@@ -86,6 +87,14 @@ const App = () => {
                 element={
                   <ProtectedRoute requiredUserType="investidor">
                     <InvestorDashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/depositar"
+                element={
+                  <ProtectedRoute requiredUserType="investidor">
+                    <DepositPage />
                   </ProtectedRoute>
                 }
               />

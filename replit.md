@@ -5,47 +5,40 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 
 ## Recent Changes (November 28, 2025)
 
-### Favicon e Open Graph Meta Tags (LATEST - COMPLETED)
+### Deposit System Implementation (LATEST - COMPLETED)
+- **Investor Deposit Form** (`/depositar` route) - Choose payment method and enter amount
+  - Payment methods: Banco BAI (IBAN: AO06 0040 0000 1433 6637 1018 6) and Multicaixa Express (949360828)
+  - Form validation and success notifications
+- **Admin Deposit Approval Dashboard** - New "Depósitos" tab in admin panel
+  - View all pending, approved, rejected deposits
+  - Approve/reject deposits with one-click actions
+  - Shows deposit amount, date, payment method and status
+- **Data Storage**: Using localStorage (MockData) until Supabase table "deposits" is created
+- **Flow**: Investor submits → Admin approves → Balance updated → Notification sent (future)
+- **Test IDs**: Added for all interactive elements (buttons, forms, etc.)
+
+### Favicon e Open Graph Meta Tags (Completed)
 - **Logo favicon configurado**: Uso do logo CS em `public/logo.png`
 - **Open Graph tags** para WhatsApp, Facebook, Telegram e LinkedIn
 - **Twitter Cards** para compartilhamento em redes sociais
 - **Theme color**: `#7E69AB` (purple brand color)
-- Configuração de titulo e descrição otimizados para SEO social sharing
-- Meta tags apontam para `/logo.png` (favicon + og:image)
 
 ### InvestmentCard Dark Theme Standardization (Completed)
-- **Forced dark mode styling for investment cards** to maintain consistency with design mockups
-- Changed cards to use `bg-slate-900` (very dark background) in all modes
+- Forced dark mode styling for investment cards (bg-slate-900)
 - Updated card borders to `border-slate-700`
 - Set category badges to `bg-slate-600` with text-white
-- Return rates display in `text-emerald-400` (green success color)
+- Return rates display in `text-emerald-400`
 - Button gradient uses `bg-gradient-primary` (purple to navy gradient)
 - Progress bars use emerald-green for visual consistency
-- Text hierarchy: white headings, slate-400 descriptions, emerald accents
 
 ### Comprehensive Color Standardization (Completed)
-- **Complete color palette migration to design system tokens** from hardcoded colors
-- Replaced 44+ instances of hardcoded colors across 12 files with semantic design tokens
-- **Color Token Mapping:**
-  - `primary` - purple/magenta brand color (#7E69AB)
-  - `card` - light/dark card backgrounds
-  - `border` - border colors (slate-700 dark)
-  - `muted-foreground` - secondary text (slate-400)
-  - `background` - page backgrounds
-  - `emerald-400` - success/accent actions (100% return rates)
-  - `text-white` - primary text on dark backgrounds
-- **Files Updated:** FeatureCard, HowItWorksSection, InvestmentCard, StatsSection, AdminDashboard, InvestorDashboard, PartnerDashboard, NotFound, Investments, InvestmentDetail, ReturnCalculator, About
+- Complete color palette migration to design system tokens from hardcoded colors
+- Replaced 44+ instances of hardcoded colors across 12 files
 
 ### Branding Updates (Completed)
 - Changed logo from "F"/"C" to "CS" across all components
-- Updated branding in Login.tsx, Navbar.tsx, Footer.tsx, and Dashboard.tsx
-
-### Return Rate Updates (Completed)
-- Changed all return rates from 50% to 100% throughout the application
-
-### Hero Section Copy Updates (Completed)
-- Updated main headline: "Comece a Investir" + "Construa o Seu Legado Financeiro"
-- New hero description focused on passive income and wealth building
+- Updated all return rates to 100%
+- Hero section with passive income messaging
 
 ## Project Architecture
 
@@ -59,8 +52,6 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 
 ### Design System
 - **Color Tokens:** Defined in `tailwind.config.ts` and `src/index.css`
-- **Custom Colors:** navy, purple, gold, success palettes
-- **Gradient Utility:** `bg-gradient-primary` (purple → navy)
 - **All components use design system tokens** - No hardcoded colors
 - Supports automatic light/dark mode switching
 - Investment cards styled for dark theme consistency
@@ -70,14 +61,47 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 - Project ID: xmemmdmyzwimluvgiqal
 
 ### Key Directories
-- `/src/pages/` - Main pages (Login, Dashboard, InvestorDashboard, AdminDashboard, etc.)
-- `/src/components/` - Reusable UI components (all using design tokens)
+- `/src/pages/` - Main pages (Login, Dashboard, InvestorDashboard, AdminDashboard, DepositPage, etc.)
+- `/src/components/` - Reusable UI components (DepositForm, AdminDeposits, etc.)
 - `/src/integrations/supabase/` - Supabase client configuration
 - `/src/contexts/` - React contexts (Auth)
-- `/public/` - Static assets including logo.png for favicon and social sharing
+- `/src/types/` - TypeScript types (investment.ts, auth.ts, deposit.ts)
+- `/public/` - Static assets including logo.png
 
-### Known Issues
-- Storage bucket creation fails due to RLS policies - requires manual SQL scripts in Supabase SQL Editor
+### New Deposit System Files
+- `src/types/deposit.ts` - Deposit and DepositRequest types
+- `src/components/DepositForm.tsx` - Investor deposit form with payment methods
+- `src/components/AdminDeposits.tsx` - Admin deposit approval component
+- `src/pages/DepositPage.tsx` - Deposit page wrapper
+
+### Routes
+- `/` - Home page
+- `/login` - Login/Register
+- `/investments` - Browse investments
+- `/investments/:id` - Investment details
+- `/investidor` - Investor dashboard (protected)
+- `/depositar` - Deposit funds page (protected, investor only)
+- `/admin` - Admin dashboard (protected, admin only)
+- `/parceiro` - Partner dashboard (protected, partner only)
+
+### Known Issues & TODOs
+1. **Deposits Table**: Currently using localStorage (MockData). Need to create "deposits" table in Supabase:
+   ```sql
+   CREATE TABLE deposits (
+     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+     user_id UUID NOT NULL REFERENCES auth.users(id),
+     amount DECIMAL(12, 2) NOT NULL,
+     payment_method VARCHAR(20) NOT NULL,
+     status VARCHAR(20) NOT NULL DEFAULT 'pending',
+     created_at TIMESTAMP DEFAULT now(),
+     approved_at TIMESTAMP,
+     approved_by UUID REFERENCES auth.users(id),
+     rejection_reason TEXT
+   );
+   ```
+2. **Notifications**: Need to implement notification system when deposits are approved/rejected
+3. **Balance Updates**: Need to properly update user account_balance when deposit is approved
+4. **Storage bucket creation**: Fails due to RLS policies - requires manual SQL scripts
 
 ## Running the Project
 ```bash
@@ -86,9 +110,15 @@ npm run dev
 The application runs on port 5000.
 
 ## Social Sharing Configuration
-The site is now properly configured for social media sharing:
+The site is properly configured for social media sharing:
 - **WhatsApp**: Shows CS logo, "Capital Seguro | Gestão de Ativos" title
-- **Facebook**: Shows preview with custom logo and description
-- **Telegram**: Shows complete preview card
-- **LinkedIn**: Professional sharing with full metadata
-- All platforms use `/public/logo.png` as the preview image
+- **Facebook**: Preview with custom logo and description
+- **Telegram**: Complete preview card
+- **LinkedIn**: Professional sharing with metadata
+- All platforms use `/public/logo.png`
+
+## User Preferences
+- Portuguese language (pt-PT)
+- Dark theme for investment cards
+- 100% return rates for all investments
+- Payment methods: Banco BAI and Multicaixa Express
