@@ -59,9 +59,9 @@ export const LoginForm = () => {
           })
 
           if (!userTypeError && userTypeData) {
-            userType = (userTypeData as string).toLowerCase()
-            if (!["admin", "parceiro", "investidor"].includes(userType)) {
-              userType = null
+            const typeStr = String(userTypeData).toLowerCase()
+            if (typeStr === "admin" || typeStr === "parceiro" || typeStr === "investidor") {
+              userType = typeStr as "admin" | "parceiro" | "investidor"
             }
           }
         } catch (userTypeError) {

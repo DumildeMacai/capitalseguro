@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { supabase } from "@/integrations/supabase/client"
 import { motion } from "framer-motion"
-import { Building, CarTaxiFront, Coins } from "lucide-react"
+import { Building, CarTaxiFront } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
@@ -40,7 +40,7 @@ const Investments = () => {
         if (!mounted) return
 
         // Map rows to UI Investment type
-        const mapped = (data || []).map((row: any) => ({
+        const mapped: Investment[] = (data || []).map((row: any) => ({
           id: row.id,
           title: row.titulo || "",
           description: row.descricao || "",
@@ -52,7 +52,8 @@ const Investments = () => {
           totalFunding: row.total_funding || 0,
           image: row.imagem || "",
           colocacao: row.colocacao || 'oportunidades',
-          risk: "Médio",
+          featured: row.colocacao === 'destaque' || row.colocacao === 'pagina_inicial',
+          risk: "Médio" as const,
         }))
 
         setAvailableInvestments(mapped)
@@ -69,7 +70,7 @@ const Investments = () => {
   }, [])
 
   // Lista de investimentos do usuário (simulado)
-  const [myInvestments, setMyInvestments] = useState<UserInvestment[]>([
+  const [myInvestments] = useState<UserInvestment[]>([
     {
       id: "inv-001",
       investmentId: "1",

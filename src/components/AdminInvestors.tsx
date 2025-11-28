@@ -23,15 +23,6 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -44,7 +35,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, Edit, Ban, Bell, MoreVertical, Search } from "lucide-react";
+import { Eye, MoreVertical, Search } from "lucide-react";
 
 interface Investor {
   id: string;
@@ -53,7 +44,6 @@ interface Investor {
   telefone: string | null;
   bio: string | null;
   data_criacao: string | null;
-  status?: string;
 }
 
 const AdminInvestors = () => {
@@ -62,9 +52,6 @@ const AdminInvestors = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
-  const [openNotifyDialog, setOpenNotifyDialog] = useState(false);
-  const [openSuspendDialog, setOpenSuspendDialog] = useState(false);
-  const [notificationMessage, setNotificationMessage] = useState("");
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
@@ -79,18 +66,14 @@ const AdminInvestors = () => {
   const fetchInvestors = async () => {
     try {
       setLoading(true);
-      // Use users_by_role view to get investors (tipo = 'investidor')
       const { data, error } = await supabase
-        .from("users_by_role")
-        .select("*")
+        .from("profiles")
+        .select("id, nome_completo, email, telefone, bio, data_criacao")
         .eq("tipo", "investidor")
         .order("data_criacao", { ascending: false });
 
       if (error) throw error;
-      setInvestors((data || []).map(p => ({
-        ...p,
-        status: p.status || "Ativo"
-      })));
+      setInvestors(data || []);
     } catch (error: any) {
       console.error("Erro ao buscar investidores:", error);
       toast({
@@ -126,7 +109,6 @@ const AdminInvestors = () => {
         .from("profiles")
         .update({
           nome_completo: formData.nome_completo || null,
-          email: formData.email,
           telefone: formData.telefone || null,
         })
         .eq("id", selectedInvestor.id);
@@ -145,76 +127,6 @@ const AdminInvestors = () => {
         variant: "destructive",
         title: "Erro",
         description: "Não foi possível atualizar investidor.",
-      });
-    }
-  };
-
-  const handleSuspendInvestor = async () => {
-    try {
-      if (!selectedInvestor) return;
-
-      const newStatus = (selectedInvestor.status || "Ativo") === "Ativo" ? "Suspenso" : "Ativo";
-
-      const { error } = await supabase
-        .from("profiles")
-        .update({ status: newStatus })
-        .eq("id", selectedInvestor.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: `Investidor ${newStatus === "Ativo" ? "ativado" : "suspenso"} com sucesso.`,
-      });
-
-      setOpenSuspendDialog(false);
-      setSelectedInvestor(null);
-      await fetchInvestors();
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível atualizar status do investidor.",
-      });
-    }
-  };
-
-  const handleSendNotification = async () => {
-    try {
-      if (!selectedInvestor || !notificationMessage.trim()) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: "Digite uma mensagem para enviar.",
-        });
-        return;
-      }
-
-      // Save notification to database
-      const { error } = await supabase.from("notifications").insert({
-        usuario_id: selectedInvestor.id,
-        tipo: "admin",
-        titulo: "Mensagem do Administrador",
-        mensagem: notificationMessage,
-        lido: false,
-        relacionada_a: "geral",
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Sucesso",
-        description: `Notificação enviada para ${selectedInvestor.email}`,
-      });
-
-      setOpenNotifyDialog(false);
-      setNotificationMessage("");
-    } catch (error: any) {
-      console.error("Erro ao enviar notificação:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível enviar notificação.",
       });
     }
   };
@@ -281,9 +193,7 @@ const AdminInvestors = () => {
                       <TableCell>{investor.telefone || "—"}</TableCell>
                       <TableCell>{formatDate(investor.data_criacao)}</TableCell>
                       <TableCell>
-                        <Badge variant={(investor.status || "Ativo") === "Ativo" ? "outline" : "destructive"}>
-                          {investor.status || "Ativo"}
-                        </Badge>
+                        <Badge variant="outline">Ativo</Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <DropdownMenu>
@@ -298,17 +208,6 @@ const AdminInvestors = () => {
                             <DropdownMenuItem onClick={() => handleViewInvestor(investor)}>
                               <Eye className="mr-2 h-4 w-4" />
                               <span>Visualizar/Editar</span>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => { setSelectedInvestor(investor); setOpenSuspendDialog(true); }}>
-                              <Ban className="mr-2 h-4 w-4" />
-                              <span>
-                                {(investor.status || "Ativo") === "Ativo" ? "Suspender" : "Ativar"}
-                              </span>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem onClick={() => { setSelectedInvestor(investor); setOpenNotifyDialog(true); }}>
-                              <Bell className="mr-2 h-4 w-4" />
-                              <span>Notificar</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -349,7 +248,7 @@ const AdminInvestors = () => {
               <label className="text-sm font-medium">Email</label>
               <Input
                 value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                disabled
                 placeholder="email@exemplo.com"
               />
             </div>
@@ -370,54 +269,6 @@ const AdminInvestors = () => {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      <Dialog open={openNotifyDialog} onOpenChange={setOpenNotifyDialog}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Notificar Investidor</DialogTitle>
-            <DialogDescription>
-              Envie uma mensagem para {selectedInvestor?.email}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <textarea
-              className="w-full px-3 py-2 border rounded-md text-sm"
-              rows={5}
-              value={notificationMessage}
-              onChange={(e) => setNotificationMessage(e.target.value)}
-              placeholder="Digite sua mensagem aqui..."
-            />
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenNotifyDialog(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSendNotification}>Enviar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <AlertDialog open={openSuspendDialog} onOpenChange={setOpenSuspendDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {(selectedInvestor?.status || "Ativo") === "Ativo" ? "Suspender Investidor" : "Ativar Investidor"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {(selectedInvestor?.status || "Ativo") === "Ativo"
-                ? `Tem certeza que deseja suspender "${selectedInvestor?.nome_completo}"? O investidor não poderá mais fazer operações.`
-                : `Tem certeza que deseja ativar "${selectedInvestor?.nome_completo}"? O investidor poderá fazer operações novamente.`}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogAction
-            onClick={handleSuspendInvestor}
-            className={(selectedInvestor?.status || "Ativo") === "Ativo" ? "bg-destructive text-destructive-foreground" : "bg-primary"}
-          >
-            {(selectedInvestor?.status || "Ativo") === "Ativo" ? "Suspender" : "Ativar"}
-          </AlertDialogAction>
-          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
