@@ -5,7 +5,14 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 
 ## Recent Changes (November 28, 2025)
 
-### Receipt Upload for Deposits (LATEST - COMPLETED)
+### Receipt Download Feature (LATEST - COMPLETED)
+- **Admin Download** - Admins can download receipt images for offline storage
+  - Download button in receipt modal with icon
+  - Automatic file naming with timestamp: `comprovante-{timestamp}.png`
+  - Success toast notification after download
+  - Works with base64 encoded images
+
+### Receipt Upload for Deposits (COMPLETED)
 - **Investor Upload Flow** - Investors must upload proof/receipt image when requesting deposits
   - File upload input in DepositForm (PNG, JPG, JPEG only, max 5MB)
   - Receipt stored as base64 in localStorage with deposit
@@ -13,7 +20,7 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 - **Admin Receipt Viewer** - New "Comprovante" column in AdminDeposits table
   - Eye icon button to view uploaded receipt
   - Modal dialog displays full-size receipt image
-  - Admin can verify payment before approving deposit
+  - Admin can download receipt before approving deposit
 
 ### Deposit System Implementation (COMPLETED)
 - **Investor Deposit Form** (`/depositar` route) - Choose payment method and enter amount + upload receipt
@@ -23,12 +30,12 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
   - View all pending, approved, rejected deposits
   - Approve/reject deposits with one-click actions
   - Shows deposit amount, date, payment method and status
-  - View receipt image before approving
+  - View/download receipt image before approving
 - **Transaction History** - "Histórico" tab in investor dashboard
   - Shows all deposits, investments with status
   - Real-time updates on deposit approval
 - **Data Storage**: Using localStorage (MockData) until Supabase table "deposits" is created
-- **Flow**: Investor uploads receipt + submits → Admin reviews receipt + approves → Balance updated
+- **Flow**: Investor uploads receipt + submits → Admin reviews/downloads receipt + approves → Balance updated
 - **Test IDs**: Added for all interactive elements (buttons, forms, etc.)
 
 ### Favicon e Open Graph Meta Tags (Completed)
@@ -65,12 +72,12 @@ Capital Seguro is a React + TypeScript investment platform built with Vite, feat
 - `/public/` - Static assets including logo.png
 
 ### Key Files for Deposits
-- `src/types/deposit.ts` - Deposit, DepositRequest, Transaction types (now includes receiptUrl)
+- `src/types/deposit.ts` - Deposit, DepositRequest, Transaction types (includes receiptUrl)
 - `src/components/DepositForm.tsx` - Investor deposit form with file upload
-- `src/components/AdminDeposits.tsx` - Admin deposit approval + receipt viewer
+- `src/components/AdminDeposits.tsx` - Admin deposit approval + receipt viewer + download
 - `src/components/TransactionHistory.tsx` - Transaction history display
 - `src/pages/DepositPage.tsx` - Deposit page wrapper
-- `src/pages/InvestorDashboard.tsx` - Now includes Histórico tab with TransactionHistory
+- `src/pages/InvestorDashboard.tsx` - Includes Histórico tab with TransactionHistory
 
 ### Routes
 - `/` - Home page
@@ -96,10 +103,11 @@ The application runs on port 5000.
 
 ## Deposit System Features
 1. **Investor submits deposit** with receipt photo
-2. **Admin reviews** receipt in modal before approving
-3. **Admin approves** → balance updated automatically
-4. **Investor sees** updated balance in "Saldo Disponível" card
-5. **Transaction history** tracks all deposit activity
+2. **Admin views receipt** in modal with full preview
+3. **Admin downloads receipt** for offline records/verification
+4. **Admin approves/rejects** → balance updated automatically
+5. **Investor sees** updated balance in "Saldo Disponível" card
+6. **Transaction history** tracks all deposit activity
 
 ## User Preferences
 - Portuguese language (pt-PT)
@@ -107,3 +115,4 @@ The application runs on port 5000.
 - 100% return rates for all investments
 - Payment methods: Banco BAI and Multicaixa Express
 - Receipt upload required for all deposits
+- Admin can download/archive receipt images

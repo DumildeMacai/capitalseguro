@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useToast } from "@/hooks/use-toast"
-import { CheckCircle2, XCircle, Loader2, Clock, Eye } from "lucide-react"
+import { CheckCircle2, XCircle, Loader2, Clock, Eye, Download } from "lucide-react"
 import { Deposit } from "@/types/deposit"
 import {
   Dialog,
@@ -23,6 +23,20 @@ export const AdminDeposits = () => {
   const [approvingId, setApprovingId] = useState<string | null>(null)
   const [selectedReceipt, setSelectedReceipt] = useState<string | null>(null)
   const { toast } = useToast()
+
+  const handleDownloadReceipt = (receiptUrl: string) => {
+    try {
+      const link = document.createElement("a")
+      link.href = receiptUrl
+      link.download = `comprovante-${Date.now()}.png`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      toast({ title: "Sucesso", description: "Comprovante baixado com sucesso" })
+    } catch (error) {
+      toast({ title: "Erro", description: "Não foi possível baixar o comprovante", variant: "destructive" })
+    }
+  }
 
   useEffect(() => {
     loadDeposits()
@@ -244,8 +258,23 @@ export const AdminDeposits = () => {
         <Dialog open={!!selectedReceipt} onOpenChange={() => setSelectedReceipt(null)}>
           <DialogContent className="max-w-2xl">
             <DialogHeader>
-              <DialogTitle>Comprovante de Transferência</DialogTitle>
-              <DialogDescription>Foto do comprovante enviado pelo investidor</DialogDescription>
+              <div className="flex items-center justify-between">
+                <div>
+                  <DialogTitle>Comprovante de Transferência</DialogTitle>
+                  <DialogDescription>Foto do comprovante enviado pelo investidor</DialogDescription>
+                </div>
+                {selectedReceipt && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => handleDownloadReceipt(selectedReceipt)}
+                    data-testid="button-download-receipt"
+                  >
+                    <Download className="h-4 w-4 mr-2" />
+                    Baixar
+                  </Button>
+                )}
+              </div>
             </DialogHeader>
             {selectedReceipt && (
               <div className="flex justify-center">
