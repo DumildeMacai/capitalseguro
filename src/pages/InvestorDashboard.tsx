@@ -54,7 +54,7 @@ const InvestorDashboard = () => {
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [show2FA, setShow2FA] = useState(false)
 
-  // load profile on mount
+  // load profile and balance on mount
   useEffect(() => {
     ;(async () => {
       try {
@@ -66,20 +66,22 @@ const InvestorDashboard = () => {
         const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single()
         setProfile(data || null)
         if (data && "avatar_url" in data && data.avatar_url) setAvatarUrl(data.avatar_url as string)
+        
+        // Carregar saldo imediatamente após obter o userId
+        const userBalances = JSON.parse(localStorage.getItem("userBalances") || "{}")
+        setSaldo(userBalances[user.id] || 0)
       } catch (err) {
         setProfile(null)
       }
     })()
   }, [])
 
-  // Load saldo e listen para atualizações
+  // Listen para atualizações em tempo real
   useEffect(() => {
     const loadSaldo = () => {
       const userBalances = JSON.parse(localStorage.getItem("userBalances") || "{}")
       setSaldo(userBalances[userId] || 0)
     }
-    
-    loadSaldo()
     
     window.addEventListener("balanceUpdated", loadSaldo)
     window.addEventListener("depositApproved", loadSaldo)

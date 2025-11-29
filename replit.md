@@ -56,6 +56,13 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - **InvestorDashboard.tsx**: Integração com diálogos/modais
 - **Status**: ✅ IMPLEMENTADO
 
+#### 8. ✅ FIX: Saldo Disponível - Carregamento Instantâneo
+- **Problema**: Saldo demorava a aparecer (apenas após cliques ou trocas de página)
+- **Causa**: Saldo era carregado do localStorage APÓS setUserId
+- **Solução**: Carregar saldo imediatamente no primeiro useEffect junto com profile
+- **Resultado**: Saldo agora aparece INSTANTANEAMENTE ao entrar no dashboard
+- **Status**: ✅ CORRIGIDO
+
 ---
 
 ## Próximos Passos (Opcional)
