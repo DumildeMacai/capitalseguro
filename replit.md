@@ -66,6 +66,22 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - **Resultado**: TODOS os dados aparecem INSTANTANEAMENTE (0ms de delay)
 - **Status**: ✅ RESOLVIDO
 
+#### 9. ✅ FIX: Saldo Volta ao Zero Após Depósito - Problema Resolvido
+- **Problema**: Quando usuário clicava em "Depositar", o saldo voltava a 0
+- **Causas Corrigidas**:
+  1. **AdminDeposits.tsx**: Estava SUBSTITUINDO saldo em vez de ADICIONAR
+     - Antes: `saldo_disponivel: deposit.amount` ❌
+     - Depois: `saldo_disponivel: currentBalance + deposit.amount` ✅
+  2. **InvestorDashboard.tsx**: Carregava do localStorage (vazio) em vez do Supabase
+     - Antes: localStorage (unreliable)
+     - Depois: Supabase `profiles.saldo_disponivel` (fonte de verdade) ✅
+  3. **Real-time listeners**: Agora busca saldo do Supabase ao receber eventos
+- **Resultado**: 
+  - Saldo agora PERSISTE corretamente
+  - Depósitos somam ao saldo existente
+  - Saldo atualiza em tempo real
+- **Status**: ✅ CORRIGIDO
+
 ---
 
 ## Próximos Passos (Opcional)

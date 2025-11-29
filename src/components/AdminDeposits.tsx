@@ -101,17 +101,29 @@ export const AdminDeposits = () => {
 
       if (depositError) throw depositError
 
-      // Atualizar saldo do investidor em profiles
+      // Buscar saldo atual do investidor
+      const { data: profileData, error: profileError } = await (supabase
+        .from("profiles")
+        .select("saldo_disponivel")
+        .eq("id", deposit.userId)
+        .single() as any)
+
+      if (profileError) throw profileError
+
+      const currentBalance = Number(profileData?.saldo_disponivel || 0)
+      const newBalance = currentBalance + deposit.amount
+
+      // Atualizar saldo do investidor em profiles - ADICIONAR ao saldo existente
       const { error: balanceError } = await (supabase
         .from("profiles")
         .update({
-          saldo_disponivel: deposit.amount,
+          saldo_disponivel: newBalance,
         } as any)
         .eq("id", deposit.userId) as any)
 
       if (balanceError) throw balanceError
 
-      toast({ title: "Sucesso", description: `Depósito de Kz ${deposit.amount} aprovado! Saldo atualizado.` })
+      toast({ title: "Sucesso", description: `Depósito de Kz ${deposit.amount.toLocaleString("pt-PT")} aprovado! Novo saldo: Kz ${newBalance.toLocaleString("pt-PT")}` })
       loadDeposits()
 
       // Disparar evento customizado para atualizar dashboard

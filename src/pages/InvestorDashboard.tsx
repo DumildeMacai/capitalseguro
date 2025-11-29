@@ -91,9 +91,9 @@ const InvestorDashboard = () => {
           setAvatarUrl(profileData.avatar_url as string)
         }
 
-        // Process balance - load immediately from localStorage
-        const userBalances = JSON.parse(localStorage.getItem("userBalances") || "{}")
-        setSaldo(userBalances[user.id] || 0)
+        // Process balance - load from Supabase database (saldo_disponivel)
+        const saldoDoDb = profileData?.saldo_disponivel ? Number(profileData.saldo_disponivel) : 0
+        setSaldo(saldoDoDb)
 
         // Process investments
         if (investmentsResponse.data) {
@@ -115,19 +115,27 @@ const InvestorDashboard = () => {
     })()
   }, [])
 
-  // Listen para atualizações em tempo real
+  // Listen para atualizações em tempo real do saldo
   useEffect(() => {
-    const loadSaldo = () => {
-      const userBalances = JSON.parse(localStorage.getItem("userBalances") || "{}")
-      setSaldo(userBalances[userId] || 0)
+    if (!userId) return
+
+    const loadSaldoFromDb = async () => {
+      try {
+        const { data } = await supabase.from("profiles").select("saldo_disponivel").eq("id", userId).single()
+        if (data) {
+          setSaldo(Number(data.saldo_disponivel || 0))
+        }
+      } catch (err) {
+        console.error("Erro ao carregar saldo atualizado:", err)
+      }
     }
     
-    window.addEventListener("balanceUpdated", loadSaldo)
-    window.addEventListener("depositApproved", loadSaldo)
+    window.addEventListener("balanceUpdated", loadSaldoFromDb)
+    window.addEventListener("depositApproved", loadSaldoFromDb)
     
     return () => {
-      window.removeEventListener("balanceUpdated", loadSaldo)
-      window.removeEventListener("depositApproved", loadSaldo)
+      window.removeEventListener("balanceUpdated", loadSaldoFromDb)
+      window.removeEventListener("depositApproved", loadSaldoFromDb)
     }
   }, [userId])
 
