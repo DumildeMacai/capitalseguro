@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { useToast } from "@/hooks/use-toast"
+import { useRateLimit } from "@/hooks/useRateLimit"
 import { AlertCircle, CheckCircle2, Loader2, Upload } from "lucide-react"
 
 export const DepositForm = () => {
@@ -20,6 +21,7 @@ export const DepositForm = () => {
   const [receipt, setReceipt] = useState<string | null>(null)
   const [receiptFileName, setReceiptFileName] = useState("")
   const [submitted, setSubmitted] = useState(false)
+  const { isAllowed } = useRateLimit("deposit", "")
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
@@ -40,7 +42,7 @@ export const DepositForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     if (!amount || parseFloat(amount) <= 0) {
       toast({ title: "Erro", description: "Valor deve ser maior que 0", variant: "destructive" })
       return
@@ -56,26 +58,32 @@ export const DepositForm = () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Utilizador não autenticado")
 
-      // Guardar depósito em localStorage (MockData até tabela existir no Supabase)
-      const deposits = JSON.parse(localStorage.getItem("deposits") || "[]")
-      const newDeposit = {
-        id: `dep-${Date.now()}`,
-        userId: user.id,
-        amount: parseFloat(amount),
-        paymentMethod,
-        receiptUrl: receipt,
-        status: "pending",
-        createdAt: new Date().toISOString(),
+      // Verificar rate limiting (limitador client-side)
+      const depositLimiterCheck = isAllowed()
+      if (!depositLimiterCheck) {
+        throw new Error("Limite de requisições atingido. Tente novamente em alguns minutos.")
       }
-      deposits.push(newDeposit)
-      localStorage.setItem("deposits", JSON.stringify(deposits))
+
+      // Inserir depósito em Supabase
+      const { error: insertError } = await (supabase
+        .from("deposits")
+        .insert({
+          usuario_id: user.id,
+          valor: parseFloat(amount),
+          metodo_pagamento: paymentMethod,
+          comprovante_url: receipt,
+          status: "pendente",
+          data_criacao: new Date().toISOString(),
+        }) as any)
+
+      if (insertError) throw insertError
 
       setSubmitted(true)
       toast({ title: "Sucesso", description: "Depósito solicitado! Aguardando aprovação do admin." })
-      
+
       // Disparar evento para notificar admin em tempo real
       window.dispatchEvent(new Event("newDepositRequest"))
-      
+
       setTimeout(() => {
         navigate("/investidor")
       }, 2000)

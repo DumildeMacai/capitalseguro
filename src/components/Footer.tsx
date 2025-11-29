@@ -79,23 +79,8 @@ const Footer = () => {
             <h3 className="text-lg font-semibold mb-4">Investments</h3>
             <ul className="space-y-3">
               <li>
-                <Link to="/investments/real-estate" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Real Estate
-                </Link>
-              </li>
-              <li>
-                <Link to="/investments/businesses" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Business Partners
-                </Link>
-              </li>
-              <li>
-                <Link to="/investments/properties" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Property Investment
-                </Link>
-              </li>
-              <li>
-                <Link to="/investments/calculator" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Return Calculator
+                <Link to="/investments" className="text-muted-foreground hover:text-foreground transition-colors">
+                  Browse Investments
                 </Link>
               </li>
             </ul>

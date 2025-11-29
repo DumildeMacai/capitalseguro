@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { motion } from "framer-motion"
+import { supabase } from "@/integrations/supabase/client"
 import {
   ArrowLeft,
   TrendingUp,
@@ -46,107 +47,53 @@ const InvestmentDetail = () => {
   const [investmentAmount, setInvestmentAmount] = useState<number>(0)
   const [activeTab, setActiveTab] = useState("visao-geral")
 
-  const availableInvestments: Investment[] = [
-    {
-      id: "1",
-      title: "Edifício Comercial Talatona",
-      description:
-        "Investimento em edifício comercial premium na zona sul da cidade. Alto potencial de valorização e renda por aluguel.",
-      category: "Imóveis",
-      icon: <Building className="text-primary" />,
-      returnRate: 100,
-      minInvestment: 50000,
-      remaining: 2500000,
-      totalFunding: 10000000,
-      image:
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
-      featured: true,
-      risk: "Médio",
-    },
-    {
-      id: "2",
-      title: "Rede de Táxi Coletivo (Candongueiros)",
-      description: "Investimento em frota de táxis coletivos operando em rotas de alta demanda.",
-      category: "Transporte",
-      icon: <CarTaxiFront className="text-blue-500" />,
-      returnRate: 100,
-      minInvestment: 20000,
-      remaining: 800000,
-      totalFunding: 1500000,
-      image:
-        "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1774&q=80",
-      featured: false,
-      risk: "Alto",
-    },
-    {
-      id: "3",
-      title: "Rede de Mototáxi (Kupapata)",
-      description: "Financiamento coletivo para expansão de operadores de mototáxi nas zonas urbanas.",
-      category: "Transporte",
-      icon: <CarTaxiFront className="text-orange-500" />,
-      returnRate: 100,
-      minInvestment: 10000,
-      remaining: 350000,
-      totalFunding: 500000,
-      image:
-        "https://images.unsplash.com/photo-1558981852-426c6c22a060?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
-      featured: true,
-      risk: "Alto",
-    },
-    {
-      id: "4",
-      title: "Supermercado Bela Vista",
-      description: "Participação em rede de supermercados em expansão nas principais cidades.",
-      category: "Empresas",
-      icon: <Building className="text-green-600" />,
-      returnRate: 100,
-      minInvestment: 100000,
-      remaining: 5000000,
-      totalFunding: 15000000,
-      image:
-        "https://images.unsplash.com/photo-1604719312566-8912e9667d9f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1674&q=80",
-      featured: false,
-      risk: "Baixo",
-    },
-    {
-      id: "5",
-      title: "Condomínio Residencial Miramar",
-      description: "Investimento em desenvolvimento de condomínio residencial de luxo com 50 apartamentos.",
-      category: "Imóveis",
-      icon: <Building className="text-primary" />,
-      returnRate: 100,
-      minInvestment: 75000,
-      remaining: 4000000,
-      totalFunding: 20000000,
-      image:
-        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1773&q=80",
-      featured: true,
-      risk: "Médio",
-    },
-    {
-      id: "6",
-      title: "Tech Startup Angolana",
-      description: "Investimento em startup de tecnologia em fase de expansão focada no mercado local.",
-      category: "Empresas",
-      icon: <Coins className="text-blue-500" />,
-      returnRate: 100,
-      minInvestment: 25000,
-      remaining: 900000,
-      totalFunding: 1200000,
-      image:
-        "https://images.unsplash.com/photo-1504384308090-c894fdcc538d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
-      featured: false,
-      risk: "Alto",
-    },
-  ]
-
   useEffect(() => {
-    const found = availableInvestments.find((inv) => inv.id === id)
-    if (found) {
-      setInvestment(found)
-      setInvestmentAmount(found.minInvestment)
+    let mounted = true
+
+    const fetchInvestment = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("investimentos")
+          .select("*")
+          .eq("id", id)
+          .single()
+
+        if (error) throw error
+
+        if (!mounted) return
+
+        const row = data as any
+        const mapped: Investment = {
+          id: row.id.toString(),
+          title: row.titulo || "",
+          description: row.descricao || "",
+          category: row.categoria || "Outros",
+          icon: row.categoria === "Imóveis" ? <Building className="text-primary" /> : 
+                row.categoria === "Transporte" ? <CarTaxiFront className="text-blue-500" /> :
+                <Coins className="text-blue-500" />,
+          returnRate: row.retorno_estimado || 0,
+          minInvestment: row.valor_minimo || 0,
+          remaining: row.remaining || 0,
+          totalFunding: row.total_funding || 0,
+          image: row.imagem || "",
+          featured: row.colocacao === 'destaque' || row.colocacao === 'pagina_inicial',
+          risk: "Médio" as const,
+        }
+
+        setInvestment(mapped)
+        setInvestmentAmount(mapped.minInvestment)
+      } catch (err) {
+        console.error("Erro ao buscar investimento:", err)
+      } finally {
+        if (mounted) setLoading(false)
+      }
     }
-    setLoading(false)
+
+    fetchInvestment()
+
+    return () => {
+      mounted = false
+    }
   }, [id])
 
   if (loading) {
@@ -181,24 +128,70 @@ const InvestmentDetail = () => {
   const numInvestors = Math.floor(Math.random() * 500) + 100
   const daysRemaining = Math.floor(Math.random() * 90) + 30
 
-  const handleInvest = () => {
-    if (investmentAmount < investment.minInvestment) {
+  const handleInvest = async () => {
+    try {
+      if (investmentAmount < investment.minInvestment) {
+        toast({
+          title: "Valor inválido",
+          description: `O investimento mínimo é AOA ${investment.minInvestment.toLocaleString("pt-PT")}`,
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Get current user
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        toast({
+          title: "Erro",
+          description: "Você precisa estar autenticado para investir",
+          variant: "destructive",
+        })
+        navigate("/login")
+        return
+      }
+
+      // Save investment to database
+      const { error } = await supabase
+        .from("inscricoes_investimentos")
+        .insert({
+          usuario_id: user.id,
+          investimento_id: investment.id, // investment.id é string UUID
+          valor_investido: investmentAmount,
+          status: "Ativo",
+          data_inscricao: new Date().toISOString(),
+        })
+
+      if (error) {
+        console.error("Erro ao salvar investimento:", error)
+        toast({
+          title: "Erro ao processar investimento",
+          description: "Não foi possível salvar seu investimento. Tente novamente.",
+          variant: "destructive",
+        })
+        return
+      }
+
       toast({
-        title: "Valor inválido",
-        description: `O investimento mínimo é AOA ${investment.minInvestment.toLocaleString("pt-PT")}`,
+        title: "Investimento processado",
+        description: `Você investiu AOA ${investmentAmount.toLocaleString("pt-PT")} em ${investment.title}`,
+      })
+
+      // Dispatch custom event for real-time update
+      window.dispatchEvent(new Event("investmentCreated"))
+
+      setTimeout(() => {
+        navigate("/investidor")
+      }, 1500)
+    } catch (err) {
+      console.error("Erro no investimento:", err)
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro ao processar seu investimento",
         variant: "destructive",
       })
-      return
     }
-
-    toast({
-      title: "Investimento processado",
-      description: `Você investiu AOA ${investmentAmount.toLocaleString("pt-PT")} em ${investment.title}`,
-    })
-
-    setTimeout(() => {
-      navigate("/investidor")
-    }, 1500)
   }
 
   const features = [
@@ -238,7 +231,7 @@ const InvestmentDetail = () => {
     { factor: "Financeiro", level: "Baixo", description: "Estrutura de capital estável" },
   ]
 
-  const similarInvestments = availableInvestments.filter((inv) => inv.id !== id && inv.category === investment.category)
+  const similarInvestments: Investment[] = [] // Será preenchido com investimentos similares do Supabase se necessário
 
   return (
     <div className="min-h-screen bg-white dark:bg-background">

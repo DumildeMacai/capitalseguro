@@ -51,16 +51,30 @@ export const AdminDeposits = () => {
 
   const loadDeposits = async () => {
     try {
-      // Carregar de localStorage (MockData) - com reload forçado
-      const depositsRaw = localStorage.getItem("deposits") || "[]"
-      const deposits = JSON.parse(depositsRaw)
-      setDeposits(deposits)
+      const { data, error } = await (supabase
+        .from("deposits")
+        .select("*")
+        .order("data_criacao", { ascending: false }) as any)
+
+      if (error) throw error
+
+      const formattedDeposits: Deposit[] = (data || []).map((d: any) => ({
+        id: d.id,
+        userId: d.usuario_id,
+        amount: Number(d.valor),
+        paymentMethod: d.metodo_pagamento === "bank_transfer" ? "bank_transfer" : "multicaixa",
+        receiptUrl: d.comprovante_url,
+        status: d.status === "pendente" ? "pending" : d.status === "aprovado" ? "approved" : "rejected",
+        createdAt: d.data_criacao,
+        approvedAt: d.data_aprovacao,
+        approvedBy: d.aprovado_por,
+        rejectionReason: d.motivo_rejeicao,
+      }))
+      setDeposits(formattedDeposits)
       setLoading(false)
-      // TODO: Integrar com Supabase quando tabela existir
     } catch (error: any) {
       console.error("Erro ao carregar depósitos:", error)
       setLoading(false)
-      // Não mostrar toast em polling para não irritar o user
     }
   }
 
@@ -70,38 +84,36 @@ export const AdminDeposits = () => {
       const deposit = deposits.find((d) => d.id === depositId)
       if (!deposit) throw new Error("Depósito não encontrado")
 
-      // Atualizar depósitos
-      const updatedDeposits = deposits.map((d: any) =>
-        d.id === depositId
-          ? { ...d, status: "approved", approvedAt: new Date().toISOString() }
-          : d
-      )
-      localStorage.setItem("deposits", JSON.stringify(updatedDeposits))
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error("Admin não autenticado")
 
-      // Atualizar saldo do investidor
-      const userBalances = JSON.parse(localStorage.getItem("userBalances") || "{}")
-      const currentBalance = userBalances[deposit.userId] || 0
-      userBalances[deposit.userId] = currentBalance + deposit.amount
-      localStorage.setItem("userBalances", JSON.stringify(userBalances))
+      const approvedAt = new Date().toISOString()
 
-      // Criar histórico de transação
-      const transactions = JSON.parse(localStorage.getItem("transactions") || "[]")
-      transactions.push({
-        id: `tx-${Date.now()}`,
-        userId: deposit.userId,
-        type: "deposit",
-        amount: deposit.amount,
-        status: "approved",
-        description: `Depósito aprovado - ${deposit.paymentMethod === 'bank_transfer' ? 'Banco BAI' : 'Multicaixa'}`,
-        createdAt: deposit.createdAt,
-        approvedAt: new Date().toISOString(),
-        relatedDepositId: depositId
-      })
-      localStorage.setItem("transactions", JSON.stringify(transactions))
+      // Atualizar depósito em Supabase
+      const { error: depositError } = await (supabase
+        .from("deposits")
+        .update({
+          status: "aprovado",
+          data_aprovacao: approvedAt,
+          aprovado_por: user.id,
+        })
+        .eq("id", depositId) as any)
+
+      if (depositError) throw depositError
+
+      // Atualizar saldo do investidor em profiles
+      const { error: balanceError } = await (supabase
+        .from("profiles")
+        .update({
+          saldo_disponivel: deposit.amount,
+        } as any)
+        .eq("id", deposit.userId) as any)
+
+      if (balanceError) throw balanceError
 
       toast({ title: "Sucesso", description: `Depósito de Kz ${deposit.amount} aprovado! Saldo atualizado.` })
       loadDeposits()
-      
+
       // Disparar evento customizado para atualizar dashboard
       window.dispatchEvent(new Event("depositApproved"))
       window.dispatchEvent(new Event("balanceUpdated"))
@@ -116,15 +128,19 @@ export const AdminDeposits = () => {
   const handleReject = async (depositId: string) => {
     setApprovingId(depositId)
     try {
-      // Atualizar localStorage
-      const updatedDeposits = deposits.map((d: any) =>
-        d.id === depositId ? { ...d, status: "rejected" } : d
-      )
-      localStorage.setItem("deposits", JSON.stringify(updatedDeposits))
+      // Atualizar depósito em Supabase
+      const { error } = await (supabase
+        .from("deposits")
+        .update({
+          status: "rejeitado",
+        })
+        .eq("id", depositId) as any)
+
+      if (error) throw error
 
       toast({ title: "Sucesso", description: "Depósito rejeitado" })
       loadDeposits()
-      
+
       // Disparar evento customizado
       window.dispatchEvent(new Event("depositRejected"))
     } catch (error: any) {

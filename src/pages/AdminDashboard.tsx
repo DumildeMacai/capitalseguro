@@ -43,7 +43,7 @@ const AdminDashboard = () => {
       {/* Main Content */}
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold">
+          <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-admin-panel">
             {activeTab === "overview" && "Painel Administrativo"}
             {activeTab === "deposits" && "Gerenciamento de Depósitos"}
             {activeTab === "investors" && "Gerenciamento de Investidores"}
@@ -53,10 +53,10 @@ const AdminDashboard = () => {
             {activeTab === "settings" && "Configurações"}
           </h1>
           <div className="flex items-center gap-4">
-            <Button variant="outline" size="icon">
+            <Button variant="outline" size="icon" data-testid="button-notifications">
               <Bell className="h-[1.2rem] w-[1.2rem]" />
             </Button>
-            <Button onClick={handleLogout} variant="outline">
+            <Button onClick={handleLogout} variant="outline" data-testid="button-logout">
               Sair
             </Button>
           </div>

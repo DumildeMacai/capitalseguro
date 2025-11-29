@@ -41,6 +41,7 @@ const InvestorDashboard = () => {
   const [userId, setUserId] = useState<string>("")
   const [unreadNotifications, setUnreadNotifications] = useState(3)
   const [saldo, setSaldo] = useState(0)
+  const [myInvestments, setMyInvestments] = useState<any[]>([])
 
   // load profile on mount
   useEffect(() => {
@@ -78,6 +79,48 @@ const InvestorDashboard = () => {
     }
   }, [userId])
 
+  // Fetch investimentos do usuário do Supabase
+  useEffect(() => {
+    if (!userId) return
+
+    const fetchUserInvestments = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("inscricoes_investimentos")
+          .select(`
+            *,
+            investimentos (
+              id,
+              titulo,
+              categoria,
+              retorno_estimado
+            )
+          `)
+          .eq("usuario_id", userId)
+          .order("data_inscricao", { ascending: false })
+
+        if (error) throw error
+
+        // Map para formato da tabela
+        const formatted = (data || []).map((inv: any) => ({
+          id: inv.id,
+          name: inv.investimentos?.titulo || "Investimento",
+          type: inv.investimentos?.categoria || "Outro",
+          value: inv.valor_investido || 0,
+          date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
+          status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
+          return: inv.investimentos?.retorno_estimado || 0,
+        }))
+
+        setMyInvestments(formatted)
+      } catch (err) {
+        console.error("Erro ao buscar investimentos:", err)
+      }
+    }
+
+    fetchUserInvestments()
+  }, [userId])
+
   const handleLogout = async () => {
     await supabase.auth.signOut()
     navigate("/login")
@@ -90,66 +133,9 @@ const InvestorDashboard = () => {
     { name: "Outros", value: 10000 },
   ]
 
-  const recentInvestments = [
-    {
-      id: "inv-001",
-      name: "Edifício Comercial Centro",
-      type: "Imóvel",
-      value: 25000,
-      date: "2023-09-15",
-      status: "Ativo",
-      return: 12.5,
-    },
-    {
-      id: "inv-002",
-      name: "Tech Solutions Inc.",
-      type: "Empresa",
-      value: 10000,
-      date: "2023-10-05",
-      status: "Em análise",
-      return: 8.2,
-    },
-    {
-      id: "inv-003",
-      name: "EcoResort Expansão",
-      type: "Imóvel",
-      value: 15000,
-      date: "2023-11-20",
-      status: "Ativo",
-      return: 15.0,
-    },
-  ]
+  const recentInvestments = myInvestments
 
-  const featuredInvestments = [
-    {
-      id: "real-estate-fund-1",
-      title: "Fundo Imobiliário Premium",
-      description:
-        "Portfólio diversificado de propriedades comerciais em localizações privilegiadas com renda estável de aluguel.",
-      category: "Imóveis",
-      returnRate: 100,
-      minInvestment: 5000,
-      remaining: 1250000,
-      totalFunding: 5000000,
-      image:
-        "https://images.unsplash.com/photo-1560518883-ce09059eeffa?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1773&q=80",
-      featured: true,
-    },
-    {
-      id: "commercial-plaza-development",
-      title: "Desenvolvimento de Plaza Comercial",
-      description:
-        "Novo desenvolvimento de plaza comercial em área urbana de alto tráfego com acordos de locação pré-assinados.",
-      category: "Imóveis",
-      returnRate: 100,
-      minInvestment: 15000,
-      remaining: 2000000,
-      totalFunding: 6000000,
-      image:
-        "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1770&q=80",
-      featured: true,
-    },
-  ]
+  const featuredInvestments = []
 
   return (
     <SidebarProvider>
