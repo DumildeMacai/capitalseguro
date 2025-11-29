@@ -304,7 +304,9 @@ const InvestorDashboard = () => {
                   <div className="flex justify-between items-start mb-4">
                     <div>
                       <p className="text-muted-foreground text-sm mb-1">Total Investido</p>
-                      <p className="text-4xl font-bold text-foreground">Kz 100.000</p>
+                      <p className="text-4xl font-bold text-foreground">
+                        Kz {myInvestments.reduce((sum, inv) => sum + inv.value, 0).toLocaleString("pt-PT")}
+                      </p>
                     </div>
                     <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
                       <Wallet className="text-primary" size={24} />

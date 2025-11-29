@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Transaction } from "@/types/deposit"
+import { supabase } from "@/integrations/supabase/client"
 import { TrendingUp, TrendingDown, Clock } from "lucide-react"
 
 interface TransactionHistoryProps {
@@ -10,7 +10,8 @@ interface TransactionHistoryProps {
 }
 
 export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
-  const [transactions, setTransactions] = useState<Transaction[]>([])
+  const [transactions, setTransactions] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadTransactions()
@@ -26,15 +27,35 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
     }
   }, [userId])
 
-  const loadTransactions = () => {
+  const loadTransactions = async () => {
     try {
-      const allTransactions = JSON.parse(localStorage.getItem("transactions") || "[]")
-      const userTransactions = allTransactions.filter((t: Transaction) => t.userId === userId)
-      setTransactions(userTransactions.sort((a: Transaction, b: Transaction) => 
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-      ))
+      setLoading(true)
+      // Carregar depósitos do Supabase
+      const { data, error } = await (supabase
+        .from("deposits")
+        .select("*")
+        .eq("usuario_id", userId)
+        .order("data_criacao", { ascending: false }) as any)
+
+      if (error) throw error
+
+      // Transformar depósitos em transações
+      const formattedTransactions = (data || []).map((d: any) => ({
+        id: d.id,
+        userId: d.usuario_id,
+        type: "deposit",
+        amount: Number(d.valor),
+        status: d.status === "pendente" ? "pending" : d.status === "aprovado" ? "approved" : "rejected",
+        description: `Depósito via ${d.metodo_pagamento === "bank_transfer" ? "Banco BAI" : "Multicaixa Express"}`,
+        createdAt: d.data_criacao,
+        approvedAt: d.data_aprovacao,
+      }))
+
+      setTransactions(formattedTransactions)
     } catch (error) {
       console.error("Erro ao carregar histórico:", error)
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -52,6 +73,17 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
     return type === "deposit" ? <TrendingDown className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />
   }
 
+  if (loading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Histórico de Transações</CardTitle>
+          <CardDescription>Carregando...</CardDescription>
+        </CardHeader>
+      </Card>
+    )
+  }
+
   if (transactions.length === 0) {
     return (
       <Card>
@@ -59,6 +91,10 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
           <CardTitle>Histórico de Transações</CardTitle>
           <CardDescription>Nenhuma transação registrada</CardDescription>
         </CardHeader>
+        <CardContent className="text-center py-8">
+          <Clock className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+          <p className="text-muted-foreground">Seus depósitos aparecerão aqui</p>
+        </CardContent>
       </Card>
     )
   }
@@ -67,7 +103,7 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
     <Card>
       <CardHeader>
         <CardTitle>Histórico de Transações</CardTitle>
-        <CardDescription>Todas as suas transações</CardDescription>
+        <CardDescription>Todas as suas transações ({transactions.length})</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
@@ -86,10 +122,10 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
                 <TableRow key={tx.id}>
                   <TableCell className="flex items-center gap-2">
                     {getTypeIcon(tx.type)}
-                    <span className="capitalize">{tx.type}</span>
+                    <span className="capitalize">{tx.type === "deposit" ? "Depósito" : tx.type}</span>
                   </TableCell>
                   <TableCell>{tx.description}</TableCell>
-                  <TableCell className="text-right font-semibold">{tx.amount.toFixed(2)}</TableCell>
+                  <TableCell className="text-right font-semibold">{Number(tx.amount).toLocaleString("pt-PT")}</TableCell>
                   <TableCell>
                     <Badge variant={getStatusBadge(tx.status)}>
                       {tx.status === "approved" && "Aprovado"}

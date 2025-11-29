@@ -84,6 +84,22 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
+#### 10. ✅ FIX: Análise de Histórico, Saldo Investido e Saldo Disponível - Completo
+- **Saldo Disponível**: ✅ Carrega corretamente de `profiles.saldo_disponivel`
+- **Total Investido**: 
+  - Antes: Hardcoded `Kz 100.000` ❌
+  - Depois: Dinâmico com `myInvestments.reduce()` ✅
+  - Agora reflete investimentos REAIS em tempo real
+- **Histórico de Transações**:
+  - Antes: localStorage (vazio/unreliable) ❌
+  - Depois: Carrega de `deposits` table no Supabase ✅
+  - Mostra: Tipo, Descrição, Valor, Status, Data
+  - Atualiza em tempo real com eventos customizados
+- **TypeScript**: Adicionado `saldo_disponivel: number` ao tipo Profile
+- **Status**: ✅ RESOLVIDO
+
+---
+
 ## Próximos Passos (Opcional)
 
 1. **Email Notifications** - SendGrid para alertar quando depósito aprovado

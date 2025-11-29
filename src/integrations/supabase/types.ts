@@ -103,6 +103,7 @@ export type Database = {
           nome_completo: string | null
           provincia: string | null
           ramo_negocio: string | null
+          saldo_disponivel: number
           telefone: string | null
           tipo: Database["public"]["Enums"]["user_type"]
         }
