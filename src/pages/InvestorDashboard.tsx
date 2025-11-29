@@ -16,6 +16,13 @@ import {
   SidebarMenuItem,
   SidebarMenuButton,
 } from "@/components/ui/sidebar"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Home, PieChart, Search, User, Settings, LogOut, Wallet, TrendingUp, Bell } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import InvestmentCard from "@/components/InvestmentCard"
@@ -25,6 +32,8 @@ import EditProfileModal from "@/components/profile/EditProfileModal"
 import UploadAvatar from "@/components/profile/UploadAvatar"
 import Questionnaire from "@/components/profile/Questionnaire"
 import NotificationsSection from "@/components/NotificationsSection"
+import { ChangePasswordForm } from "@/components/security/ChangePasswordForm"
+import { TwoFactorAuthForm } from "@/components/security/TwoFactorAuthForm"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
@@ -42,6 +51,8 @@ const InvestorDashboard = () => {
   const [unreadNotifications, setUnreadNotifications] = useState(3)
   const [saldo, setSaldo] = useState(0)
   const [myInvestments, setMyInvestments] = useState<any[]>([])
+  const [showChangePassword, setShowChangePassword] = useState(false)
+  const [show2FA, setShow2FA] = useState(false)
 
   // load profile on mount
   useEffect(() => {
@@ -673,8 +684,20 @@ const InvestorDashboard = () => {
                   <div className="space-y-2 pt-4">
                     <h3 className="font-medium">Segurança</h3>
                     <div className="space-y-4">
-                      <Button variant="outline">Alterar Senha</Button>
-                      <Button variant="outline">Ativar Autenticação em Duas Etapas</Button>
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setShowChangePassword(true)}
+                        data-testid="button-open-change-password"
+                      >
+                        Alterar Senha
+                      </Button>
+                      <Button 
+                        variant="outline"
+                        onClick={() => setShow2FA(true)}
+                        data-testid="button-open-2fa"
+                      >
+                        Ativar Autenticação em Duas Etapas
+                      </Button>
                     </div>
                   </div>
                 </CardContent>
@@ -683,6 +706,30 @@ const InvestorDashboard = () => {
           </Tabs>
         </main>
       </div>
+
+      {/* Change Password Dialog */}
+      <Dialog open={showChangePassword} onOpenChange={setShowChangePassword}>
+        <DialogContent className="sm:max-w-md flex items-center justify-center">
+          <ChangePasswordForm
+            onClose={() => setShowChangePassword(false)}
+            onSuccess={() => {
+              setShowChangePassword(false)
+            }}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Two Factor Auth Dialog */}
+      <Dialog open={show2FA} onOpenChange={setShow2FA}>
+        <DialogContent className="sm:max-w-md flex items-center justify-center">
+          <TwoFactorAuthForm
+            onClose={() => setShow2FA(false)}
+            onSuccess={() => {
+              setShow2FA(false)
+            }}
+          />
+        </DialogContent>
+      </Dialog>
     </SidebarProvider>
   )
 }

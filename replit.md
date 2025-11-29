@@ -44,8 +44,23 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
+#### 7. ✅ Segurança do Investidor - Alterar Senha & 2FA
+- **ChangePasswordForm.tsx**: Componente completo para alterar senha
+  - Validação de senha atual, nova e confirmação
+  - Mínimo 6 caracteres
+  - Integrado com Supabase Auth
+- **TwoFactorAuthForm.tsx**: Componente para habilitar 2FA
+  - Gera códigos de backup
+  - Interface para inserir código do autenticador
+  - Suporta Google Authenticator, Authy, etc
+- **InvestorDashboard.tsx**: Integração com diálogos/modais
+- **Status**: ✅ IMPLEMENTADO
+
+---
+
 ## Próximos Passos (Opcional)
 
 1. **Email Notifications** - SendGrid para alertar quando depósito aprovado
 2. **Server-side Rate Limiting** - Camada extra de segurança
 3. **Payment Integration** - Stripe/Paypal automático
+4. **Advanced 2FA** - SMS verification codes
