@@ -100,6 +100,20 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
+#### 11. ✅ FIX: Investimentos em Destaque Não Apareciam - RESOLVIDO
+- **Problema**: Quando admin altera investimento para "em destaque", próximo não aparecia
+- **Causa**: `featuredInvestments` era um array vazio, nunca buscava dados do Supabase
+- **Solução**:
+  1. Adicionado estado `featuredInvestmentsState` no InvestorDashboard
+  2. Criado `useEffect` que busca investimentos onde `colocacao = 'destaque'` do Supabase
+  3. Transformados dados para formato esperado pelo InvestmentCard
+  4. Adicionados listeners para eventos 'investmentFeatured' e 'investmentUpdated'
+  5. AdminInvestments agora dispara `window.dispatchEvent(new CustomEvent('investmentFeatured'))` quando um investimento é marcado como "destaque"
+- **Resultado**: Investimentos em destaque carregam e atualizam em TEMPO REAL
+- **Status**: ✅ RESOLVIDO
+
+---
+
 ## Próximos Passos (Opcional)
 
 1. **Email Notifications** - SendGrid para alertar quando depósito aprovado

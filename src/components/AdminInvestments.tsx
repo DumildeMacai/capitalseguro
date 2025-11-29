@@ -207,6 +207,10 @@ const AdminInvestments = () => {
           title: "Sucesso",
           description: "Investimento atualizado com sucesso.",
         });
+        // Disparar evento para atualizar dashboard do investidor se for "destaque"
+        if (formData.colocacao === 'destaque') {
+          window.dispatchEvent(new CustomEvent('investmentFeatured'));
+        }
       } else {
         const { error } = await supabase
           .from("investimentos")
@@ -217,6 +221,10 @@ const AdminInvestments = () => {
           title: "Sucesso",
           description: "Investimento criado com sucesso.",
         });
+        // Disparar evento para atualizar dashboard do investidor se for "destaque"
+        if (formData.colocacao === 'destaque') {
+          window.dispatchEvent(new CustomEvent('investmentFeatured'));
+        }
       }
 
       setOpenDialog(false);

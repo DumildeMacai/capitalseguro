@@ -51,6 +51,7 @@ const InvestorDashboard = () => {
   const [unreadNotifications, setUnreadNotifications] = useState(3)
   const [saldo, setSaldo] = useState(0)
   const [myInvestments, setMyInvestments] = useState<any[]>([])
+  const [featuredInvestmentsState, setFeaturedInvestmentsState] = useState<any[]>([])
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [show2FA, setShow2FA] = useState(false)
 
@@ -115,6 +116,52 @@ const InvestorDashboard = () => {
     })()
   }, [])
 
+  // Buscar investimentos em destaque
+  useEffect(() => {
+    const loadFeaturedInvestments = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("investimentos")
+          .select("*")
+          .eq("colocacao", "destaque")
+          .eq("ativo", true)
+          .order("data_criacao", { ascending: false })
+
+        if (error) throw error
+
+        // Transformar dados para o formato esperado pelo InvestmentCard
+        const formatted = (data || []).map((inv: any) => ({
+          id: inv.id,
+          title: inv.titulo,
+          description: inv.descricao || "",
+          category: inv.categoria || "Investimento",
+          returnRate: inv.retorno_estimado || 0,
+          minInvestment: inv.valor_minimo || 0,
+          image: inv.imagem || "/placeholder.svg",
+          featured: true,
+          remaining: inv.valor_minimo || 0,
+          totalFunding: inv.valor_minimo ? (inv.valor_minimo * 2) : 10000,
+        }))
+
+        setFeaturedInvestmentsState(formatted)
+      } catch (err) {
+        console.error("Erro ao carregar investimentos em destaque:", err)
+      }
+    }
+
+    loadFeaturedInvestments()
+    
+    // Recarregar quando investimentos mudam
+    const handleUpdate = () => loadFeaturedInvestments()
+    window.addEventListener("investmentUpdated", handleUpdate)
+    window.addEventListener("investmentFeatured", handleUpdate)
+
+    return () => {
+      window.removeEventListener("investmentUpdated", handleUpdate)
+      window.removeEventListener("investmentFeatured", handleUpdate)
+    }
+  }, [])
+
   // Listen para atualizações em tempo real do saldo
   useEffect(() => {
     if (!userId) return
@@ -152,8 +199,7 @@ const InvestorDashboard = () => {
   ]
 
   const recentInvestments = myInvestments
-
-  const featuredInvestments = []
+  const featuredInvestments = featuredInvestmentsState
 
   return (
     <SidebarProvider>
