@@ -6,9 +6,17 @@ import {
   SheetContent,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Menu, LogOut, LayoutDashboard, User } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
+  const { user, userType, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
 
   // Attach scroll listener once
@@ -58,16 +66,69 @@ const Navbar = () => {
 
         {/* Auth Buttons */}
         <div className="hidden md:flex items-center gap-4">
-          <Link to="/login">
-            <Button variant="outline" className="font-medium">
-              Entrar
-            </Button>
-          </Link>
-          <Link to="/login?register=true">
-            <Button className="bg-gradient-primary hover:opacity-90 font-medium">
-              Comece a Investir
-            </Button>
-          </Link>
+          {user ? (
+            <>
+              <div className="text-sm text-muted-foreground">
+                {user.email}
+              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <User size={16} />
+                    {userType === "investidor" && "Investidor"}
+                    {userType === "parceiro" && "Parceiro"}
+                    {userType === "admin" && "Admin"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  {userType === "investidor" && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/investidor" className="flex items-center gap-2 cursor-pointer">
+                        <LayoutDashboard size={16} />
+                        Dashboard do Investidor
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {userType === "parceiro" && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/parceiro" className="flex items-center gap-2 cursor-pointer">
+                        <LayoutDashboard size={16} />
+                        Dashboard de Parceiro
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  {userType === "admin" && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center gap-2 cursor-pointer">
+                        <LayoutDashboard size={16} />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  <DropdownMenuItem
+                    onClick={() => signOut()}
+                    className="text-red-600 cursor-pointer"
+                  >
+                    <LogOut size={16} className="mr-2" />
+                    Logout
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
+          ) : (
+            <>
+              <Link to="/login">
+                <Button variant="outline" className="font-medium">
+                  Entrar
+                </Button>
+              </Link>
+              <Link to="/login?register=true">
+                <Button className="bg-gradient-primary hover:opacity-90 font-medium">
+                  Comece a Investir
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile Menu */}
@@ -94,16 +155,58 @@ const Navbar = () => {
               </Link>
               
               <div className="border-t mt-4 pt-4 px-4 flex flex-col gap-3">
-                <Link to="/login" className="w-full">
-                  <Button variant="outline" className="w-full font-medium">
-                    Entrar
-                  </Button>
-                </Link>
-                <Link to="/login?register=true" className="w-full">
-                  <Button className="w-full bg-gradient-primary hover:opacity-90 font-medium">
-                    Comece a Investir
-                  </Button>
-                </Link>
+                {user ? (
+                  <>
+                    <div className="text-xs text-muted-foreground mb-2">
+                      {user.email}
+                    </div>
+                    {userType === "investidor" && (
+                      <Link to="/investidor" className="w-full">
+                        <Button variant="outline" className="w-full justify-start font-medium gap-2">
+                          <LayoutDashboard size={16} />
+                          Dashboard
+                        </Button>
+                      </Link>
+                    )}
+                    {userType === "parceiro" && (
+                      <Link to="/parceiro" className="w-full">
+                        <Button variant="outline" className="w-full justify-start font-medium gap-2">
+                          <LayoutDashboard size={16} />
+                          Dashboard
+                        </Button>
+                      </Link>
+                    )}
+                    {userType === "admin" && (
+                      <Link to="/admin" className="w-full">
+                        <Button variant="outline" className="w-full justify-start font-medium gap-2">
+                          <LayoutDashboard size={16} />
+                          Admin
+                        </Button>
+                      </Link>
+                    )}
+                    <Button
+                      variant="destructive"
+                      className="w-full justify-start font-medium gap-2"
+                      onClick={() => signOut()}
+                    >
+                      <LogOut size={16} />
+                      Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Link to="/login" className="w-full">
+                      <Button variant="outline" className="w-full font-medium">
+                        Entrar
+                      </Button>
+                    </Link>
+                    <Link to="/login?register=true" className="w-full">
+                      <Button className="w-full bg-gradient-primary hover:opacity-90 font-medium">
+                        Comece a Investir
+                      </Button>
+                    </Link>
+                  </>
+                )}
               </div>
             </nav>
           </SheetContent>
