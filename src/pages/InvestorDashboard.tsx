@@ -54,7 +54,7 @@ const InvestorDashboard = () => {
   const [showChangePassword, setShowChangePassword] = useState(false)
   const [show2FA, setShow2FA] = useState(false)
 
-  // load profile and balance on mount
+  // Load ALL data in parallel immediately on mount
   useEffect(() => {
     ;(async () => {
       try {
@@ -62,15 +62,54 @@ const InvestorDashboard = () => {
           data: { user },
         } = await supabase.auth.getUser()
         if (!user) return
-        setUserId(user.id)
-        const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single()
-        setProfile(data || null)
-        if (data && "avatar_url" in data && data.avatar_url) setAvatarUrl(data.avatar_url as string)
         
-        // Carregar saldo imediatamente após obter o userId
+        // Set userId first so dependent useEffects work
+        setUserId(user.id)
+        
+        // Load EVERYTHING in parallel - profile, balance, and investments
+        const [profileResponse, investmentsResponse] = await Promise.all([
+          supabase.from("profiles").select("*").eq("id", user.id).single(),
+          supabase
+            .from("inscricoes_investimentos")
+            .select(`
+              *,
+              investimentos (
+                id,
+                titulo,
+                categoria,
+                retorno_estimado
+              )
+            `)
+            .eq("usuario_id", user.id)
+            .order("data_inscricao", { ascending: false })
+        ])
+
+        // Process profile
+        const profileData = profileResponse.data
+        setProfile(profileData || null)
+        if (profileData && "avatar_url" in profileData && profileData.avatar_url) {
+          setAvatarUrl(profileData.avatar_url as string)
+        }
+
+        // Process balance - load immediately from localStorage
         const userBalances = JSON.parse(localStorage.getItem("userBalances") || "{}")
         setSaldo(userBalances[user.id] || 0)
+
+        // Process investments
+        if (investmentsResponse.data) {
+          const formatted = (investmentsResponse.data || []).map((inv: any) => ({
+            id: inv.id,
+            name: inv.investimentos?.titulo || "Investimento",
+            type: inv.investimentos?.categoria || "Outro",
+            value: inv.valor_investido || 0,
+            date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
+            status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
+            return: inv.investimentos?.retorno_estimado || 0,
+          }))
+          setMyInvestments(formatted)
+        }
       } catch (err) {
+        console.error("Erro ao carregar dados do dashboard:", err)
         setProfile(null)
       }
     })()
@@ -90,48 +129,6 @@ const InvestorDashboard = () => {
       window.removeEventListener("balanceUpdated", loadSaldo)
       window.removeEventListener("depositApproved", loadSaldo)
     }
-  }, [userId])
-
-  // Fetch investimentos do usuário do Supabase
-  useEffect(() => {
-    if (!userId) return
-
-    const fetchUserInvestments = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("inscricoes_investimentos")
-          .select(`
-            *,
-            investimentos (
-              id,
-              titulo,
-              categoria,
-              retorno_estimado
-            )
-          `)
-          .eq("usuario_id", userId)
-          .order("data_inscricao", { ascending: false })
-
-        if (error) throw error
-
-        // Map para formato da tabela
-        const formatted = (data || []).map((inv: any) => ({
-          id: inv.id,
-          name: inv.investimentos?.titulo || "Investimento",
-          type: inv.investimentos?.categoria || "Outro",
-          value: inv.valor_investido || 0,
-          date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
-          status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
-          return: inv.investimentos?.retorno_estimado || 0,
-        }))
-
-        setMyInvestments(formatted)
-      } catch (err) {
-        console.error("Erro ao buscar investimentos:", err)
-      }
-    }
-
-    fetchUserInvestments()
   }, [userId])
 
   const handleLogout = async () => {
