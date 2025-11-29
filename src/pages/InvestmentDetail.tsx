@@ -46,6 +46,8 @@ const InvestmentDetail = () => {
   const [loading, setLoading] = useState(true)
   const [investmentAmount, setInvestmentAmount] = useState<number>(0)
   const [activeTab, setActiveTab] = useState("visao-geral")
+  const [alreadyInvested, setAlreadyInvested] = useState(false)
+  const [checkingInvestment, setCheckingInvestment] = useState(true)
 
   useEffect(() => {
     let mounted = true
@@ -82,6 +84,9 @@ const InvestmentDetail = () => {
 
         setInvestment(mapped)
         setInvestmentAmount(mapped.minInvestment)
+        
+        // Verificar se o usuário já investiu neste investimento
+        checkIfAlreadyInvested(row.id.toString())
       } catch (err) {
         console.error("Erro ao buscar investimento:", err)
       } finally {
@@ -95,6 +100,36 @@ const InvestmentDetail = () => {
       mounted = false
     }
   }, [id])
+
+  const checkIfAlreadyInvested = async (investmentId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        setCheckingInvestment(false)
+        return
+      }
+
+      const { data, error } = await supabase
+        .from("inscricoes_investimentos")
+        .select("id")
+        .eq("usuario_id", user.id)
+        .eq("investimento_id", investmentId)
+        .single()
+
+      if (error && error.code !== "PGRST116") {
+        console.error("Erro ao verificar investimento:", error)
+      }
+
+      if (data) {
+        setAlreadyInvested(true)
+      }
+    } catch (err) {
+      console.error("Erro ao verificar investimento:", err)
+    } finally {
+      setCheckingInvestment(false)
+    }
+  }
 
   if (loading) {
     return (
@@ -165,9 +200,21 @@ const InvestmentDetail = () => {
 
       if (error) {
         console.error("Erro ao salvar investimento:", error)
+        
+        // Detectar erro de duplicate key
+        if (error.code === "23505") {
+          setAlreadyInvested(true)
+          toast({
+            title: "Investimento já realizado",
+            description: "Você já possui um investimento ativo neste produto. Acesse seu dashboard para mais detalhes.",
+            variant: "destructive",
+          })
+          return
+        }
+        
         toast({
           title: "Erro ao processar investimento",
-          description: "Não foi possível salvar seu investimento. Tente novamente.",
+          description: error.message || "Não foi possível salvar seu investimento. Tente novamente.",
           variant: "destructive",
         })
         return
@@ -700,6 +747,7 @@ const InvestmentDetail = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => setInvestmentAmount(amount)}
+                          disabled={alreadyInvested || checkingInvestment}
                           className="text-xs hover:bg-primary hover:text-primary-foreground transition-colors"
                         >
                           AOA {(amount / 1000).toFixed(0)}K
@@ -708,12 +756,28 @@ const InvestmentDetail = () => {
                     </div>
                   </div>
 
+                  {alreadyInvested && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="p-4 rounded-lg bg-amber-500/15 border border-amber-500/30 flex gap-3"
+                    >
+                      <AlertCircle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="font-semibold text-amber-800 dark:text-amber-200">Investimento já realizado</p>
+                        <p className="text-sm text-amber-700 dark:text-amber-300">Você já possui um investimento ativo neste produto.</p>
+                      </div>
+                    </motion.div>
+                  )}
+
                   <Button
                     onClick={handleInvest}
-                    className="w-full bg-gradient-to-r from-primary via-primary to-primary/90 hover:shadow-lg transition-all h-12 text-base font-semibold"
+                    disabled={alreadyInvested || checkingInvestment}
+                    className="w-full bg-gradient-to-r from-primary via-primary to-primary/90 hover:shadow-lg transition-all h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+                    data-testid="button-invest-now"
                   >
                     <CreditCard className="mr-2" size={20} />
-                    Investir Agora
+                    {alreadyInvested ? "Investimento Realizado" : "Investir Agora"}
                   </Button>
 
                   <div className="space-y-2 pt-2 border-t border-border/50">
