@@ -13,7 +13,7 @@ const DepositPage = () => {
       <div className="max-w-4xl mx-auto">
         <Button
           variant="ghost"
-          onClick={() => navigate("/investor/dashboard")}
+          onClick={() => navigate("/investidor")}
           className="mb-6"
           data-testid="button-back"
         >
