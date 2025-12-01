@@ -31,18 +31,43 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         const {
           data: { user },
         } = await supabase.auth.getUser()
-        if (!user) return
+        if (!user) {
+          console.error("Usuário não encontrado")
+          return
+        }
 
+        console.log("Carregando saldo para usuário:", user.id)
         setUserId(user.id)
 
-        const { data: profileData } = await supabase
+        const { data: profileData, error } = await supabase
           .from("profiles")
           .select("saldo_disponivel")
           .eq("id", user.id)
           .single()
 
+        if (error) {
+          console.error("Erro ao carregar perfil:", error)
+        }
+
         if (profileData) {
-          setSaldo(Number(profileData.saldo_disponivel) || 0)
+          const saldoCarregado = Number(profileData.saldo_disponivel) || 0
+          console.log("Saldo carregado:", saldoCarregado)
+          setSaldo(saldoCarregado)
+        } else {
+          console.warn("Perfil não encontrado, aguardando...")
+          // Fallback após 500ms
+          setTimeout(async () => {
+            const { data: retryData } = await supabase
+              .from("profiles")
+              .select("saldo_disponivel")
+              .eq("id", user.id)
+              .single()
+            if (retryData) {
+              const saldoRetry = Number(retryData.saldo_disponivel) || 0
+              console.log("Saldo carregado (retry):", saldoRetry)
+              setSaldo(saldoRetry)
+            }
+          }, 500)
         }
       } catch (err) {
         console.error("Erro ao carregar saldo:", err)
