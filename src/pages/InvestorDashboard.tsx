@@ -28,6 +28,7 @@ import { Home, PieChart, Search, User, Settings, LogOut, Wallet, TrendingUp, Bel
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import InvestmentCard from "@/components/InvestmentCard"
 import InvestorPortfolioChart from "@/components/InvestorPortfolioChart"
+import ReturnsEvolutionChart from "@/components/ReturnsEvolutionChart"
 import InvestmentOptions from "@/components/InvestmentOptions"
 import EditProfileModal from "@/components/profile/EditProfileModal"
 import UploadAvatar from "@/components/profile/UploadAvatar"
@@ -668,8 +669,14 @@ const InvestorDashboard = () => {
                     <CardDescription>Evolução dos ganhos ao longo do tempo</CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="h-80 flex items-center justify-center">
-                      <p className="text-muted-foreground text-center">Gráfico de linha com evolução temporal</p>
+                    <div className="h-80">
+                      {myInvestments.length > 0 ? (
+                        <ReturnsEvolutionChart investments={myInvestments} />
+                      ) : (
+                        <div className="flex items-center justify-center h-full">
+                          <p className="text-muted-foreground text-center">Nenhum investimento para exibir</p>
+                        </div>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

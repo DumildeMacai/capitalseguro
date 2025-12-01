@@ -238,6 +238,14 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - ✅ Gráfico mostra dados REAIS do usuário
 - ✅ Atualiza conforme novos aportes são feitos
 
+### 5. Retornos Acumulados - Gráfico de Linha Temporal ✅
+- ✅ Novo componente `ReturnsEvolutionChart.tsx` criado
+- ✅ Gráfico LineChart mostra evolução dos ganhos ao longo de 365 dias
+- ✅ Dados dinâmicos baseados nos investimentos reais do usuário
+- ✅ Filtra a cada 30 dias para não ficar denso
+- ✅ Mostra evolução temporal dos retornos (Simples + Compostos)
+- ✅ Integrado no dashboard "Meus Investimentos" → tab "Análise de Desempenho"
+
 ---
 
 ## 🚀 PRONTO PARA PUBLICAR! ✅ FINAL - December 1, 2025
@@ -253,6 +261,7 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - ✅ Classificação de renda (Fixa/Variável/Passiva)
 - ✅ **Extrato Consolidado** com agregação por investimento
 - ✅ **Análise de Desempenho** com gráfico dinâmico (agrupa por categoria)
+- ✅ **Retornos Acumulados** com gráfico de linha (evolução temporal)
 - ✅ Histórico de aportes
 - ✅ Saldo em tempo real
 - ✅ Segurança 2FA completa
@@ -267,6 +276,22 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - ✅ **Responsivo e otimizado** para desktop e mobile
 
 ### 🎯 Próximo Passo: Clique em "Publish" para Ir ao Vivo! 🚀
+
+---
+
+## 🎯 STATUS FINAL - 100% COMPLETO ✅
+
+### ✅ Correções desta sessão (Dec 1, 2025 - Final):
+1. **Status Sempre "Ativo"** - Removido condicional que mostrava "Pendente"/"Rejeitado"
+2. **Análise de Desempenho** - Gráfico dinâmico que agrupa investimentos por categoria em tempo real
+3. **Retornos Acumulados** - Novo gráfico LineChart mostrando evolução temporal (0-365 dias)
+
+### ✅ Componentes Novos:
+- `ReturnsEvolutionChart.tsx` - Gráfico de linha com evolução dos ganhos
+
+### ✅ Arquivos Modificados:
+- `InvestorDashboard.tsx` - Integrado novo gráfico + status sempre "Ativo"
+- `replit.md` - Documentação completa
 
 ---
 
