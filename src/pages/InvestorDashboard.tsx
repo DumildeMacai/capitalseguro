@@ -101,7 +101,7 @@ const InvestorDashboard = () => {
             value: inv.valor_investido || 0,
             date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
             dateISO: inv.data_inscricao,
-            status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
+            status: "Ativo",
             return: inv.investimentos?.retorno_estimado || 0,
             tipoJuros: inv.investimentos?.tipo_juros || "simples",
             tipoRenda: inv.investimentos?.tipo_renda || "fixa",
@@ -236,7 +236,7 @@ const InvestorDashboard = () => {
           value: inv.valor_investido || 0,
           date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
           dateISO: inv.data_inscricao,
-          status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
+          status: "Ativo",
           return: inv.investimentos?.retorno_estimado || 0,
           tipoJuros: inv.investimentos?.tipo_juros || "simples",
           tipoRenda: inv.investimentos?.tipo_renda || "fixa",
@@ -292,12 +292,19 @@ const InvestorDashboard = () => {
     return endDate.toLocaleDateString("pt-PT")
   }
 
-  const portfolioData = [
-    { name: "Imóveis", value: 50000 },
-    { name: "Empresas", value: 25000 },
-    { name: "Startups", value: 15000 },
-    { name: "Outros", value: 10000 },
-  ]
+  // Gera dados dinâmicos para o gráfico, agrupando por categoria
+  const portfolioData = myInvestments.length > 0 
+    ? Object.values(
+        myInvestments.reduce((acc: any, inv: any) => {
+          const category = inv.type || "Outro"
+          if (!acc[category]) {
+            acc[category] = { name: category, value: 0 }
+          }
+          acc[category].value += inv.value
+          return acc
+        }, {})
+      )
+    : [{ name: "Sem investimentos", value: 0 }]
 
   const recentInvestments = myInvestments
   const featuredInvestments = featuredInvestmentsState
@@ -564,7 +571,7 @@ const InvestorDashboard = () => {
                 {/* Portfolio Distribution */}
                 <div className="bg-card rounded-xl border border-border p-6">
                   <h3 className="text-xl font-bold text-foreground mb-4">Distribuição</h3>
-                  <InvestorPortfolioChart data={portfolioData} />
+                  <InvestorPortfolioChart data={portfolioData as any} />
                 </div>
               </div>
 
@@ -650,7 +657,7 @@ const InvestorDashboard = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="h-80">
-                      <InvestorPortfolioChart data={portfolioData} showBars={true} />
+                      <InvestorPortfolioChart data={portfolioData as any} showBars={true} />
                     </div>
                   </CardContent>
                 </Card>
