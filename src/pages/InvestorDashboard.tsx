@@ -104,6 +104,7 @@ const InvestorDashboard = () => {
             type: inv.investimentos?.categoria || "Outro",
             value: inv.valor_investido || 0,
             date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
+            dateISO: inv.data_inscricao, // Armazenar data ISO original para cálculos
             status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
             return: inv.investimentos?.retorno_estimado || 0,
           }))
@@ -170,6 +171,7 @@ const InvestorDashboard = () => {
       try {
         const { data } = await supabase.from("profiles").select("saldo_disponivel").eq("id", userId).single()
         if (data) {
+          console.log("Saldo atualizado:", data.saldo_disponivel)
           setSaldo(Number(data.saldo_disponivel || 0))
         }
       } catch (err) {
@@ -192,6 +194,25 @@ const InvestorDashboard = () => {
       window.removeEventListener("investmentStatusUpdated", handleInvestmentStatusUpdate)
       window.removeEventListener("investmentApproved", handleInvestmentStatusUpdate)
     }
+  }, [userId])
+
+  // Recarregar saldo imediatamente quando o userId está pronto (fallback)
+  useEffect(() => {
+    if (!userId) return
+    
+    const timeout = setTimeout(async () => {
+      try {
+        const { data } = await supabase.from("profiles").select("saldo_disponivel").eq("id", userId).single()
+        if (data) {
+          console.log("Saldo carregado (fallback):", data.saldo_disponivel)
+          setSaldo(Number(data.saldo_disponivel || 0))
+        }
+      } catch (err) {
+        console.error("Erro ao carregar saldo (fallback):", err)
+      }
+    }, 500)
+    
+    return () => clearTimeout(timeout)
   }, [userId])
 
   // Recarrega investimentos do usuário com status atualizado
@@ -221,6 +242,7 @@ const InvestorDashboard = () => {
           type: inv.investimentos?.categoria || "Outro",
           value: inv.valor_investido || 0,
           date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
+          dateISO: inv.data_inscricao, // Armazenar data ISO original para cálculos
           status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
           return: inv.investimentos?.retorno_estimado || 0,
         }))
@@ -239,8 +261,8 @@ const InvestorDashboard = () => {
   // Calcula retorno acumulado diário (não anual imediato)
   const calculateDailyReturn = () => {
     return myInvestments.reduce((total, inv) => {
-      // Calcular dias desde a data de investimento
-      const investmentDate = new Date(inv.date)
+      // Calcular dias desde a data de investimento - usar dateISO (ISO string)
+      const investmentDate = new Date(inv.dateISO || inv.date)
       const today = new Date()
       const daysElapsed = Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24))
       
