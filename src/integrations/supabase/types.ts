@@ -14,13 +14,209 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      deposits: {
+        Row: {
+          aprovado_por: string | null
+          comprovante_url: string | null
+          created_at: string | null
+          data_aprovacao: string | null
+          id: string
+          metodo: string
+          status: string | null
+          usuario_id: string
+          valor: number
+        }
+        Insert: {
+          aprovado_por?: string | null
+          comprovante_url?: string | null
+          created_at?: string | null
+          data_aprovacao?: string | null
+          id?: string
+          metodo: string
+          status?: string | null
+          usuario_id: string
+          valor: number
+        }
+        Update: {
+          aprovado_por?: string | null
+          comprovante_url?: string | null
+          created_at?: string | null
+          data_aprovacao?: string | null
+          id?: string
+          metodo?: string
+          status?: string | null
+          usuario_id?: string
+          valor?: number
+        }
+        Relationships: []
+      }
+      inscricoes_investimentos: {
+        Row: {
+          data_aprovacao: string | null
+          data_inscricao: string | null
+          id: string
+          investimento_id: string
+          status: string | null
+          usuario_id: string
+          valor_investido: number
+        }
+        Insert: {
+          data_aprovacao?: string | null
+          data_inscricao?: string | null
+          id?: string
+          investimento_id: string
+          status?: string | null
+          usuario_id: string
+          valor_investido: number
+        }
+        Update: {
+          data_aprovacao?: string | null
+          data_inscricao?: string | null
+          id?: string
+          investimento_id?: string
+          status?: string | null
+          usuario_id?: string
+          valor_investido?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inscricoes_investimentos_investimento_id_fkey"
+            columns: ["investimento_id"]
+            isOneToOne: false
+            referencedRelation: "investimentos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investimentos: {
+        Row: {
+          ativo: boolean | null
+          categoria: string | null
+          colocacao: string | null
+          criado_por: string | null
+          data_criacao: string | null
+          descricao: string | null
+          id: string
+          imagem: string | null
+          prazo_minimo: number | null
+          remaining: number | null
+          retorno_estimado: number | null
+          risco: string | null
+          titulo: string
+          total_funding: number | null
+          valor_minimo: number | null
+        }
+        Insert: {
+          ativo?: boolean | null
+          categoria?: string | null
+          colocacao?: string | null
+          criado_por?: string | null
+          data_criacao?: string | null
+          descricao?: string | null
+          id?: string
+          imagem?: string | null
+          prazo_minimo?: number | null
+          remaining?: number | null
+          retorno_estimado?: number | null
+          risco?: string | null
+          titulo: string
+          total_funding?: number | null
+          valor_minimo?: number | null
+        }
+        Update: {
+          ativo?: boolean | null
+          categoria?: string | null
+          colocacao?: string | null
+          criado_por?: string | null
+          data_criacao?: string | null
+          descricao?: string | null
+          id?: string
+          imagem?: string | null
+          prazo_minimo?: number | null
+          remaining?: number | null
+          retorno_estimado?: number | null
+          risco?: string | null
+          titulo?: string
+          total_funding?: number | null
+          valor_minimo?: number | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          cidade: string | null
+          created_at: string | null
+          data_nascimento: string | null
+          documento_numero: string | null
+          documento_tipo: string | null
+          documento_url: string | null
+          email: string | null
+          empresa_nome: string | null
+          endereco: string | null
+          id: string
+          is_admin: boolean | null
+          nif: string | null
+          nome_completo: string | null
+          pais: string | null
+          ramo_negocio: string | null
+          saldo_disponivel: number | null
+          telefone: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          cidade?: string | null
+          created_at?: string | null
+          data_nascimento?: string | null
+          documento_numero?: string | null
+          documento_tipo?: string | null
+          documento_url?: string | null
+          email?: string | null
+          empresa_nome?: string | null
+          endereco?: string | null
+          id: string
+          is_admin?: boolean | null
+          nif?: string | null
+          nome_completo?: string | null
+          pais?: string | null
+          ramo_negocio?: string | null
+          saldo_disponivel?: number | null
+          telefone?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          cidade?: string | null
+          created_at?: string | null
+          data_nascimento?: string | null
+          documento_numero?: string | null
+          documento_tipo?: string | null
+          documento_url?: string | null
+          email?: string | null
+          empresa_nome?: string | null
+          endereco?: string | null
+          id?: string
+          is_admin?: boolean | null
+          nif?: string | null
+          nome_completo?: string | null
+          pais?: string | null
+          ramo_negocio?: string | null
+          saldo_disponivel?: number | null
+          telefone?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_type: { Args: { user_id: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

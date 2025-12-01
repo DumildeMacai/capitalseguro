@@ -71,12 +71,12 @@ const AdminPartners = () => {
       // Fetch profiles that have empresa_nome (likely partners)
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, nome_completo, email, telefone, empresa_nome, ramo_negocio, data_criacao")
+        .select("id, nome_completo, email, telefone, empresa_nome, ramo_negocio, created_at")
         .not("empresa_nome", "is", null)
-        .order("data_criacao", { ascending: false });
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setPartners(data || []);
+      setPartners((data || []) as any);
     } catch (error: any) {
       console.error("Erro ao buscar parceiros:", error);
       toast({

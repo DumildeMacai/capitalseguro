@@ -31,9 +31,9 @@ import {
 
 interface UserData {
   id: string;
-  email: string;
+  email: string | null;
   nome_completo: string | null;
-  tipo: 'admin' | 'investidor' | 'parceiro';
+  is_admin: boolean | null;
   telefone: string | null;
 }
 
@@ -55,13 +55,13 @@ const AdminUsers = () => {
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('*');
+        .select('id, email, nome_completo, is_admin, telefone');
         
       if (error) {
         throw error;
       }
       
-      setUsers(data as UserData[]);
+      setUsers((data || []) as UserData[]);
     } catch (error: any) {
       console.error("Erro ao buscar usuários:", error);
       toast({
@@ -88,8 +88,11 @@ const AdminUsers = () => {
     try {
       setOpenModal(false);
       
-      // Using RPC function directly with parameters as object
-      const { error } = await supabase.rpc('set_user_as_admin', { user_email: email });
+      // Update is_admin directly on profiles table
+      const { error } = await supabase
+        .from('profiles')
+        .update({ is_admin: true })
+        .eq('id', userId);
       
       if (error) throw error;
       
@@ -159,19 +162,17 @@ const AdminUsers = () => {
                     <TableCell>{user.email}</TableCell>
                     <TableCell>
                       <div className="flex items-center">
-                        {user.tipo === 'admin' ? (
+                        {user.is_admin ? (
                           <Shield className="h-4 w-4 mr-1 text-red-500" />
-                        ) : user.tipo === 'parceiro' ? (
-                          <UserCheck className="h-4 w-4 mr-1 text-blue-500" />
                         ) : (
                           <UserX className="h-4 w-4 mr-1 text-green-500" />
                         )}
-                        {user.tipo}
+                        {user.is_admin ? 'Admin' : 'Investidor'}
                       </div>
                     </TableCell>
                     <TableCell>{user.telefone || "Não informado"}</TableCell>
                     <TableCell>
-                      {user.tipo !== 'admin' && (
+                      {!user.is_admin && (
                         <Button 
                           variant="outline" 
                           size="sm" 
@@ -202,15 +203,11 @@ const AdminUsers = () => {
           <div className="text-sm flex items-center gap-4">
             <div className="flex items-center">
               <Shield className="h-4 w-4 mr-1 text-red-500" />
-              <span>Admin: {users.filter(u => u.tipo === 'admin').length}</span>
-            </div>
-            <div className="flex items-center">
-              <UserCheck className="h-4 w-4 mr-1 text-blue-500" />
-              <span>Parceiro: {users.filter(u => u.tipo === 'parceiro').length}</span>
+              <span>Admin: {users.filter(u => u.is_admin).length}</span>
             </div>
             <div className="flex items-center">
               <UserX className="h-4 w-4 mr-1 text-green-500" />
-              <span>Investidor: {users.filter(u => u.tipo === 'investidor').length}</span>
+              <span>Investidor: {users.filter(u => !u.is_admin).length}</span>
             </div>
           </div>
         </CardFooter>

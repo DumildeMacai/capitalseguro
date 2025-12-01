@@ -28,12 +28,12 @@ const EditProfileModal: React.FC<Props> = ({ open, onOpenChange, onSaved }) => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
         const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).single();
-        if (error) return;
-        setName(data?.nome_completo || "");
-        setPhone(data?.telefone || "");
-        setAddress(data?.endereco || "");
-        setCity(data?.cidade || "");
-        setProvince(data?.provincia || "");
+        if (error || !data) return;
+        setName(data.nome_completo || "");
+        setPhone(data.telefone || "");
+        setAddress(data.endereco || "");
+        setCity(data.cidade || "");
+        setProvince(data.pais || "Angola");
       } catch (err) {
         console.error(err);
       }
