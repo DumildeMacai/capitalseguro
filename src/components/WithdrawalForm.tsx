@@ -187,10 +187,26 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       <CardHeader>
         <CardTitle>Sacar Fundos</CardTitle>
         <CardDescription>
-          Saldo Disponível: <strong>Kz {saldo.toFixed(2)}</strong>
+          Saldo Disponível: <strong>Kz {saldo.toLocaleString("pt-PT")}</strong>
         </CardDescription>
       </CardHeader>
       <CardContent>
+        {/* Saldo Disponível Display */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="p-4 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg">
+            <p className="text-sm text-muted-foreground mb-1">Saldo Disponível para Saque</p>
+            <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+              Kz {saldo.toLocaleString("pt-PT")}
+            </p>
+          </div>
+          <div className="p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg">
+            <p className="text-sm text-muted-foreground mb-1">Valor Mínimo para Saque</p>
+            <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+              Kz 5.000,00
+            </p>
+          </div>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Valor */}
           <div className="space-y-2">
@@ -207,7 +223,7 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
               disabled={loading}
               data-testid="input-withdrawal-amount"
             />
-            <p className="text-xs text-muted-foreground">Máximo disponível: Kz {saldo.toFixed(2)}</p>
+            <p className="text-xs text-muted-foreground">Máximo disponível: Kz {saldo.toLocaleString("pt-PT")}</p>
           </div>
 
           {/* Método de Pagamento */}

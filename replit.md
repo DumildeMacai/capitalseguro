@@ -285,12 +285,14 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 1. **Status Sempre "Ativo"** - Removido condicional que mostrava "Pendente"/"Rejeitado"
 2. **Análise de Desempenho** - Gráfico dinâmico que agrupa investimentos por categoria em tempo real
 3. **Retornos Acumulados** - Novo gráfico LineChart mostrando evolução temporal (0-365 dias)
+4. **Saldo Disponível para Saque** - Dois cards destacados mostrando saldo e valor mínimo
 
 ### ✅ Componentes Novos:
 - `ReturnsEvolutionChart.tsx` - Gráfico de linha com evolução dos ganhos
 
 ### ✅ Arquivos Modificados:
 - `InvestorDashboard.tsx` - Integrado novo gráfico + status sempre "Ativo"
+- `WithdrawalForm.tsx` - Adicionados cards destacados de saldo disponível
 - `replit.md` - Documentação completa
 
 ---
