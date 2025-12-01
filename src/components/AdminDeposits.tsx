@@ -28,7 +28,10 @@ export const AdminDeposits = () => {
     try {
       const link = document.createElement("a")
       link.href = receiptUrl
-      link.download = `comprovante-${Date.now()}.png`
+      // Detectar tipo de arquivo e usar extensão correta
+      const isPdf = receiptUrl.startsWith("data:application/pdf")
+      const extension = isPdf ? "pdf" : "png"
+      link.download = `comprovante-${Date.now()}.${extension}`
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
