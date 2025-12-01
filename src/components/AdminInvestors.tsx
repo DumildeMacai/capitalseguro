@@ -165,19 +165,27 @@ const AdminInvestors = () => {
 
       setCreditLoading(true);
 
-      // Use RPC function to credit balance (bypasses schema cache issues)
-      const { data, error } = await supabase
-        .rpc("credit_balance", {
-          p_user_id: selectedInvestor.id,
-          p_amount: amount,
-        });
+      // Get current profile first (simpler approach to bypass cache issues)
+      const { data: profile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("saldo_disponivel")
+        .eq("id", selectedInvestor.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      const newBalance = (Number(profile?.saldo_disponivel || 0)) + amount;
+
+      // Update using minimal fields
+      const { error } = await supabase
+        .from("profiles")
+        .update({ saldo_disponivel: newBalance })
+        .eq("id", selectedInvestor.id);
 
       if (error) {
-        console.error("Erro ao chamar RPC:", error);
+        console.error("Erro ao atualizar:", error);
         throw error;
       }
-
-      const newBalance = data;
 
       toast({
         title: "Sucesso",

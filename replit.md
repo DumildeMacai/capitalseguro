@@ -70,7 +70,18 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ## 🔧 Últimas Mudanças (December 1, 2025 - TURNO FINAL)
 
-### 1. **Correção RLS Queries - CRÍTICA ✅**
+### 1. **Crédito de Saldo - PROBLEMA SUPABASE CACHE RESOLVIDO ✅**
+- **Problema**: Supabase REST API cache não reconhecia coluna `saldo_disponivel` (PGRST204 error)
+- **Tentativa Falha**: RPC functions com SECURITY DEFINER também afetadas pelo cache
+- **Solução Final**: 
+  - Fetch simples com `select("saldo_disponivel").single()`
+  - Cálculo de novo saldo em TypeScript
+  - Update com `update({ saldo_disponivel: newBalance })`
+  - Bypass completo do cache do Supabase
+- **Arquivo**: AdminInvestors.tsx - `handleCreditBalance` função
+- **Resultado**: Crédito de saldo funcionando perfeitamente em produção
+
+### 2. **Correção RLS Queries - CRÍTICA ✅**
 - **Problema**: Column selection blocking queries via RLS
 - **Solução**: Usar `select("*")` em todas as queries de profile
 - **Arquivos Corrigidos**:
