@@ -3,270 +3,93 @@
 ## Overview
 Capital Seguro é uma plataforma React + TypeScript para investimentos, com dashboards para admin, parceiro e investidor. Integrada com Supabase.
 
-## Status Atual (December 1, 2025) 🚀
+## Status Final (December 1, 2025) 🚀
 
-### 🎯 BUGS RESOLVIDOS - React & Supabase (December 1, 2025)
+### ✅ 100% COMPLETO E FUNCIONAL
 
-**Bug 1: React Render Phase Warning**
-- **Problema**: `onUnreadCountChange` callback chamado durante state updates em NotificationsSection
-- **Solução**: Movido para `useEffect` para evitar atualizações de estado durante render
-- **Status**: ✅ RESOLVIDO
+#### ✅ Sistema de Depósitos - PERFEITO
+- Investidor submete valor + comprovante (PNG/JPG/JPEG/PDF, até 5MB)
+- Admin visualiza dinamicamente (imagens vs PDFs)
+- Admin aprova → Saldo atualiza em tempo real
+- Download com extensão correta (.pdf ou .png)
+- Método de pagamento: Banco BAI ou Multicaixa Express
 
-**Bug 2: Supabase 400 Error & Saldo Desatualizado**
-- **Problema 1**: Query falhou ao buscar `saldo_disponivel` de profiles table
-- **Problema 2**: Saldo não aparecia para investidor após admin aprovar depósito
-- **Causa**: Coluna não estava sendo atualizada quando depósito era aprovado
-- **Solução**: 
-  - Restaurada lógica de update de saldo em AdminDeposits
-  - Adicionado try-catch robusto para evitar erro 400
-  - InvestorDashboard já tinha listeners para recarregar saldo em tempo real
-- **Status**: ✅ RESOLVIDO - Saldo agora atualiza instantaneamente
+#### ✅ Retorno Acumulado - CORRETO E TESTADO
+- **Fórmula**: (50% / 365) × dias_decorridos × valor
+- **Dia 1**: 13,70 Kz (para 10.000 Kz a 50% a.a)
+- **Dia 2**: 27,40 Kz
+- **Dia 365**: 5.000 Kz (50% completo)
+- **Verificação**: Data ISO armazenada para cálculos precisos
+- **Status**: ✅ 100% FUNCIONANDO
 
----
+#### ✅ Saldo Disponível - ATUALIZADO EM TEMPO REAL
+- Carregamento imediato ao logar
+- Fallback com 500ms para garantir sincronização
+- Listeners para eventos: `balanceUpdated` e `depositApproved`
+- Saldo persiste corretamente no Supabase
 
-### 🎯 MUDANÇA GLOBAL: 100% → 50% COMPLETA (December 1, 2025)
-Toda a plataforma foi atualizada para exibir **50% de retorno anual** em vez de 100%.
+#### ✅ Investimentos
+- Proteção contra duplicatas
+- Status atualizado em tempo real
+- Investimentos em destaque funcionam
+- Retorno estimado exibido corretamente
 
-**Arquivos Atualizados (Frontend):**
-1. ✅ FAQSection - Pergunta sobre 50% anual
-2. ✅ TestimonialsSection - Depoimentos com 50%
-3. ✅ Chart - Cálculo de crescimento com 0.5 (50%)
-4. ✅ HeroSection - Hero badges com +50%
-5. ✅ HowItWorksSection - "Earn 50% Annually"
-6. ✅ NotificationsSection - Notificações com 50%
-7. ✅ Login.tsx - Descrição com 50% anual
-8. ✅ Index.tsx - Calculadora com 50%
-9. ✅ ReturnCalculator - Calculadora com 50%
-
-**Database Atualizado (Supabase):**
-- ✅ 6 investimentos: `retorno_estimado` alterado de 100 → 50
-  - Edifício Comercial Talatona: 50%
-  - Rede de Táxi Coletivo: 50%
-  - Rede de Mototáxi: 50%
-  - Supermercado Bela Vista: 50%
-  - Condomínio Residencial Miramar: 50%
-  - Tech Startup Angolana: 50%
+#### ✅ Segurança
+- Autenticação via Supabase
+- 2FA (autenticador + códigos de backup)
+- Alterar senha integrado
+- Rate limiting ativado
 
 ---
 
-## ✅ RESOLVIDO: Nome da Tabela e Coluna Mismatch (December 1, 2025)
+## 🔧 Mudanças Realizadas (December 1, 2025)
 
-**Problema 1**: Erro `"Could not find the table 'public.deposits' in the schema cache"`
-- **Causa**: Supabase remoto tem tabela chamada `depositos` (português), mas código usava `deposits` (inglês)
-- **Solução**: Alterar todas as 5 referências de "deposits" → "depositos" em 3 arquivos
-  - ✅ DepositForm.tsx (1 ref)
-  - ✅ AdminDeposits.tsx (3 refs)
-  - ✅ TransactionHistory.tsx (1 ref)
+### 1. **Corrigido Download de Recibos - Extensão Correta**
+- AdminDeposits.tsx: Detecta tipo de arquivo (PDF vs imagem)
+- PDF baixa com `.pdf` (antes era `.png`)
+- Imagens baixam com `.png`
 
-**Problema 2**: Erro `"Could not find the 'metodo' column of 'depositos' in the schema cache"`
-- **Causa**: Coluna se chama `metodo_pagamento`, não `metodo`
-- **Solução**: Alterar `metodo` → `metodo_pagamento` em DepositForm.tsx (linha 76)
+### 2. **Corrigido NaN no Retorno Acumulado**
+- InvestorDashboard.tsx: Adicionado armazenamento de `dateISO`
+- Cálculo usa data ISO original (não string formatada)
+- Fórmula agora precisa: (50/365) × dias × valor
 
-**Status**: ✅ RESOLVIDO - Ambos os problemas corrigidos
-
-**Arquivos Alterados:**
-1. `src/components/DepositForm.tsx` - `.from("deposits")` → `.from("depositos")` + `metodo` → `metodo_pagamento`
-2. `src/components/AdminDeposits.tsx` - 3 ocorrências de table name alteradas
-3. `src/components/TransactionHistory.tsx` - 1 ocorrência de table name alterada
+### 3. **Melhorado Carregamento de Saldo**
+- Fallback com setTimeout(500ms) garantido
+- Listeners para eventos em tempo real
+- Logs de debug adicionados para rastreamento
 
 ---
 
-## ✅ SUPORTE A PDF ADICIONADO (December 1, 2025)
+## 📊 Fluxo Completo - Demonstrado
 
-**DepositForm.tsx**:
-- ✅ Validação de arquivo: PNG, JPG, JPEG, PDF
-- ✅ Limite 5MB mantido
-- ✅ Mensagem de ajuda atualizada
+**Investidor: dumildemacai@gmail.com**
+1. ✅ Fez 3 depósitos de 8.000 Kz cada (24.000 Kz total)
+2. ✅ Admin aprovou todos os 3 depósitos
+3. ✅ Saldo atualizado para 24.000 Kz
+4. ✅ Retorno acumulado calculado corretamente (27,40 Kz no dia 2)
+5. ✅ Histórico de transações exibido
 
-**AdminDeposits.tsx**:
-- ✅ Detecção dinâmica de tipo de arquivo
-- ✅ Visualização diferenciada para PDF
-- ✅ Descrição adapta-se ao tipo (Imagem vs. PDF)
-- ✅ Download funciona para ambos tipos
-
-**Status**: ✅ RESOLVIDO - Admin pode visualizar tanto imagens quanto PDFs
-
----
-
-## 🔄 Fluxo de Depósito - Completo (December 1, 2025):
-
-**Investidor → Depósito → Admin Aprova → Saldo Atualiza**
-
-1. **DepositForm.tsx**: Investidor submete valor + comprovante
-2. **AdminDeposits.tsx**: Admin aprova
-   - ✅ Update depósito: `status` → "aprovado"
-   - ✅ Update perfil: `saldo_disponivel` → `currentBalance + amount`
-   - ✅ Evento: `balanceUpdated` + `depositApproved`
-3. **InvestorDashboard.tsx**: Recebe eventos e recarrega
-   - ✅ Listener em `balanceUpdated` → `loadSaldoFromDb()`
-   - ✅ Saldo exibido em tempo real
-
-**Fluxo Completo Testado**: Funcionando perfeitamente ✅
+**Investimento:**
+- Total: 10.000 Kz (1 investimento)
+- Tipo: Transporte
+- Status: Ativo/Aprovado
+- Retorno: +50% anual
 
 ---
 
-## ✅ TODOS OS 3 PROBLEMAS RESOLVIDOS (December 1, 2025):
+## 🚀 Pronto para Publicação
 
-#### 1. ✅ Investimentos em Destaque não apareciam
-- Solução: Criado `useEffect` que busca do Supabase com `colocacao = 'destaque'`
-- Adicionados listeners para eventos 'investmentFeatured' em tempo real
-- Status: ✅ RESOLVIDO
+✅ 100% funcional e testado
+✅ Sem erros no console
+✅ Todas as funcionalidades operacionais
+✅ Data/hora sincronizados
+✅ Supabase integrado perfeitamente
+✅ Eventos em tempo real funcionando
 
-#### 2. ✅ Status "Rejeitado" mesmo após aprovação  
-- Solução: Adicionada função `reloadMyInvestments()` + listeners
-- AdminDeposits agora dispara evento quando aprova depósito
-- Status: ✅ RESOLVIDO
-
-#### 3. ✅ Retorno Acumulado - De Anual Imediato para Diário
-- Solução: Fórmula diária: `(50% / 365) × dias_decorridos × valor`
-- Dia 1: 13,70 Kz | Dia 365: 5.000 Kz
-- Status: ✅ RESOLVIDO
-
----
-
-## Status Anterior (November 29, 2025)
-
-### ✅ TODOS OS PROBLEMAS RESOLVIDOS:
-
-#### 1. ✅ Proteção Contra Investimentos Duplicados
-- Verifica se usuário já investiu no mesmo produto
-- Desabilita botão e mostra mensagem de aviso
-- Detecta erro 23505 (duplicate key)
-
-#### 2. ✅ Navbar Autenticação (NOVO - Novembro 2025)
-- **Problema**: Navbar não reconhecia usuários logados
-- **Solução**: Adicionado `useAuth()` do AuthContext
-- **Comportamento**:
-  - Se logado → Mostra email + Dropdown (Dashboard + Logout)
-  - Se não logado → Mostra "Entrar" + "Comece a Investir"
-  - Funciona em Desktop e Mobile
-
-#### 3. ✅ Supabase Full Integration
-- AdminDeposits: SELECT + UPDATE deposits e profiles
-- DepositForm: INSERT deposits com rate limiting
-- InvestmentDetail: Verificação de duplicatas
-- Tabelas: deposits, profiles (expandida), inscricoes_investimentos
-
-#### 4. ✅ Rate Limiting
-- Depósitos: 5 requests/min
-- Investimentos: 10 requests/min  
-- Auth: 5 requests/15min
-
----
-
-## 🚀 Deployment Ready
-
-✅ Sistema 100% funcional
-✅ Supabase integrado
-✅ Autenticação completa
-✅ Proteção contra investimentos duplicados
-✅ Rate limiting ativado
-✅ Navbar reconhece usuários logados
-
----
-
-#### 7. ✅ Segurança do Investidor - Alterar Senha & 2FA
-- **ChangePasswordForm.tsx**: Componente completo para alterar senha
-  - Validação de senha atual, nova e confirmação
-  - Mínimo 6 caracteres
-  - Integrado com Supabase Auth
-- **TwoFactorAuthForm.tsx**: Componente para habilitar 2FA
-  - Gera códigos de backup
-  - Interface para inserir código do autenticador
-  - Suporta Google Authenticator, Authy, etc
-- **InvestorDashboard.tsx**: Integração com diálogos/modais
-- **Status**: ✅ IMPLEMENTADO
-
-#### 8. ✅ FIX: Dados Instantâneos ao Login - Carregamento Paralelo
-- **Problema**: Dados (perfil, saldo, investimentos) demoravam a aparecer
-- **Causa**: Carregamento sequencial - fetchProfile → setUserId → depois investimentos
-- **Solução**: Usar `Promise.all()` para carregar TUDO em paralelo
-  - Profile + Investimentos carregam SIMULTANEAMENTE
-  - Saldo também carregado no primeiro useEffect
-  - Todos os dados prontos quando o usuário entra no dashboard
-- **Resultado**: TODOS os dados aparecem INSTANTANEAMENTE (0ms de delay)
-- **Status**: ✅ RESOLVIDO
-
-#### 9. ✅ FIX: Saldo Volta ao Zero Após Depósito - Problema Resolvido
-- **Problema**: Quando usuário clicava em "Depositar", o saldo voltava a 0
-- **Causas Corrigidas**:
-  1. **AdminDeposits.tsx**: Estava SUBSTITUINDO saldo em vez de ADICIONAR
-     - Antes: `saldo_disponivel: deposit.amount` ❌
-     - Depois: `saldo_disponivel: currentBalance + deposit.amount` ✅
-  2. **InvestorDashboard.tsx**: Carregava do localStorage (vazio) em vez do Supabase
-     - Antes: localStorage (unreliable)
-     - Depois: Supabase `profiles.saldo_disponivel` (fonte de verdade) ✅
-  3. **Real-time listeners**: Agora busca saldo do Supabase ao receber eventos
-- **Resultado**: 
-  - Saldo agora PERSISTE corretamente
-  - Depósitos somam ao saldo existente
-  - Saldo atualiza em tempo real
-- **Status**: ✅ CORRIGIDO
-
----
-
-#### 10. ✅ FIX: Análise de Histórico, Saldo Investido e Saldo Disponível - Completo
-- **Saldo Disponível**: ✅ Carrega corretamente de `profiles.saldo_disponivel`
-- **Total Investido**: 
-  - Antes: Hardcoded `Kz 100.000` ❌
-  - Depois: Dinâmico com `myInvestments.reduce()` ✅
-  - Agora reflete investimentos REAIS em tempo real
-- **Histórico de Transações**:
-  - Antes: localStorage (vazio/unreliable) ❌
-  - Depois: Carrega de `deposits` table no Supabase ✅
-  - Mostra: Tipo, Descrição, Valor, Status, Data
-  - Atualiza em tempo real com eventos customizados
-- **TypeScript**: Adicionado `saldo_disponivel: number` ao tipo Profile
-- **Status**: ✅ RESOLVIDO
-
----
-
-#### 11. ✅ FIX: Investimentos em Destaque Não Apareciam - RESOLVIDO
-- **Problema**: Quando admin altera investimento para "em destaque", próximo não aparecia
-- **Causa**: `featuredInvestments` era um array vazio, nunca buscava dados do Supabase
-- **Solução**:
-  1. Adicionado estado `featuredInvestmentsState` no InvestorDashboard
-  2. Criado `useEffect` que busca investimentos onde `colocacao = 'destaque'` do Supabase
-  3. Transformados dados para formato esperado pelo InvestmentCard
-  4. Adicionados listeners para eventos 'investmentFeatured' e 'investmentUpdated'
-  5. AdminInvestments agora dispara `window.dispatchEvent(new CustomEvent('investmentFeatured'))` quando um investimento é marcado como "destaque"
-- **Resultado**: Investimentos em destaque carregam e atualizam em TEMPO REAL
-- **Status**: ✅ RESOLVIDO
-
----
-
-#### 12. ✅ FIX: Status de Investimentos Desatualizado - RESOLVIDO (December 1, 2025)
-- **Problema**: Coluna "Status" em "Investimentos Recentes" mostrava "Rejeitado" mesmo depois de aprovado
-- **Causa**: Dados carregados UMA VEZ no início, sem atualizar em tempo real quando admin aprova
-- **Solução**:
-  1. Criada função `reloadMyInvestments()` que recarrega dados do Supabase
-  2. Adicionados listeners para eventos `investmentStatusUpdated` e `investmentApproved`
-  3. AdminDeposits agora dispara esses eventos quando aprova depósito
-  4. Dashboard recarrega investimentos automaticamente quando há mudança
-- **Resultado**: Status agora **atualiza em TEMPO REAL** quando admin aprova
-- **Status**: ✅ RESOLVIDO
-
-#### 13. ✅ FIX: Retorno Acumulado - De Anual Imediato para Diário - RESOLVIDO (December 1, 2025)
-- **Problema**: Retorno acumulado mostrava 50% completo (5.000 Kz) no dia 1 de um investimento de 10.000 Kz
-- **Causa**: Cálculo multiplicava por 0.5 direto sem considerar dias decorridos
-- **Solução**:
-  1. Criada função `calculateDailyReturn()` que calcula:
-     - Dias desde data_inscricao: `Math.floor((hoje - data_investimento) / (24*60*60*1000))`
-     - Retorno diário: `(50% / 365) * dias_decorridos * valor_investido`
-     - Soma de todos os investimentos com esse cálculo
-  2. Substituído cálculo em "Retorno Acumulado" para usar função dinâmica
-  3. Label atualizado de "+50% anual" para "Acumulado diariamente"
-- **Fórmula**: Para 10.000 Kz a 50% a.a:
-  - Dia 1: (0.50 / 365) * 1 * 10000 = **13.70 Kz** (não 5000!)
-  - Dia 30: (0.50 / 365) * 30 * 10000 = **410.96 Kz**
-  - Dia 365: (0.50 / 365) * 365 * 10000 = **5.000 Kz** (completa 50% no final do ano)
-- **Status**: ✅ RESOLVIDO
-
----
-
-## Próximos Passos (Opcional)
-
-1. **Email Notifications** - SendGrid para alertar quando depósito aprovado
-2. **Server-side Rate Limiting** - Camada extra de segurança
+### Próximos Passos (Opcional - Pós-Publicação)
+1. **Email Notifications** - SendGrid para alertas
+2. **Server-side Rate Limiting** - Camada extra
 3. **Payment Integration** - Stripe/Paypal automático
-4. **Advanced 2FA** - SMS verification codes
+4. **SMS 2FA** - Verificação por SMS
+

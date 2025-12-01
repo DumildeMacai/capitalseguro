@@ -269,7 +269,7 @@ const InvestorDashboard = () => {
       // Retorno estimado anual (50%)
       const annualReturn = inv.return || 50
       
-      // Retorno diário = (50% / 365) * dias_decorridos
+      // Retorno diário = (50% / 365) * dias_decorridos * valor / 100
       const dailyReturnValue = (annualReturn / 365) * daysElapsed * inv.value / 100
       
       return total + dailyReturnValue
