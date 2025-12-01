@@ -606,51 +606,38 @@ const InvestorDashboard = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {[
-                        ...recentInvestments,
-                        {
-                          id: "inv-004",
-                          name: "Complexo Residencial Jardins",
-                          type: "Imóvel",
-                          value: 30000,
-                          date: "2023-07-10",
-                          status: "Ativo",
-                          return: 9.8,
-                        },
-                        {
-                          id: "inv-005",
-                          name: "Startup FinTech Inovação",
-                          type: "Startup",
-                          value: 15000,
-                          date: "2023-08-22",
-                          status: "Ativo",
-                          return: 22.5,
-                        },
-                      ].map((investment) => (
-                        <TableRow key={investment.id}>
-                          <TableCell className="font-medium">{investment.name}</TableCell>
-                          <TableCell>{investment.type}</TableCell>
-                          <TableCell>{new Date(investment.date).toLocaleDateString("pt-BR")}</TableCell>
-                          <TableCell>Kz {investment.value.toLocaleString("pt-PT")}</TableCell>
-                          <TableCell>
-                            Kz {Math.round(investment.value * (1 + investment.return / 100)).toLocaleString("pt-PT")}
-                          </TableCell>
-                          <TableCell className="text-primary">+{investment.return}%</TableCell>
-                          <TableCell>
-                            <span
-                              className={`px-2 py-1 rounded-full text-xs ${
-                                investment.status === "Ativo"
-                                  ? "bg-primary/20 text-primary"
-                                  : investment.status === "Em análise"
-                                    ? "bg-accent/20 text-accent"
-                                    : "bg-muted text-muted-foreground"
-                              }`}
-                            >
-                              {investment.status}
-                            </span>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                      {myInvestments.map((investment) => {
+                        const daysElapsed = investment.dateISO 
+                          ? Math.floor((new Date().getTime() - new Date(investment.dateISO).getTime()) / (1000 * 60 * 60 * 24))
+                          : 0
+                        const accumulatedReturn = (investment.return / 365) * daysElapsed * investment.value / 100
+                        const currentValue = investment.value + accumulatedReturn
+                        return (
+                          <TableRow key={investment.id}>
+                            <TableCell className="font-medium">{investment.name}</TableCell>
+                            <TableCell>{investment.type}</TableCell>
+                            <TableCell>{investment.date}</TableCell>
+                            <TableCell>Kz {investment.value.toLocaleString("pt-PT")}</TableCell>
+                            <TableCell>
+                              Kz {currentValue.toLocaleString("pt-PT", { maximumFractionDigits: 2 })}
+                            </TableCell>
+                            <TableCell className="text-primary">+{investment.return}%</TableCell>
+                            <TableCell>
+                              <span
+                                className={`px-2 py-1 rounded-full text-xs ${
+                                  investment.status === "Ativo"
+                                    ? "bg-primary/20 text-primary"
+                                    : investment.status === "Pendente"
+                                      ? "bg-accent/20 text-accent"
+                                      : "bg-destructive/20 text-destructive"
+                                }`}
+                              >
+                                {investment.status}
+                              </span>
+                            </TableCell>
+                          </TableRow>
+                        )
+                      })}
                     </TableBody>
                   </Table>
                 </CardContent>
