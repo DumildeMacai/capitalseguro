@@ -66,7 +66,7 @@ export const DepositForm = () => {
 
       // Inserir depósito em Supabase
       const { error: insertError } = await supabase
-        .from("deposits")
+        .from("depositos")
         .insert({
           usuario_id: user.id,
           valor: parseFloat(amount),

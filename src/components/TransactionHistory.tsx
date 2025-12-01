@@ -32,7 +32,7 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
       setLoading(true)
       // Carregar depósitos do Supabase
       const { data, error } = await (supabase
-        .from("deposits")
+        .from("depositos")
         .select("*")
         .eq("usuario_id", userId)
         .order("data_criacao", { ascending: false }) as any)

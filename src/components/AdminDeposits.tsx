@@ -52,7 +52,7 @@ export const AdminDeposits = () => {
   const loadDeposits = async () => {
     try {
       const { data, error } = await (supabase
-        .from("deposits")
+        .from("depositos")
         .select("*")
         .order("data_criacao", { ascending: false }) as any)
 
@@ -91,7 +91,7 @@ export const AdminDeposits = () => {
 
       // Atualizar depósito em Supabase
       const { error: depositError } = await (supabase
-        .from("deposits")
+        .from("depositos")
         .update({
           status: "aprovado",
           data_aprovacao: approvedAt,
@@ -145,7 +145,7 @@ export const AdminDeposits = () => {
     try {
       // Atualizar depósito em Supabase
       const { error } = await (supabase
-        .from("deposits")
+        .from("depositos")
         .update({
           status: "rejeitado",
         })
