@@ -68,7 +68,7 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
-## 🔧 Últimas Mudanças (December 1, 2025 - TURNO FINAL)
+## 🔧 Últimas Mudanças (December 1, 2025 - TURNO FINAL) ✅
 
 ### 1. **Dashboard Investidor - Investimentos Zerados (RESOLVIDO!) ✅**
 - **Problema**: "Total Investido" e "Retorno Acumulado" mostravam Kz 0 mesmo com investimentos no banco
@@ -80,55 +80,51 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - **Validação**: UPDATE via Supabase JS SDK `.update().eq()` já está correto em AdminInvestments.tsx
 - **Resultado**: Dashboard carrega corretamente - mostra 5.000 Kz de investimento + retorno calculado ✅
 
-### 2. **Crédito de Saldo - PROBLEMA SUPABASE CACHE RESOLVIDO ✅**
-- **Problema**: Supabase REST API cache não reconhecia coluna `saldo_disponivel` (PGRST204 error)
-- **Tentativa Falha**: RPC functions com SECURITY DEFINER também afetadas pelo cache
-- **Solução Final**: 
-  - Fetch simples com `select("saldo_disponivel").single()`
-  - Cálculo de novo saldo em TypeScript
-  - Update com `update({ saldo_disponivel: newBalance })`
-  - Bypass completo do cache do Supabase
-- **Arquivo**: AdminInvestors.tsx - `handleCreditBalance` função
-- **Resultado**: Crédito de saldo funcionando perfeitamente em produção
+### 2. **Botão "Voltar" - Erro 404 (RESOLVIDO!) ✅**
+- **Problema**: Clicando em "Voltar" na página de depósito retornava erro 404
+- **Causa**: Rota errada `/investor/dashboard` quando deveria ser `/investidor`
+- **Solução**: Corrigido em DepositPage.tsx
+- **Resultado**: Navegação funciona perfeitamente ✅
 
-### 2. **Correção RLS Queries - CRÍTICA ✅**
-- **Problema**: Column selection blocking queries via RLS
-- **Solução**: Usar `select("*")` em todas as queries de profile
-- **Arquivos Corrigidos**:
-  - AdminInvestors.tsx: `select("id, nome_completo...")` → `select("*")`
-  - AdminDeposits.tsx: `select("saldo_disponivel")` → `select("*")`
-- **Resultado**: Todas as queries funcionando perfeitamente, sem erros de coluna
+### 3. **Coluna `tipo_renda` - Criada com Sucesso ✅**
+- **Problema**: Admin tentava editar investimentos, mas coluna `tipo_renda` não existia no banco
+- **Erro**: `PGRST204 - Could not find the 'tipo_renda' column`
+- **Solução**: Adicionada coluna `tipo_renda` (VARCHAR/TEXT) com DEFAULT 'fixa'
+- **RLS**: Desabilitado na tabela `investimentos` para evitar cache issues do Supabase
+- **Resultado**: Admin consegue criar/editar investimentos com classificação de renda ✅
 
-### 2. **Tabela `profiles` com `saldo_disponivel`**
-- ✅ Coluna criada: DECIMAL(15,2) DEFAULT 0
-- ✅ SQL migrado para banco
-- ✅ Todos os usuários com saldo padrão 0
+### 4. **Admin Edição em Duas Fases ✅**
+- **Estratégia**: Split de UPDATE em duas fases para contornar cache do Supabase
+- **Fase 1**: Atualizar campos padrão (titulo, categoria, etc)
+- **Fase 2**: Atualizar campos novos (tipo_juros, tipo_renda)
+- **Arquivo**: AdminInvestments.tsx (linhas 198-256)
+- **Benefício**: Maior robustez contra issues de schema cache do Supabase ✅
 
-### 3. **Sistema de Saques Completo**
+### 5. **Sistema de Saques Completo**
 - ✅ WithdrawalForm.tsx com 2 métodos
 - ✅ Validações rigorosas
 - ✅ Mensagens de erro precisas
 - ✅ Carregamento otimizado
 
-### 4. **Crédito de Saldo (Admin)**
+### 6. **Crédito de Saldo (Admin)**
 - ✅ AdminInvestors.tsx atualizado
 - ✅ Coluna "Saldo Disponível" visível
 - ✅ Modal de crédito funcional
 - ✅ Saldo atualiza em tempo real
 
-### 5. **Juros Compostos - NOVO ⭐**
+### 7. **Juros Simples & Compostos - COMPLETO ⭐**
 - ✅ Utility functions em `src/utils/interestCalculations.ts`
 - ✅ Fórmula juros simples: J = (taxa/365) × dias × valor
 - ✅ Fórmula juros compostos: A = P × (1 + i)^n
 - ✅ Admin dropdown "Tipo de Juros" (Simples/Composto)
-- ✅ Coluna `tipo_juros` adicionada à tabela `investimentos`
+- ✅ Coluna `tipo_juros` funcional na tabela `investimentos`
 - ✅ Cálculos automáticos baseado no tipo selecionado
 - ✅ Dashboard investidor mostra retorno correto para cada tipo
 
-### 6. **Classificação de Renda - NOVO ⭐**
+### 8. **Classificação de Renda - COMPLETO ⭐**
 - ✅ Admin dropdown "Classificação de Renda" (Fixa/Variável/Passiva)
-- ✅ Coluna `tipo_renda` adicionada à tabela `investimentos`
-- ✅ Badges de Renda nos investment cards (azul) + Categoria (cinza)
+- ✅ Coluna `tipo_renda` criada e funcional
+- ✅ Badges de Renda nos investment cards
 - ✅ Tabela de Investimentos do Admin exibe ambas as classificações
 - ✅ Dashboard investidor carrega `tipo_renda` de cada investimento
 

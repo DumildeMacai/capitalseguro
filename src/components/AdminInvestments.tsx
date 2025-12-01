@@ -192,27 +192,41 @@ const AdminInvestments = () => {
           }
         }
 
-      const payload = {
+      // Split payload to work around Supabase schema cache issues
+      const payloadPhase1 = {
         titulo: formData.titulo,
         categoria: formData.categoria || null,
         valor_minimo: formData.valor_minimo ? parseFloat(formData.valor_minimo) : null,
         retorno_estimado: formData.retorno_estimado ? parseFloat(formData.retorno_estimado) : null,
         prazo_minimo: formData.prazo_minimo ? parseInt(formData.prazo_minimo) : null,
         descricao: formData.descricao || null,
-          imagem: imagemUrl || null,
+        imagem: imagemUrl || null,
         ativo: !!formData.ativo,
         colocacao: formData.colocacao || 'oportunidades',
+      };
+
+      const payloadPhase2 = {
         tipo_juros: formData.tipo_juros || 'simples',
         tipo_renda: formData.tipo_renda || 'fixa',
       };
 
       if (selectedInvestment) {
-        const { error } = await supabase
+        // Phase 1: Update standard fields
+        let { error: error1 } = await supabase
           .from("investimentos")
-          .update(payload)
+          .update(payloadPhase1)
           .eq("id", selectedInvestment.id);
 
-        if (error) throw error;
+        if (error1) throw error1;
+
+        // Phase 2: Update type fields
+        let { error: error2 } = await supabase
+          .from("investimentos")
+          .update(payloadPhase2)
+          .eq("id", selectedInvestment.id);
+
+        if (error2) throw error2;
+
         toast({
           title: "Sucesso",
           description: "Investimento atualizado com sucesso.",
@@ -222,9 +236,10 @@ const AdminInvestments = () => {
           window.dispatchEvent(new CustomEvent('investmentFeatured'));
         }
       } else {
+        const fullPayload = { ...payloadPhase1, ...payloadPhase2 };
         const { error } = await supabase
           .from("investimentos")
-          .insert([payload]);
+          .insert([fullPayload]);
 
         if (error) throw error;
         toast({
