@@ -58,6 +58,7 @@ interface Investment {
   imagem: string | null;
   colocacao?: string | null;
   tipo_juros?: string | null;
+  tipo_renda?: string | null;
 }
 
 const AdminInvestments = () => {
@@ -79,6 +80,7 @@ const AdminInvestments = () => {
     ativo: true,
     colocacao: "oportunidades",
     tipo_juros: "simples",
+    tipo_renda: "fixa",
   });
   const { toast } = useToast();
 
@@ -127,6 +129,7 @@ const AdminInvestments = () => {
       ativo: true,
       colocacao: "oportunidades",
       tipo_juros: "simples",
+      tipo_renda: "fixa",
     });
     setOpenDialog(true);
   };
@@ -145,6 +148,7 @@ const AdminInvestments = () => {
       ativo: investment.ativo ?? true,
       colocacao: (investment as any).colocacao ?? ((investment as any).featured ? 'destaque' : 'oportunidades'),
       tipo_juros: investment.tipo_juros || "simples",
+      tipo_renda: investment.tipo_renda || "fixa",
     });
     setOpenDialog(true);
   };
@@ -199,6 +203,7 @@ const AdminInvestments = () => {
         ativo: !!formData.ativo,
         colocacao: formData.colocacao || 'oportunidades',
         tipo_juros: formData.tipo_juros || 'simples',
+        tipo_renda: formData.tipo_renda || 'fixa',
       };
 
       if (selectedInvestment) {
@@ -329,6 +334,8 @@ const AdminInvestments = () => {
                   <TableHead>Valor Mínimo</TableHead>
                   <TableHead>Retorno</TableHead>
                   <TableHead>Prazo</TableHead>
+                  <TableHead>Tipo Renda</TableHead>
+                  <TableHead>Tipo Juros</TableHead>
                   <TableHead>Status</TableHead>
                       <TableHead>Destaque</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
@@ -354,6 +361,16 @@ const AdminInvestments = () => {
                         {investment.prazo_minimo
                           ? `${investment.prazo_minimo} meses`
                           : "—"}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="outline">
+                          {investment.tipo_renda === 'fixa' ? 'Renda Fixa' : investment.tipo_renda === 'variavel' ? 'Renda Variável' : 'Renda Passiva'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">
+                          {investment.tipo_juros === 'composto' ? 'Composto' : 'Simples'}
+                        </Badge>
                       </TableCell>
                       <TableCell>
                         <Badge
@@ -408,7 +425,7 @@ const AdminInvestments = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={10} className="text-center py-8 text-muted-foreground">
                       Nenhum investimento encontrado
                     </TableCell>
                   </TableRow>
@@ -513,6 +530,17 @@ const AdminInvestments = () => {
               >
                 <option value="simples">Juros Simples (50% a.a.)</option>
                 <option value="composto">Juros Compostos (50% a.a.)</option>
+              </select>
+
+              <label className="text-sm">Classificação de Renda</label>
+              <select
+                className="w-full border rounded-md px-3 py-2"
+                value={formData.tipo_renda}
+                onChange={(e) => setFormData({ ...formData, tipo_renda: e.target.value })}
+              >
+                <option value="fixa">Renda Fixa</option>
+                <option value="variavel">Renda Variável</option>
+                <option value="passiva">Renda Passiva</option>
               </select>
             </div>
               <div>

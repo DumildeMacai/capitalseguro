@@ -81,7 +81,8 @@ const InvestorDashboard = () => {
                 titulo,
                 categoria,
                 retorno_estimado,
-                tipo_juros
+                tipo_juros,
+                tipo_renda
               )
             `)
             .eq("usuario_id", user.id)
@@ -111,6 +112,7 @@ const InvestorDashboard = () => {
             status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
             return: inv.investimentos?.retorno_estimado || 0,
             tipoJuros: inv.investimentos?.tipo_juros || "simples",
+            tipoRenda: inv.investimentos?.tipo_renda || "fixa",
           }))
           setMyInvestments(formatted)
         }
@@ -234,7 +236,8 @@ const InvestorDashboard = () => {
             titulo,
             categoria,
             retorno_estimado,
-            tipo_juros
+            tipo_juros,
+            tipo_renda
           )
         `)
         .eq("usuario_id", userId_to_use)
@@ -251,6 +254,7 @@ const InvestorDashboard = () => {
           status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
           return: inv.investimentos?.retorno_estimado || 0,
           tipoJuros: inv.investimentos?.tipo_juros || "simples",
+          tipoRenda: inv.investimentos?.tipo_renda || "fixa",
         }))
         setMyInvestments(formatted)
       }

@@ -38,10 +38,12 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
   - Confirmação com novo saldo
 - Atualiza imediatamente no banco
 
-#### ✅ Retorno Acumulado 50% a.a.
-- Fórmula: (50% / 365) × dias_decorridos × valor
+#### ✅ Retorno Acumulado 50% a.a. - JUROS SIMPLES & COMPOSTOS
+- **Juros Simples**: J = (50% / 365) × dias × valor
+- **Juros Compostos**: A = P × (1 + i)^n onde i = taxa/365
+- Admin define tipo de juros por investimento
 - Cálculos precisos com data ISO
-- 100% FUNCIONANDO
+- Ambas as fórmulas funcionando em tempo real
 
 #### ✅ Saldo em Tempo Real
 - Carregamento imediato ao logar
@@ -49,11 +51,14 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - Tabela `profiles` com `saldo_disponivel` DECIMAL(15,2)
 - Atualizado após depósitos, saques, créditos
 
-#### ✅ Investimentos
+#### ✅ Investimentos - CLASSIFICAÇÃO COMPLETA
 - Sem duplicatas
 - Status em tempo real
 - Destaque funcionando
 - Retorno estimado exibido
+- **Tipo de Juros**: Simples ou Composto (configurável por investimento)
+- **Classificação de Renda**: Renda Fixa / Renda Variável / Renda Passiva (configurável por investimento)
+- Badges de classificação exibidas nos cards de investimento
 
 #### ✅ Segurança
 - Autenticação Supabase
@@ -63,7 +68,7 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
-## 🔧 Últimas Mudanças (December 1, 2025 - FINAL)
+## 🔧 Últimas Mudanças (December 1, 2025 - TURNO FINAL)
 
 ### 1. **Correção RLS Queries - CRÍTICA ✅**
 - **Problema**: Column selection blocking queries via RLS
@@ -90,6 +95,22 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - ✅ Modal de crédito funcional
 - ✅ Saldo atualiza em tempo real
 
+### 5. **Juros Compostos - NOVO ⭐**
+- ✅ Utility functions em `src/utils/interestCalculations.ts`
+- ✅ Fórmula juros simples: J = (taxa/365) × dias × valor
+- ✅ Fórmula juros compostos: A = P × (1 + i)^n
+- ✅ Admin dropdown "Tipo de Juros" (Simples/Composto)
+- ✅ Coluna `tipo_juros` adicionada à tabela `investimentos`
+- ✅ Cálculos automáticos baseado no tipo selecionado
+- ✅ Dashboard investidor mostra retorno correto para cada tipo
+
+### 6. **Classificação de Renda - NOVO ⭐**
+- ✅ Admin dropdown "Classificação de Renda" (Fixa/Variável/Passiva)
+- ✅ Coluna `tipo_renda` adicionada à tabela `investimentos`
+- ✅ Badges de Renda nos investment cards (azul) + Categoria (cinza)
+- ✅ Tabela de Investimentos do Admin exibe ambas as classificações
+- ✅ Dashboard investidor carrega `tipo_renda` de cada investimento
+
 ---
 
 ## 📊 Funcionalidades Prontas
@@ -98,10 +119,13 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 ✅ Saques com 2 métodos
 ✅ Crédito de saldo (Admin → Investidor)
 ✅ Histórico de transações
-✅ Portfolio com retorno 50% a.a.
+✅ Portfolio com retorno 50% a.a. (Simples + Composto)
+✅ Classificação de Renda (Fixa/Variável/Passiva)
+✅ Tipo de Juros por Investimento
 ✅ Segurança 2FA completa
 ✅ Saldo em tempo real
 ✅ Queries RLS otimizadas
+✅ Admin pode gerenciar todas as propriedades dos investimentos
 
 ---
 

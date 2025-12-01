@@ -18,6 +18,7 @@ interface InvestmentCardProps {
   featured?: boolean
   remaining?: number
   totalFunding?: number
+  tipoRenda?: string
 }
 
 const InvestmentCard = ({
@@ -32,6 +33,7 @@ const InvestmentCard = ({
   featured = false,
   remaining,
   totalFunding,
+  tipoRenda = "fixa",
 }: InvestmentCardProps) => {
   const progress = remaining && totalFunding ? ((totalFunding - remaining) / totalFunding) * 100 : null
 
@@ -63,6 +65,9 @@ const InvestmentCard = ({
 
         <div className="absolute top-3 left-3 flex gap-2">
           <Badge className="bg-slate-600 backdrop-blur text-white border border-slate-700">{category}</Badge>
+          <Badge className="bg-blue-600 backdrop-blur text-white border border-blue-700">
+            {tipoRenda === 'fixa' ? 'Renda Fixa' : tipoRenda === 'variavel' ? 'Renda Variável' : 'Renda Passiva'}
+          </Badge>
         </div>
 
         <div className="absolute bottom-3 left-3 right-3 flex justify-between items-end">
