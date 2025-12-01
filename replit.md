@@ -30,20 +30,25 @@ Toda a plataforma foi atualizada para exibir **50% de retorno anual** em vez de 
 
 ---
 
-## ✅ RESOLVIDO: Nome da Tabela Mismatch (December 1, 2025)
+## ✅ RESOLVIDO: Nome da Tabela e Coluna Mismatch (December 1, 2025)
 
-**Problema**: Erro `"Could not find the table 'public.deposits' in the schema cache"`
+**Problema 1**: Erro `"Could not find the table 'public.deposits' in the schema cache"`
 - **Causa**: Supabase remoto tem tabela chamada `depositos` (português), mas código usava `deposits` (inglês)
 - **Solução**: Alterar todas as 5 referências de "deposits" → "depositos" em 3 arquivos
   - ✅ DepositForm.tsx (1 ref)
   - ✅ AdminDeposits.tsx (3 refs)
   - ✅ TransactionHistory.tsx (1 ref)
-- **Status**: ✅ RESOLVIDO
+
+**Problema 2**: Erro `"Could not find the 'metodo' column of 'depositos' in the schema cache"`
+- **Causa**: Coluna se chama `metodo_pagamento`, não `metodo`
+- **Solução**: Alterar `metodo` → `metodo_pagamento` em DepositForm.tsx (linha 76)
+
+**Status**: ✅ RESOLVIDO - Ambos os problemas corrigidos
 
 **Arquivos Alterados:**
-1. `src/components/DepositForm.tsx` - `.from("deposits")` → `.from("depositos")`
-2. `src/components/AdminDeposits.tsx` - 3 ocorrências alteradas
-3. `src/components/TransactionHistory.tsx` - 1 ocorrência alterada
+1. `src/components/DepositForm.tsx` - `.from("deposits")` → `.from("depositos")` + `metodo` → `metodo_pagamento`
+2. `src/components/AdminDeposits.tsx` - 3 ocorrências de table name alteradas
+3. `src/components/TransactionHistory.tsx` - 1 ocorrência de table name alterada
 
 ---
 

@@ -70,7 +70,7 @@ export const DepositForm = () => {
         .insert({
           usuario_id: user.id,
           valor: parseFloat(amount),
-          metodo: paymentMethod,
+          metodo_pagamento: paymentMethod,
           comprovante_url: receipt,
           status: "pendente",
         })
