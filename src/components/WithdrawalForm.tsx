@@ -18,6 +18,7 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [amount, setAmount] = useState("")
   const [withdrawalMethod, setWithdrawalMethod] = useState<"bank_transfer" | "multicaixa">("bank_transfer")
   const [bankAccount, setBankAccount] = useState("")
+  const [bankName, setBankName] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [saldo, setSaldo] = useState(0)
   const [userId, setUserId] = useState("")
@@ -68,6 +69,11 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       return
     }
 
+    if (withdrawalMethod === "bank_transfer" && !bankName) {
+      toast({ title: "Erro", description: "Nome do banco é obrigatório", variant: "destructive" })
+      return
+    }
+
     setLoading(true)
     try {
       // Registrar solicitação de saque
@@ -78,6 +84,7 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           valor: withdrawAmount,
           metodo_pagamento: withdrawalMethod,
           numero_conta: bankAccount || null,
+          nome_banco: withdrawalMethod === "bank_transfer" ? bankName : null,
           status: "pendente",
         })
 
@@ -198,18 +205,33 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
           {/* Número de Conta/IBAN */}
           {withdrawalMethod === "bank_transfer" && (
-            <div className="space-y-2">
-              <Label htmlFor="bankAccount">IBAN *</Label>
-              <Input
-                id="bankAccount"
-                type="text"
-                placeholder="AO06 0040 0000 1433 6637 1018 6"
-                value={bankAccount}
-                onChange={(e) => setBankAccount(e.target.value.toUpperCase())}
-                disabled={loading}
-                data-testid="input-bank-account"
-              />
-              <p className="text-xs text-muted-foreground">Informe a conta IBAN para transferência</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="bankName">Nome do Banco *</Label>
+                <Input
+                  id="bankName"
+                  type="text"
+                  placeholder="Ex: Banco BAI, BIC, BFA, etc"
+                  value={bankName}
+                  onChange={(e) => setBankName(e.target.value)}
+                  disabled={loading}
+                  data-testid="input-bank-name"
+                />
+                <p className="text-xs text-muted-foreground">Informe o nome da instituição bancária</p>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="bankAccount">IBAN *</Label>
+                <Input
+                  id="bankAccount"
+                  type="text"
+                  placeholder="AO06 0040 0000 1433 6637 1018 6"
+                  value={bankAccount}
+                  onChange={(e) => setBankAccount(e.target.value.toUpperCase())}
+                  disabled={loading}
+                  data-testid="input-bank-account"
+                />
+                <p className="text-xs text-muted-foreground">Informe a conta IBAN para transferência</p>
+              </div>
             </div>
           )}
 
@@ -246,7 +268,7 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              disabled={loading || !amount || (withdrawalMethod === "bank_transfer" && !bankAccount)}
+              disabled={loading || !amount || (withdrawalMethod === "bank_transfer" && (!bankAccount || !bankName))}
               className="flex-1"
               data-testid="button-submit-withdrawal"
             >
