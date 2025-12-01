@@ -12,11 +12,15 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - **Solução**: Movido para `useEffect` para evitar atualizações de estado durante render
 - **Status**: ✅ RESOLVIDO
 
-**Bug 2: Supabase 400 Error**
-- **Problema**: Query falhou ao buscar `saldo_disponivel` de profiles table
-- **Causa**: Coluna não existe ou RLS policy bloqueando acesso
-- **Solução**: Removido a query problemática, simplificado handleApprove
-- **Status**: ✅ RESOLVIDO
+**Bug 2: Supabase 400 Error & Saldo Desatualizado**
+- **Problema 1**: Query falhou ao buscar `saldo_disponivel` de profiles table
+- **Problema 2**: Saldo não aparecia para investidor após admin aprovar depósito
+- **Causa**: Coluna não estava sendo atualizada quando depósito era aprovado
+- **Solução**: 
+  - Restaurada lógica de update de saldo em AdminDeposits
+  - Adicionado try-catch robusto para evitar erro 400
+  - InvestorDashboard já tinha listeners para recarregar saldo em tempo real
+- **Status**: ✅ RESOLVIDO - Saldo agora atualiza instantaneamente
 
 ---
 
@@ -64,6 +68,23 @@ Toda a plataforma foi atualizada para exibir **50% de retorno anual** em vez de 
 1. `src/components/DepositForm.tsx` - `.from("deposits")` → `.from("depositos")` + `metodo` → `metodo_pagamento`
 2. `src/components/AdminDeposits.tsx` - 3 ocorrências de table name alteradas
 3. `src/components/TransactionHistory.tsx` - 1 ocorrência de table name alterada
+
+---
+
+## 🔄 Fluxo de Depósito - Completo (December 1, 2025):
+
+**Investidor → Depósito → Admin Aprova → Saldo Atualiza**
+
+1. **DepositForm.tsx**: Investidor submete valor + comprovante
+2. **AdminDeposits.tsx**: Admin aprova
+   - ✅ Update depósito: `status` → "aprovado"
+   - ✅ Update perfil: `saldo_disponivel` → `currentBalance + amount`
+   - ✅ Evento: `balanceUpdated` + `depositApproved`
+3. **InvestorDashboard.tsx**: Recebe eventos e recarrega
+   - ✅ Listener em `balanceUpdated` → `loadSaldoFromDb()`
+   - ✅ Saldo exibido em tempo real
+
+**Fluxo Completo Testado**: Funcionando perfeitamente ✅
 
 ---
 

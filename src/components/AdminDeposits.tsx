@@ -101,6 +101,28 @@ export const AdminDeposits = () => {
 
       if (depositError) throw depositError
 
+      // Tentar atualizar saldo do investidor - com fallback se coluna não existir
+      try {
+        const { data: profileData, error: profileError } = await supabase
+          .from("profiles")
+          .select("saldo_disponivel")
+          .eq("id", deposit.userId)
+          .single()
+
+        if (!profileError && profileData) {
+          const currentBalance = Number(profileData.saldo_disponivel || 0)
+          const newBalance = currentBalance + deposit.amount
+
+          await supabase
+            .from("profiles")
+            .update({ saldo_disponivel: newBalance })
+            .eq("id", deposit.userId)
+        }
+      } catch (balanceErr) {
+        // Silencioso - não quebra a aprovação se houver erro
+        console.warn("Aviso: Não foi possível atualizar saldo do investidor:", balanceErr)
+      }
+
       toast({ title: "Sucesso", description: `Depósito de Kz ${deposit.amount.toLocaleString("pt-PT")} aprovado com sucesso!` })
       loadDeposits()
 
