@@ -191,6 +191,24 @@ const InvestorDashboard = () => {
     navigate("/login")
   }
 
+  // Calcula retorno acumulado diário (não anual imediato)
+  const calculateDailyReturn = () => {
+    return myInvestments.reduce((total, inv) => {
+      // Calcular dias desde a data de investimento
+      const investmentDate = new Date(inv.date)
+      const today = new Date()
+      const daysElapsed = Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24))
+      
+      // Retorno estimado anual (50%)
+      const annualReturn = inv.return || 50
+      
+      // Retorno diário = (50% / 365) * dias_decorridos
+      const dailyReturnValue = (annualReturn / 365) * daysElapsed * inv.value / 100
+      
+      return total + dailyReturnValue
+    }, 0)
+  }
+
   const portfolioData = [
     { name: "Imóveis", value: 50000 },
     { name: "Empresas", value: 25000 },
@@ -371,14 +389,14 @@ const InvestorDashboard = () => {
                     <div>
                       <p className="text-muted-foreground text-sm mb-1">Retorno Acumulado (50% a.a.)</p>
                       <p className="text-4xl font-bold text-foreground">
-                        Kz {(myInvestments.reduce((sum, inv) => sum + (inv.value * 0.5), 0)).toLocaleString("pt-PT", { maximumFractionDigits: 0 })}
+                        Kz {calculateDailyReturn().toLocaleString("pt-PT", { maximumFractionDigits: 0 })}
                       </p>
                     </div>
                     <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center">
                       <TrendingUp className="text-accent" size={24} />
                     </div>
                   </div>
-                  <p className="text-accent text-sm font-semibold">+50% anual</p>
+                  <p className="text-accent text-sm font-semibold">Acumulado diariamente</p>
                 </motion.div>
 
                 <motion.div

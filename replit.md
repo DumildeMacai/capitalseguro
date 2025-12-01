@@ -114,6 +114,24 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
+#### 12. ✅ FIX: Retorno Acumulado - De Anual Imediato para Diário - RESOLVIDO (December 1, 2025)
+- **Problema**: Retorno acumulado mostrava 50% completo (5.000 Kz) no dia 1 de um investimento de 10.000 Kz
+- **Causa**: Cálculo multiplicava por 0.5 direto sem considerar dias decorridos
+- **Solução**:
+  1. Criada função `calculateDailyReturn()` que calcula:
+     - Dias desde data_inscricao: `Math.floor((hoje - data_investimento) / (24*60*60*1000))`
+     - Retorno diário: `(50% / 365) * dias_decorridos * valor_investido`
+     - Soma de todos os investimentos com esse cálculo
+  2. Substituído cálculo em "Retorno Acumulado" para usar função dinâmica
+  3. Label atualizado de "+50% anual" para "Acumulado diariamente"
+- **Fórmula**: Para 10.000 Kz a 50% a.a:
+  - Dia 1: (0.50 / 365) * 1 * 10000 = **13.70 Kz** (não 5000!)
+  - Dia 30: (0.50 / 365) * 30 * 10000 = **410.96 Kz**
+  - Dia 365: (0.50 / 365) * 365 * 10000 = **5.000 Kz** (completa 50% no final do ano)
+- **Status**: ✅ RESOLVIDO
+
+---
+
 ## Próximos Passos (Opcional)
 
 1. **Email Notifications** - SendGrid para alertar quando depósito aprovado
