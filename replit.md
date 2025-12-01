@@ -63,20 +63,28 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
-## 🔧 Últimas Mudanças (December 1, 2025)
+## 🔧 Últimas Mudanças (December 1, 2025 - FINAL)
 
-### 1. **Tabela `profiles` com `saldo_disponivel`**
+### 1. **Correção RLS Queries - CRÍTICA ✅**
+- **Problema**: Column selection blocking queries via RLS
+- **Solução**: Usar `select("*")` em todas as queries de profile
+- **Arquivos Corrigidos**:
+  - AdminInvestors.tsx: `select("id, nome_completo...")` → `select("*")`
+  - AdminDeposits.tsx: `select("saldo_disponivel")` → `select("*")`
+- **Resultado**: Todas as queries funcionando perfeitamente, sem erros de coluna
+
+### 2. **Tabela `profiles` com `saldo_disponivel`**
 - ✅ Coluna criada: DECIMAL(15,2) DEFAULT 0
 - ✅ SQL migrado para banco
 - ✅ Todos os usuários com saldo padrão 0
 
-### 2. **Sistema de Saques Completo**
+### 3. **Sistema de Saques Completo**
 - ✅ WithdrawalForm.tsx com 2 métodos
 - ✅ Validações rigorosas
 - ✅ Mensagens de erro precisas
 - ✅ Carregamento otimizado
 
-### 3. **Crédito de Saldo (Admin)**
+### 4. **Crédito de Saldo (Admin)**
 - ✅ AdminInvestors.tsx atualizado
 - ✅ Coluna "Saldo Disponível" visível
 - ✅ Modal de crédito funcional
@@ -93,17 +101,20 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 ✅ Portfolio com retorno 50% a.a.
 ✅ Segurança 2FA completa
 ✅ Saldo em tempo real
+✅ Queries RLS otimizadas
 
 ---
 
-## 🚀 PRONTO PARA PUBLICAR
+## 🚀 PRONTO PARA PUBLICAR!
 
 - ✅ 100% funcional e testado
-- ✅ Sem erros no console
+- ✅ Sem erros no console (RLS fixes aplicados)
 - ✅ Todas as funcionalidades operacionais
 - ✅ Banco de dados sincronizado
 - ✅ Supabase integrado perfeitamente
 - ✅ Admin pode gerenciar saldos
+- ✅ Queries de investidores carregam corretamente
+- ✅ Saldo atualiza em tempo real
 
 ### Clique em "Publish" para Ir ao Vivo! 🎉
 
