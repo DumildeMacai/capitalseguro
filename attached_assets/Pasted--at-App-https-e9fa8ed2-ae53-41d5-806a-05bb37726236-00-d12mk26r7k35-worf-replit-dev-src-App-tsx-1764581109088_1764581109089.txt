@@ -1,0 +1,59 @@
+    at App (https://e9fa8ed2-ae53-41d5-806a-05bb37726236-00-d12mk26r7k35.worf.replit.dev/src/App.tsx:55:57)
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+(anonymous) @ injected.js:37
+printWarning @ react-dom.development.js:86
+error @ react-dom.development.js:60
+warnAboutRenderPhaseUpdatesInDEV @ react-dom.development.js:27531
+scheduleUpdateOnFiber @ react-dom.development.js:25537
+dispatchSetState @ react-dom.development.js:16708
+onUnreadCountChange @ InvestorDashboard.tsx:761
+updateUnreadCount @ NotificationsSection.tsx:56
+(anonymous) @ NotificationsSection.tsx:71
+basicStateReducer @ react-dom.development.js:15721
+updateReducer @ react-dom.development.js:15845
+updateState @ react-dom.development.js:16185
+useState @ react-dom.development.js:17096
+useState @ react.development.js:1622
+NotificationsSection @ NotificationsSection.tsx:51
+renderWithHooks @ react-dom.development.js:15486
+updateFunctionComponent @ react-dom.development.js:19617
+beginWork @ react-dom.development.js:21640
+beginWork$1 @ react-dom.development.js:27465
+performUnitOfWork @ react-dom.development.js:26596
+workLoopSync @ react-dom.development.js:26505
+renderRootSync @ react-dom.development.js:26473
+performSyncWorkOnRoot @ react-dom.development.js:26124
+flushSyncCallbacks @ react-dom.development.js:12042
+(anonymous) @ react-dom.development.js:25690
+injected.js:37 Auth state changed: SIGNED_OUT
+injected.js:37 Auth state changed: SIGNED_OUT
+injected.js:37 Auth state changed: SIGNED_IN
+injected.js:37 Auth state changed: SIGNED_IN
+2injected.js:37 [ProtectedRoute] User: admin@admin.com, UserType: admin, Required: admin
+xmemmdmyzwimluvgiqal.supabase.co/rest/v1/profiles?select=saldo_disponivel&id=eq.75f9ba92-f94f-452e-8fff-5e1096e571ec:1   Failed to load resource: the server responded with a status of 400 ()
+xmemmdmyzwimluvgiqal.supabase.co/rest/v1/profiles?select=saldo_disponivel&id=eq.75f9ba92-f94f-452e-8fff-5e1096e571ec:1   Failed to load resource: the server responded with a status of 400 ()
+injected.js:37  Erro ao aprovar depósito: Object
+(anonymous) @ injected.js:37
+injected.js:37 [ProtectedRoute] User: admin@admin.com, UserType: admin, Required: admin
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more

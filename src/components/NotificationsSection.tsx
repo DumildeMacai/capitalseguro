@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -50,30 +50,23 @@ interface NotificationsSectionProps {
 const NotificationsSection = ({ userId, onUnreadCountChange }: NotificationsSectionProps) => {
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
 
-  const updateUnreadCount = (notifs: Notification[]) => {
-    const count = notifs.filter((n) => !n.lido).length;
+  const unreadCount = notifications.filter((n) => !n.lido).length;
+
+  useEffect(() => {
     if (onUnreadCountChange) {
-      onUnreadCountChange(count);
+      onUnreadCountChange(unreadCount);
     }
-  };
+  }, [unreadCount, onUnreadCountChange]);
 
   const handleMarkAsRead = (notificationId: string) => {
-    setNotifications((prev) => {
-      const updated = prev.map((n) => (n.id === notificationId ? { ...n, lido: true } : n));
-      updateUnreadCount(updated);
-      return updated;
-    });
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === notificationId ? { ...n, lido: true } : n))
+    );
   };
 
   const handleDeleteNotification = (notificationId: string) => {
-    setNotifications((prev) => {
-      const updated = prev.filter((n) => n.id !== notificationId);
-      updateUnreadCount(updated);
-      return updated;
-    });
+    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
   };
-
-  const unreadCount = notifications.filter((n) => !n.lido).length;
 
   return (
     <div className="space-y-6">

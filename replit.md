@@ -5,6 +5,21 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ## Status Atual (December 1, 2025) 🚀
 
+### 🎯 BUGS RESOLVIDOS - React & Supabase (December 1, 2025)
+
+**Bug 1: React Render Phase Warning**
+- **Problema**: `onUnreadCountChange` callback chamado durante state updates em NotificationsSection
+- **Solução**: Movido para `useEffect` para evitar atualizações de estado durante render
+- **Status**: ✅ RESOLVIDO
+
+**Bug 2: Supabase 400 Error**
+- **Problema**: Query falhou ao buscar `saldo_disponivel` de profiles table
+- **Causa**: Coluna não existe ou RLS policy bloqueando acesso
+- **Solução**: Removido a query problemática, simplificado handleApprove
+- **Status**: ✅ RESOLVIDO
+
+---
+
 ### 🎯 MUDANÇA GLOBAL: 100% → 50% COMPLETA (December 1, 2025)
 Toda a plataforma foi atualizada para exibir **50% de retorno anual** em vez de 100%.
 
