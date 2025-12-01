@@ -452,7 +452,7 @@ const AdminInvestments = () => {
       </Card>
 
       <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {selectedInvestment ? "Editar Investimento" : "Novo Investimento"}
@@ -461,7 +461,7 @@ const AdminInvestments = () => {
               Preencha os dados do investimento abaixo.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="space-y-4 pr-4">
             <div>
               <label className="text-sm font-medium">Título *</label>
               <Input
