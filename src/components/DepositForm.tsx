@@ -27,6 +27,13 @@ export const DepositForm = () => {
     const file = e.target.files?.[0]
     if (!file) return
 
+    // Validar tipo de arquivo
+    const allowedTypes = ["image/png", "image/jpeg", "image/jpg", "application/pdf"]
+    if (!allowedTypes.includes(file.type)) {
+      toast({ title: "Erro", description: "Formato inválido. Use PNG, JPG, JPEG ou PDF", variant: "destructive" })
+      return
+    }
+
     if (file.size > 5 * 1024 * 1024) {
       toast({ title: "Erro", description: "Arquivo deve ser menor que 5MB", variant: "destructive" })
       return
@@ -191,7 +198,7 @@ export const DepositForm = () => {
               <Input
                 id="receipt"
                 type="file"
-                accept="image/*"
+                accept="image/png,image/jpeg,image/jpg,.pdf"
                 onChange={handleFileChange}
                 disabled={loading}
                 className="cursor-pointer"
@@ -207,7 +214,7 @@ export const DepositForm = () => {
                 <span>{receiptFileName}</span>
               </div>
             )}
-            <p className="text-xs text-muted-foreground">Máximo 5MB - Formatos: PNG, JPG, JPEG</p>
+            <p className="text-xs text-muted-foreground">Máximo 5MB - Formatos: PNG, JPG, JPEG, PDF</p>
           </div>
 
           {/* Aviso Importante */}
