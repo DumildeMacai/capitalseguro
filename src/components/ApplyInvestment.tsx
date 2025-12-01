@@ -91,7 +91,7 @@ export default function ApplyInvestment({
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) throw new Error("Usuário não autenticado")
 
-      // 1. Insert application record
+      // 1. Insert application record (automatically approved - no approval needed)
       const { data: application, error: appError } = await supabase
         .from("inscricoes_investimentos")
         .insert([
@@ -100,7 +100,7 @@ export default function ApplyInvestment({
             investimento_id: investmentId,
             valor_investido: valorNum,
             tipo_juros: jurosType,
-            status: "pendente",
+            status: "aprovado",
             data_inscricao: new Date().toISOString(),
           },
         ])

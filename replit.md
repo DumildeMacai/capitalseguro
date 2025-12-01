@@ -211,12 +211,20 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
-## 🎯 ÚLTIMA CORREÇÃO - Constraint Removido! ✅
+## 🎯 CORREÇÕES FINAIS ✅
 
+### 1. Constraint Removido - Múltiplos Aportes Ilimitados! ✅
 **PROBLEMA RESOLVIDO**: O banco tinha um constraint UNIQUE que impedia múltiplos aportes
 - ✅ Constraint `inscricoes_investimentos_usuario_id_investimento_id_key` removido
 - ✅ Agora **SEM LIMITE** de aportes no mesmo investimento
 - ✅ Erro 409 (Conflict) resolvido permanentemente
+
+### 2. Aportes Aprovados Automaticamente ✅
+**MUDANÇA IMPORTANTE**: Quando investidor aplica, aparece **ATIVO** imediatamente
+- ✅ Status mudado de "pendente" para "aprovado" automaticamente
+- ✅ **NENHUM aporte pendente** - tudo aparece como "Ativo" no dashboard
+- ✅ Saldo deduzido imediatamente
+- ✅ Sem necessidade de aprovação do admin
 
 ---
 
@@ -228,9 +236,11 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
   - ✅ Depósitos com comprovante
   - ✅ Saques com 2 métodos (Banco + Multicaixa)
   - ✅ Crédito de saldo (Admin)
-  - ✅ Aportes múltiplos no mesmo investimento
+  - ✅ **Aportes múltiplos ILIMITADOS** no mesmo investimento
+  - ✅ **Aportes aparecem ATIVO imediatamente** (sem aprovação)
   - ✅ Juros simples & compostos (50% a.a.)
   - ✅ Classificação de renda (Fixa/Variável/Passiva)
+  - ✅ **Extrato Consolidado** com agregação por investimento
   - ✅ Histórico de aportes
   - ✅ Saldo em tempo real
   - ✅ Segurança 2FA completa
