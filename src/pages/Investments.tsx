@@ -78,8 +78,8 @@ const Investments = () => {
       category: "Imóveis",
       icon: <Building className="text-purple-600" />,
       amountInvested: 100000,
-      currentValue: 115000,
-      returnRate: 100,
+      currentValue: 117500, // 100000 + (50% * 35% progresso) = 100000 + 17500
+      returnRate: 50,
       startDate: "2023-09-10",
       endDate: "2024-09-10",
       status: "Ativo",
@@ -92,8 +92,8 @@ const Investments = () => {
       category: "Transporte",
       icon: <CarTaxiFront className="text-orange-500" />,
       amountInvested: 30000,
-      currentValue: 37500,
-      returnRate: 100,
+      currentValue: 32250, // 30000 + (50% * 15% progresso) = 30000 + 2250
+      returnRate: 50,
       startDate: "2024-01-15",
       endDate: "2025-01-15",
       status: "Ativo",

@@ -13,12 +13,12 @@ import { Progress } from "@/components/ui/progress";
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("overview");
   
-  // Mock data
+  // Mock data - 50% annual return
   const investmentSummary = {
     totalInvested: 50000,
-    currentValue: 100000,
-    totalReturns: 50000,
-    returnsPercentage: 100,
+    currentValue: 75000, // 50000 + 50% = 75000
+    totalReturns: 25000, // 50% of 50000
+    returnsPercentage: 50,
     timeUntilWithdrawal: 182, // days remaining
   };
   
@@ -27,8 +27,8 @@ const Dashboard = () => {
       id: "inv-001",
       name: "Premium Real Estate Fund",
       amount: 20000,
-      currentValue: 30000,
-      returnRate: 100,
+      currentValue: 30000, // 20000 + 50% = 30000
+      returnRate: 50,
       category: "Real Estate",
       maturityDate: "2023-12-15",
       progress: 75,
@@ -37,8 +37,8 @@ const Dashboard = () => {
       id: "inv-002",
       name: "Tech Startup Growth",
       amount: 15000,
-      currentValue: 22500,
-      returnRate: 100,
+      currentValue: 22500, // 15000 + 50% = 22500
+      returnRate: 50,
       category: "Business",
       maturityDate: "2023-11-20",
       progress: 60,
@@ -47,8 +47,8 @@ const Dashboard = () => {
       id: "inv-003",
       name: "Luxury Apartment Complex",
       amount: 15000,
-      currentValue: 22500,
-      returnRate: 100,
+      currentValue: 22500, // 15000 + 50% = 22500
+      returnRate: 50,
       category: "Properties",
       maturityDate: "2024-01-10",
       progress: 45,
@@ -416,7 +416,7 @@ const Dashboard = () => {
               <div className="mb-6 md:mb-0 text-center md:text-left">
                 <h3 className="text-2xl font-bold mb-2">Ready to expand your portfolio?</h3>
                 <p className="opacity-90 max-w-md">
-                  Discover new investment opportunities with 100% annual returns. Grow your wealth faster with Capital Seguro.
+                  Discover new investment opportunities with 50% annual returns. Grow your wealth faster with Capital Seguro.
                 </p>
               </div>
               <Button size="lg" className="min-w-[180px] bg-white text-purple-dark hover:bg-white/90">
