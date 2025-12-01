@@ -31,43 +31,25 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         const {
           data: { user },
         } = await supabase.auth.getUser()
-        if (!user) {
-          console.error("Usuário não encontrado")
-          return
-        }
+        if (!user) return
 
-        console.log("Carregando saldo para usuário:", user.id)
         setUserId(user.id)
 
+        // Select all fields like in InvestorDashboard
         const { data: profileData, error } = await supabase
           .from("profiles")
-          .select("saldo_disponivel")
+          .select("*")
           .eq("id", user.id)
           .single()
 
         if (error) {
           console.error("Erro ao carregar perfil:", error)
+          return
         }
 
-        if (profileData) {
+        if (profileData && profileData.saldo_disponivel !== undefined) {
           const saldoCarregado = Number(profileData.saldo_disponivel) || 0
-          console.log("Saldo carregado:", saldoCarregado)
           setSaldo(saldoCarregado)
-        } else {
-          console.warn("Perfil não encontrado, aguardando...")
-          // Fallback após 500ms
-          setTimeout(async () => {
-            const { data: retryData } = await supabase
-              .from("profiles")
-              .select("saldo_disponivel")
-              .eq("id", user.id)
-              .single()
-            if (retryData) {
-              const saldoRetry = Number(retryData.saldo_disponivel) || 0
-              console.log("Saldo carregado (retry):", saldoRetry)
-              setSaldo(saldoRetry)
-            }
-          }, 500)
         }
       } catch (err) {
         console.error("Erro ao carregar saldo:", err)
@@ -87,7 +69,10 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
 
     // Validar saldo mínimo de 5000 Kz
     if (saldo < 5000) {
-      toast({ title: "Erro", description: "Saldo insuficiente. Mínimo para saque: 5.000,00 Kz", variant: "destructive" })
+      const mensagem = saldo === 0 
+        ? "Saldo insuficiente. Você deve ter no mínimo 5.000,00 Kz para sacar"
+        : `Saldo insuficiente. Deve ter no mínimo 5.000,00 Kz. Saldo disponível: Kz ${saldo.toFixed(2)}`
+      toast({ title: "Erro", description: mensagem, variant: "destructive" })
       return
     }
 
