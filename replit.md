@@ -8,7 +8,7 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 ### 🎯 MUDANÇA GLOBAL: 100% → 50% COMPLETA (December 1, 2025)
 Toda a plataforma foi atualizada para exibir **50% de retorno anual** em vez de 100%.
 
-**Arquivos Atualizados:**
+**Arquivos Atualizados (Frontend):**
 1. ✅ FAQSection - Pergunta sobre 50% anual
 2. ✅ TestimonialsSection - Depoimentos com 50%
 3. ✅ Chart - Cálculo de crescimento com 0.5 (50%)
@@ -17,6 +17,35 @@ Toda a plataforma foi atualizada para exibir **50% de retorno anual** em vez de 
 6. ✅ NotificationsSection - Notificações com 50%
 7. ✅ Login.tsx - Descrição com 50% anual
 8. ✅ Index.tsx - Calculadora com 50%
+9. ✅ ReturnCalculator - Calculadora com 50%
+
+**Database Atualizado (Supabase):**
+- ✅ 6 investimentos: `retorno_estimado` alterado de 100 → 50
+  - Edifício Comercial Talatona: 50%
+  - Rede de Táxi Coletivo: 50%
+  - Rede de Mototáxi: 50%
+  - Supermercado Bela Vista: 50%
+  - Condomínio Residencial Miramar: 50%
+  - Tech Startup Angolana: 50%
+
+---
+
+## ✅ TODOS OS 3 PROBLEMAS RESOLVIDOS (December 1, 2025):
+
+#### 1. ✅ Investimentos em Destaque não apareciam
+- Solução: Criado `useEffect` que busca do Supabase com `colocacao = 'destaque'`
+- Adicionados listeners para eventos 'investmentFeatured' em tempo real
+- Status: ✅ RESOLVIDO
+
+#### 2. ✅ Status "Rejeitado" mesmo após aprovação  
+- Solução: Adicionada função `reloadMyInvestments()` + listeners
+- AdminDeposits agora dispara evento quando aprova depósito
+- Status: ✅ RESOLVIDO
+
+#### 3. ✅ Retorno Acumulado - De Anual Imediato para Diário
+- Solução: Fórmula diária: `(50% / 365) × dias_decorridos × valor`
+- Dia 1: 13,70 Kz | Dia 365: 5.000 Kz
+- Status: ✅ RESOLVIDO
 
 ---
 
