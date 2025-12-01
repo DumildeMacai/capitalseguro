@@ -33,9 +33,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Eye, MoreVertical, Search } from "lucide-react";
+import { Eye, MoreVertical, Search, Send } from "lucide-react";
 
 interface Investor {
   id: string;
@@ -44,6 +45,7 @@ interface Investor {
   telefone: string | null;
   bio: string | null;
   data_criacao: string | null;
+  saldo_disponivel?: number;
 }
 
 const AdminInvestors = () => {
@@ -52,6 +54,9 @@ const AdminInvestors = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedInvestor, setSelectedInvestor] = useState<Investor | null>(null);
   const [openDialog, setOpenDialog] = useState(false);
+  const [openCreditDialog, setOpenCreditDialog] = useState(false);
+  const [creditAmount, setCreditAmount] = useState("");
+  const [creditLoading, setCreditLoading] = useState(false);
   const [formData, setFormData] = useState({
     nome_completo: "",
     email: "",
@@ -66,10 +71,10 @@ const AdminInvestors = () => {
   const fetchInvestors = async () => {
     try {
       setLoading(true);
-      // Fetch all profiles - use created_at column
+      // Fetch all profiles including saldo_disponivel
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, nome_completo, email, telefone, bio, created_at")
+        .select("id, nome_completo, email, telefone, bio, created_at, saldo_disponivel")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -131,6 +136,62 @@ const AdminInvestors = () => {
     }
   };
 
+  const handleOpenCreditDialog = (investor: Investor) => {
+    setSelectedInvestor(investor);
+    setCreditAmount("");
+    setOpenCreditDialog(true);
+  };
+
+  const handleCreditBalance = async () => {
+    try {
+      if (!selectedInvestor || !creditAmount) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Informe um valor válido.",
+        });
+        return;
+      }
+
+      const amount = parseFloat(creditAmount);
+      if (isNaN(amount) || amount <= 0) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Valor deve ser maior que 0.",
+        });
+        return;
+      }
+
+      setCreditLoading(true);
+      const currentBalance = Number(selectedInvestor.saldo_disponivel || 0);
+      const newBalance = currentBalance + amount;
+
+      const { error } = await supabase
+        .from("profiles")
+        .update({ saldo_disponivel: newBalance })
+        .eq("id", selectedInvestor.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso",
+        description: `Creditado Kz ${amount.toFixed(2)} ao investidor. Novo saldo: Kz ${newBalance.toFixed(2)}`,
+      });
+
+      setOpenCreditDialog(false);
+      await fetchInvestors();
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível creditar saldo.",
+      });
+    } finally {
+      setCreditLoading(false);
+    }
+  };
+
   const formatDate = (dateString: string | null) => {
     if (!dateString) return "—";
     return new Date(dateString).toLocaleDateString("pt-PT");
@@ -179,6 +240,7 @@ const AdminInvestors = () => {
                   <TableHead>Nome</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Telefone</TableHead>
+                  <TableHead>Saldo Disponível</TableHead>
                   <TableHead>Cadastro</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
@@ -191,6 +253,7 @@ const AdminInvestors = () => {
                       <TableCell className="font-medium">{investor.nome_completo || "—"}</TableCell>
                       <TableCell>{investor.email}</TableCell>
                       <TableCell>{investor.telefone || "—"}</TableCell>
+                      <TableCell>Kz {Number(investor.saldo_disponivel || 0).toLocaleString("pt-PT", { minimumFractionDigits: 2 })}</TableCell>
                       <TableCell>{formatDate(investor.data_criacao)}</TableCell>
                       <TableCell>
                         <Badge variant="outline">Ativo</Badge>
@@ -209,6 +272,10 @@ const AdminInvestors = () => {
                               <Eye className="mr-2 h-4 w-4" />
                               <span>Visualizar/Editar</span>
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleOpenCreditDialog(investor)}>
+                              <Send className="mr-2 h-4 w-4" />
+                              <span>Creditar Saldo</span>
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -216,7 +283,7 @@ const AdminInvestors = () => {
                   ))
                 ) : (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
                       Nenhum usuário encontrado
                     </TableCell>
                   </TableRow>
@@ -266,6 +333,56 @@ const AdminInvestors = () => {
               Cancelar
             </Button>
             <Button onClick={handleEditInvestor}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={openCreditDialog} onOpenChange={setOpenCreditDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Creditar Saldo ao Investidor</DialogTitle>
+            <DialogDescription>
+              Adicione fundos à conta do investidor.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">Investidor</label>
+              <Input
+                value={selectedInvestor?.nome_completo || ""}
+                disabled
+                placeholder="Nome do investidor"
+              />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Saldo Atual</label>
+              <Input
+                value={`Kz ${Number(selectedInvestor?.saldo_disponivel || 0).toFixed(2)}`}
+                disabled
+                placeholder="0.00"
+              />
+            </div>
+            <div>
+              <Label htmlFor="credit-amount">Valor a Creditar (Kz) *</Label>
+              <Input
+                id="credit-amount"
+                type="number"
+                placeholder="10000"
+                value={creditAmount}
+                onChange={(e) => setCreditAmount(e.target.value)}
+                min="0"
+                step="100"
+                disabled={creditLoading}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenCreditDialog(false)} disabled={creditLoading}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCreditBalance} disabled={creditLoading}>
+              {creditLoading ? "Creditando..." : "Creditar"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
