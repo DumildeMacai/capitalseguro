@@ -14,13 +14,15 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - Download com extensão correta (.pdf ou .png)
 - Método de pagamento: Banco BAI ou Multicaixa Express
 
-#### ✅ Sistema de Saques - COMPLETO
+#### ✅ Sistema de Saques - COMPLETO E VALIDADO
 - Investidor solicita saque com 2 métodos:
-  - **Banco BAI**: Requer Nome do Banco + IBAN
-  - **Multicaixa Express**: Requer Número de Conta
+  - **Banco BAI**: Requer Nome do Banco + IBAN + Valor
+  - **Multicaixa Express**: Requer Número de Telefone/Conta (APENAS NÚMEROS) + Valor
 - Validações implementadas:
   - Mínimo para saque: 5.000,00 Kz
   - Saldo disponível não pode ser inferior a 5.000,00 Kz
+  - TODOS os dados obrigatórios devem estar preenchidos
+  - Número de Multicaixa: apenas números (sem letras)
 - Admin aprova saques na dashboard
 - Saldo deduzido imediatamente após submissão
 
@@ -54,25 +56,32 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ## 🔧 Mudanças Realizadas (December 1, 2025)
 
-### 1. **Implementado Sistema Completo de Saques**
-- WithdrawalForm.tsx: Formulário com 2 métodos de pagamento
-- Campo obrigatório "Nome do Banco" para transferências bancárias
+### 1. **Validação Completa do Formulário de Saque**
+- WithdrawalForm.tsx: Validação de TODOS os campos obrigatórios
+- Banco BAI: Nome do Banco + IBAN (ambos obrigatórios)
+- Multicaixa: Número de Telefone/Conta (obrigatório + apenas números)
+- Input Multicaixa: Remove automaticamente letras (apenas números permitidos)
+- Botão submit: Desabilitado até preencher todos os dados
+
+### 2. **Sistema Completo de Saques**
+- Método 1: Transferência Bancária (Banco BAI)
+- Método 2: Multicaixa Express (Número de Telefone)
 - Validação de saldo mínimo: 5.000,00 Kz
 - Validação de valor mínimo de saque: 5.000,00 Kz
 - Integração com tabela `saques` no Supabase
 - Atualização automática de saldo após saque pendente
 
-### 2. **Corrigido Download de Recibos - Extensão Correta**
+### 3. **Corrigido Download de Recibos - Extensão Correta**
 - AdminDeposits.tsx: Detecta tipo de arquivo (PDF vs imagem)
 - PDF baixa com `.pdf` (antes era `.png`)
 - Imagens baixam com `.png`
 
-### 3. **Corrigido NaN no Retorno Acumulado**
+### 4. **Corrigido NaN no Retorno Acumulado**
 - InvestorDashboard.tsx: Adicionado armazenamento de `dateISO`
 - Cálculo usa data ISO original (não string formatada)
 - Fórmula agora precisa: (50/365) × dias × valor
 
-### 4. **Melhorado Carregamento de Saldo**
+### 5. **Melhorado Carregamento de Saldo**
 - Fallback com setTimeout(500ms) garantido
 - Listeners para eventos em tempo real
 - Logs de debug adicionados para rastreamento
@@ -90,8 +99,9 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 **Fluxo de Saques:**
 - Investidor clica em aba "Sacar"
-- Informa: Valor, Nome do Banco (para transferência bancária), IBAN ou Número de Conta Multicaixa
-- Sistema valida: Saldo ≥ 5.000 Kz + Valor ≥ 5.000 Kz
+- **Transferência Bancária**: Informa Nome do Banco + IBAN + Valor
+- **Multicaixa Express**: Informa Número de Telefone (apenas números) + Valor
+- Sistema valida: Saldo ≥ 5.000 Kz + Valor ≥ 5.000 Kz + Todos os campos preenchidos
 - Submete solicitação com status "pendente"
 - Admin aprova → Saque processado
 
@@ -112,6 +122,7 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 ✅ Supabase integrado perfeitamente
 ✅ Eventos em tempo real funcionando
 ✅ Sistema de saques completo com validações
+✅ Validação de entrada: apenas números para Multicaixa
 
 ### Próximos Passos (Opcional - Pós-Publicação)
 1. **Email Notifications** - SendGrid para alertas de depósito/saque

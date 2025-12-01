@@ -19,6 +19,7 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
   const [withdrawalMethod, setWithdrawalMethod] = useState<"bank_transfer" | "multicaixa">("bank_transfer")
   const [bankAccount, setBankAccount] = useState("")
   const [bankName, setBankName] = useState("")
+  const [multicaixaNumber, setMulticaixaNumber] = useState("")
   const [submitted, setSubmitted] = useState(false)
   const [saldo, setSaldo] = useState(0)
   const [userId, setUserId] = useState("")
@@ -86,6 +87,16 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       return
     }
 
+    if (withdrawalMethod === "multicaixa" && !multicaixaNumber) {
+      toast({ title: "Erro", description: "Número de telefone/conta é obrigatório para Multicaixa", variant: "destructive" })
+      return
+    }
+
+    if (withdrawalMethod === "multicaixa" && !/^\d+$/.test(multicaixaNumber)) {
+      toast({ title: "Erro", description: "Número de Multicaixa deve conter apenas números", variant: "destructive" })
+      return
+    }
+
     setLoading(true)
     try {
       // Registrar solicitação de saque
@@ -95,7 +106,7 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           usuario_id: userId,
           valor: withdrawAmount,
           metodo_pagamento: withdrawalMethod,
-          numero_conta: bankAccount || null,
+          numero_conta: withdrawalMethod === "bank_transfer" ? bankAccount : multicaixaNumber,
           nome_banco: withdrawalMethod === "bank_transfer" ? bankName : null,
           status: "pendente",
         })
@@ -254,12 +265,15 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
                 id="multicaixaAccount"
                 type="text"
                 placeholder="Ex: 923456789"
-                value={bankAccount}
-                onChange={(e) => setBankAccount(e.target.value)}
+                value={multicaixaNumber}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, "")
+                  setMulticaixaNumber(value)
+                }}
                 disabled={loading}
                 data-testid="input-multicaixa-account"
               />
-              <p className="text-xs text-muted-foreground">Informe seu número de conta Multicaixa</p>
+              <p className="text-xs text-muted-foreground">Informe seu número de conta Multicaixa (apenas números)</p>
             </div>
           )}
 
@@ -280,7 +294,12 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              disabled={loading || !amount || (withdrawalMethod === "bank_transfer" && (!bankAccount || !bankName))}
+              disabled={
+                loading ||
+                !amount ||
+                (withdrawalMethod === "bank_transfer" && (!bankAccount || !bankName)) ||
+                (withdrawalMethod === "multicaixa" && !multicaixaNumber)
+              }
               className="flex-1"
               data-testid="button-submit-withdrawal"
             >
