@@ -167,9 +167,22 @@ const AdminInvestors = () => {
       const currentBalance = Number(selectedInvestor.saldo_disponivel || 0);
       const newBalance = currentBalance + amount;
 
+      // Fetch current profile to get all fields (required for RLS)
+      const { data: currentProfile, error: fetchError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", selectedInvestor.id)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Update with all profile fields to satisfy RLS
       const { error } = await supabase
         .from("profiles")
-        .update({ saldo_disponivel: newBalance })
+        .update({ 
+          ...currentProfile,
+          saldo_disponivel: newBalance 
+        })
         .eq("id", selectedInvestor.id);
 
       if (error) throw error;
@@ -182,6 +195,7 @@ const AdminInvestors = () => {
       setOpenCreditDialog(false);
       await fetchInvestors();
     } catch (error: any) {
+      console.error("Erro ao creditar saldo:", error);
       toast({
         variant: "destructive",
         title: "Erro",
