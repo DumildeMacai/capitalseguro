@@ -276,6 +276,30 @@ const InvestorDashboard = () => {
     }, 0)
   }
 
+  // Calcula valor acumulado para um investimento específico
+  const calculateInvestmentAccumulated = (investment: any) => {
+    const investmentDate = new Date(investment.dateISO || investment.date)
+    const today = new Date()
+    const daysElapsed = Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24))
+    const annualReturn = investment.return || 50
+    return (annualReturn / 365) * daysElapsed * investment.value / 100
+  }
+
+  // Calcula dias decorridos
+  const calculateDaysElapsed = (investment: any) => {
+    const investmentDate = new Date(investment.dateISO || investment.date)
+    const today = new Date()
+    return Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24))
+  }
+
+  // Calcula data de término (data de investimento + 365 dias)
+  const calculateEndDate = (investment: any) => {
+    const investmentDate = new Date(investment.dateISO || investment.date)
+    const endDate = new Date(investmentDate)
+    endDate.setDate(endDate.getDate() + 365)
+    return endDate.toLocaleDateString("pt-PT")
+  }
+
   const portfolioData = [
     { name: "Imóveis", value: 50000 },
     { name: "Empresas", value: 25000 },
@@ -499,7 +523,11 @@ const InvestorDashboard = () => {
                         <TableRow className="border-border hover:bg-transparent">
                           <TableHead className="text-muted-foreground">Nome</TableHead>
                           <TableHead className="text-muted-foreground">Tipo</TableHead>
-                          <TableHead className="text-muted-foreground">Valor</TableHead>
+                          <TableHead className="text-muted-foreground">Data Investido</TableHead>
+                          <TableHead className="text-muted-foreground">Data Término</TableHead>
+                          <TableHead className="text-muted-foreground">Dias</TableHead>
+                          <TableHead className="text-muted-foreground">Valor Investido</TableHead>
+                          <TableHead className="text-muted-foreground">Acumulado</TableHead>
                           <TableHead className="text-muted-foreground">Status</TableHead>
                           <TableHead className="text-muted-foreground">Retorno</TableHead>
                         </TableRow>
@@ -509,8 +537,14 @@ const InvestorDashboard = () => {
                           <TableRow key={investment.id} className="border-border hover:bg-muted/50">
                             <TableCell className="font-medium text-foreground">{investment.name}</TableCell>
                             <TableCell className="text-muted-foreground">{investment.type}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{investment.date}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm">{calculateEndDate(investment)}</TableCell>
+                            <TableCell className="text-muted-foreground text-sm font-medium">{calculateDaysElapsed(investment)}d</TableCell>
                             <TableCell className="text-muted-foreground">
                               Kz {investment.value.toLocaleString("pt-PT")}
+                            </TableCell>
+                            <TableCell className="text-accent font-semibold">
+                              Kz {calculateInvestmentAccumulated(investment).toLocaleString("pt-PT", { maximumFractionDigits: 2 })}
                             </TableCell>
                             <TableCell>
                               <span
