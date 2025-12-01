@@ -59,6 +59,18 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
       return
     }
 
+    // Validar saldo mínimo de 5000 Kz
+    if (saldo < 5000) {
+      toast({ title: "Erro", description: "Saldo insuficiente. Mínimo para saque: 5.000,00 Kz", variant: "destructive" })
+      return
+    }
+
+    // Validar valor mínimo de saque de 5000 Kz
+    if (withdrawAmount < 5000) {
+      toast({ title: "Erro", description: "Valor mínimo de saque: 5.000,00 Kz", variant: "destructive" })
+      return
+    }
+
     if (withdrawAmount > saldo) {
       toast({ title: "Erro", description: `Saldo insuficiente. Disponível: Kz ${saldo.toFixed(2)}`, variant: "destructive" })
       return

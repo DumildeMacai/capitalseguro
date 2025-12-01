@@ -14,6 +14,16 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - Download com extensão correta (.pdf ou .png)
 - Método de pagamento: Banco BAI ou Multicaixa Express
 
+#### ✅ Sistema de Saques - COMPLETO
+- Investidor solicita saque com 2 métodos:
+  - **Banco BAI**: Requer Nome do Banco + IBAN
+  - **Multicaixa Express**: Requer Número de Conta
+- Validações implementadas:
+  - Mínimo para saque: 5.000,00 Kz
+  - Saldo disponível não pode ser inferior a 5.000,00 Kz
+- Admin aprova saques na dashboard
+- Saldo deduzido imediatamente após submissão
+
 #### ✅ Retorno Acumulado - CORRETO E TESTADO
 - **Fórmula**: (50% / 365) × dias_decorridos × valor
 - **Dia 1**: 13,70 Kz (para 10.000 Kz a 50% a.a)
@@ -44,17 +54,25 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ## 🔧 Mudanças Realizadas (December 1, 2025)
 
-### 1. **Corrigido Download de Recibos - Extensão Correta**
+### 1. **Implementado Sistema Completo de Saques**
+- WithdrawalForm.tsx: Formulário com 2 métodos de pagamento
+- Campo obrigatório "Nome do Banco" para transferências bancárias
+- Validação de saldo mínimo: 5.000,00 Kz
+- Validação de valor mínimo de saque: 5.000,00 Kz
+- Integração com tabela `saques` no Supabase
+- Atualização automática de saldo após saque pendente
+
+### 2. **Corrigido Download de Recibos - Extensão Correta**
 - AdminDeposits.tsx: Detecta tipo de arquivo (PDF vs imagem)
 - PDF baixa com `.pdf` (antes era `.png`)
 - Imagens baixam com `.png`
 
-### 2. **Corrigido NaN no Retorno Acumulado**
+### 3. **Corrigido NaN no Retorno Acumulado**
 - InvestorDashboard.tsx: Adicionado armazenamento de `dateISO`
 - Cálculo usa data ISO original (não string formatada)
 - Fórmula agora precisa: (50/365) × dias × valor
 
-### 3. **Melhorado Carregamento de Saldo**
+### 4. **Melhorado Carregamento de Saldo**
 - Fallback com setTimeout(500ms) garantido
 - Listeners para eventos em tempo real
 - Logs de debug adicionados para rastreamento
@@ -69,6 +87,13 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 3. ✅ Saldo atualizado para 24.000 Kz
 4. ✅ Retorno acumulado calculado corretamente (27,40 Kz no dia 2)
 5. ✅ Histórico de transações exibido
+
+**Fluxo de Saques:**
+- Investidor clica em aba "Sacar"
+- Informa: Valor, Nome do Banco (para transferência bancária), IBAN ou Número de Conta Multicaixa
+- Sistema valida: Saldo ≥ 5.000 Kz + Valor ≥ 5.000 Kz
+- Submete solicitação com status "pendente"
+- Admin aprova → Saque processado
 
 **Investimento:**
 - Total: 10.000 Kz (1 investimento)
@@ -86,10 +111,10 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 ✅ Data/hora sincronizados
 ✅ Supabase integrado perfeitamente
 ✅ Eventos em tempo real funcionando
+✅ Sistema de saques completo com validações
 
 ### Próximos Passos (Opcional - Pós-Publicação)
-1. **Email Notifications** - SendGrid para alertas
-2. **Server-side Rate Limiting** - Camada extra
+1. **Email Notifications** - SendGrid para alertas de depósito/saque
+2. **Server-side Rate Limiting** - Camada extra de proteção
 3. **Payment Integration** - Stripe/Paypal automático
 4. **SMS 2FA** - Verificação por SMS
-
