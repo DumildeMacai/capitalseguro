@@ -162,7 +162,7 @@ const InvestorDashboard = () => {
     }
   }, [])
 
-  // Listen para atualizações em tempo real do saldo
+  // Listen para atualizações em tempo real do saldo e investimentos
   useEffect(() => {
     if (!userId) return
 
@@ -176,15 +176,60 @@ const InvestorDashboard = () => {
         console.error("Erro ao carregar saldo atualizado:", err)
       }
     }
+
+    const handleInvestmentStatusUpdate = () => {
+      reloadMyInvestments(userId)
+    }
     
     window.addEventListener("balanceUpdated", loadSaldoFromDb)
     window.addEventListener("depositApproved", loadSaldoFromDb)
+    window.addEventListener("investmentStatusUpdated", handleInvestmentStatusUpdate)
+    window.addEventListener("investmentApproved", handleInvestmentStatusUpdate)
     
     return () => {
       window.removeEventListener("balanceUpdated", loadSaldoFromDb)
       window.removeEventListener("depositApproved", loadSaldoFromDb)
+      window.removeEventListener("investmentStatusUpdated", handleInvestmentStatusUpdate)
+      window.removeEventListener("investmentApproved", handleInvestmentStatusUpdate)
     }
   }, [userId])
+
+  // Recarrega investimentos do usuário com status atualizado
+  const reloadMyInvestments = async (uid?: string) => {
+    try {
+      const userId_to_use = uid || userId
+      if (!userId_to_use) return
+
+      const { data } = await supabase
+        .from("inscricoes_investimentos")
+        .select(`
+          *,
+          investimentos (
+            id,
+            titulo,
+            categoria,
+            retorno_estimado
+          )
+        `)
+        .eq("usuario_id", userId_to_use)
+        .order("data_inscricao", { ascending: false })
+
+      if (data) {
+        const formatted = data.map((inv: any) => ({
+          id: inv.id,
+          name: inv.investimentos?.titulo || "Investimento",
+          type: inv.investimentos?.categoria || "Outro",
+          value: inv.valor_investido || 0,
+          date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
+          status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
+          return: inv.investimentos?.retorno_estimado || 0,
+        }))
+        setMyInvestments(formatted)
+      }
+    } catch (err) {
+      console.error("Erro ao recarregar investimentos:", err)
+    }
+  }
 
   const handleLogout = async () => {
     await supabase.auth.signOut()

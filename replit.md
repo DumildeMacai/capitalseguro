@@ -114,7 +114,18 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
-#### 12. ✅ FIX: Retorno Acumulado - De Anual Imediato para Diário - RESOLVIDO (December 1, 2025)
+#### 12. ✅ FIX: Status de Investimentos Desatualizado - RESOLVIDO (December 1, 2025)
+- **Problema**: Coluna "Status" em "Investimentos Recentes" mostrava "Rejeitado" mesmo depois de aprovado
+- **Causa**: Dados carregados UMA VEZ no início, sem atualizar em tempo real quando admin aprova
+- **Solução**:
+  1. Criada função `reloadMyInvestments()` que recarrega dados do Supabase
+  2. Adicionados listeners para eventos `investmentStatusUpdated` e `investmentApproved`
+  3. AdminDeposits agora dispara esses eventos quando aprova depósito
+  4. Dashboard recarrega investimentos automaticamente quando há mudança
+- **Resultado**: Status agora **atualiza em TEMPO REAL** quando admin aprova
+- **Status**: ✅ RESOLVIDO
+
+#### 13. ✅ FIX: Retorno Acumulado - De Anual Imediato para Diário - RESOLVIDO (December 1, 2025)
 - **Problema**: Retorno acumulado mostrava 50% completo (5.000 Kz) no dia 1 de um investimento de 10.000 Kz
 - **Causa**: Cálculo multiplicava por 0.5 direto sem considerar dias decorridos
 - **Solução**:

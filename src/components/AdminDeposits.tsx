@@ -129,6 +129,9 @@ export const AdminDeposits = () => {
       // Disparar evento customizado para atualizar dashboard
       window.dispatchEvent(new Event("depositApproved"))
       window.dispatchEvent(new Event("balanceUpdated"))
+      // Disparar para investimentos também (em caso de aprovação de investimentos)
+      window.dispatchEvent(new Event("investmentStatusUpdated"))
+      window.dispatchEvent(new Event("investmentApproved"))
     } catch (error: any) {
       console.error("Erro ao aprovar depósito:", error)
       toast({ title: "Erro", description: error.message, variant: "destructive" })
