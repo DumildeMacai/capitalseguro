@@ -71,6 +71,23 @@ Toda a plataforma foi atualizada para exibir **50% de retorno anual** em vez de 
 
 ---
 
+## ✅ SUPORTE A PDF ADICIONADO (December 1, 2025)
+
+**DepositForm.tsx**:
+- ✅ Validação de arquivo: PNG, JPG, JPEG, PDF
+- ✅ Limite 5MB mantido
+- ✅ Mensagem de ajuda atualizada
+
+**AdminDeposits.tsx**:
+- ✅ Detecção dinâmica de tipo de arquivo
+- ✅ Visualização diferenciada para PDF
+- ✅ Descrição adapta-se ao tipo (Imagem vs. PDF)
+- ✅ Download funciona para ambos tipos
+
+**Status**: ✅ RESOLVIDO - Admin pode visualizar tanto imagens quanto PDFs
+
+---
+
 ## 🔄 Fluxo de Depósito - Completo (December 1, 2025):
 
 **Investidor → Depósito → Admin Aprova → Saldo Atualiza**

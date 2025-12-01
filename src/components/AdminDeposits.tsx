@@ -292,7 +292,11 @@ export const AdminDeposits = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <DialogTitle>Comprovante de Transferência</DialogTitle>
-                  <DialogDescription>Foto do comprovante enviado pelo investidor</DialogDescription>
+                  <DialogDescription>
+                    {selectedReceipt?.startsWith("data:application/pdf") 
+                      ? "Documento PDF enviado pelo investidor" 
+                      : "Foto do comprovante enviado pelo investidor"}
+                  </DialogDescription>
                 </div>
                 {selectedReceipt && (
                   <Button
@@ -309,11 +313,29 @@ export const AdminDeposits = () => {
             </DialogHeader>
             {selectedReceipt && (
               <div className="flex justify-center">
-                <img 
-                  src={selectedReceipt} 
-                  alt="Comprovante" 
-                  className="max-w-full max-h-96 rounded-lg border border-border"
-                />
+                {selectedReceipt.startsWith("data:application/pdf") ? (
+                  <div className="w-full bg-muted p-8 rounded-lg border border-border flex items-center justify-center min-h-96">
+                    <div className="text-center">
+                      <div className="text-4xl mb-3">📄</div>
+                      <p className="font-semibold mb-2">Documento PDF</p>
+                      <p className="text-sm text-muted-foreground mb-4">Clique em "Baixar" para visualizar o documento</p>
+                      <Button
+                        size="sm"
+                        onClick={() => handleDownloadReceipt(selectedReceipt)}
+                        data-testid="button-view-pdf"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        Baixar PDF
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <img 
+                    src={selectedReceipt} 
+                    alt="Comprovante" 
+                    className="max-w-full max-h-96 rounded-lg border border-border"
+                  />
+                )}
               </div>
             )}
           </DialogContent>
