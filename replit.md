@@ -30,19 +30,17 @@ Toda a plataforma foi atualizada para exibir **50% de retorno anual** em vez de 
 
 ---
 
-## 🔧 Issue Conhecida: Schema Cache Dessincronizado (December 1, 2025)
+## ✅ RESOLVIDO: Schema Cache Dessincronizado (December 1, 2025)
 
-**Erro:** `"Could not find the table 'public.deposits' in the schema cache"`
-- Ocorre ao tentar inserir depósito via DepositForm.tsx
-- Tabela "deposits" existe no banco (verificado ✅)
-- Problema: Cache de schema do Supabase está dessincronizado
+**Erro Anterior:** `"Could not find the table 'public.deposits' in the schema cache"`
+- **Causa**: Cache de schema do Supabase dessincronizado
+- **Solução**: Reiniciar aplicação para reconstruir cliente Supabase
+- **Status**: ✅ RESOLVIDO com restart do workflow
 
-**Solução:**
-1. Regenerar tipos do Supabase: `npx supabase gen types typescript > src/integrations/supabase/types.ts`
-2. Ou acessar painel Supabase e clicar em "Refresh Schema"
-3. Ou fazer restart da aplicação (pode resolver temporariamente)
-
-**Arquivo Afetado:** `src/components/DepositForm.tsx` (linha 72)
+**Se o erro reaparecer:**
+1. Acessar painel Supabase → "Refresh Schema"
+2. Ou regenerar tipos: `npx supabase gen types typescript > src/integrations/supabase/types.ts`
+3. Ou fazer novo restart da aplicação
 
 ---
 
