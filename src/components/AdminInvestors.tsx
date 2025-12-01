@@ -66,14 +66,14 @@ const AdminInvestors = () => {
   const fetchInvestors = async () => {
     try {
       setLoading(true);
-      // Fetch all profiles - the actual database doesn't have 'tipo' column
+      // Fetch all profiles - use created_at column
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, nome_completo, email, telefone, bio, data_criacao")
-        .order("data_criacao", { ascending: false });
+        .select("id, nome_completo, email, telefone, bio, created_at")
+        .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setInvestors(data || []);
+      setInvestors((data || []) as any);
     } catch (error: any) {
       console.error("Erro ao buscar investidores:", error);
       toast({

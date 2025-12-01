@@ -65,16 +65,15 @@ export const DepositForm = () => {
       }
 
       // Inserir depósito em Supabase
-      const { error: insertError } = await (supabase
+      const { error: insertError } = await supabase
         .from("deposits")
         .insert({
           usuario_id: user.id,
           valor: parseFloat(amount),
-          metodo_pagamento: paymentMethod,
+          metodo: paymentMethod,
           comprovante_url: receipt,
           status: "pendente",
-          data_criacao: new Date().toISOString(),
-        }) as any)
+        })
 
       if (insertError) throw insertError
 

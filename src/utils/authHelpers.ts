@@ -135,23 +135,20 @@ export const handleDocumentUpload = async (userId: string, userData: any) => {
 
 export const updateUserProfile = async (userId: string, userData: any, userType: "investidor" | "parceiro") => {
   try {
-    const updateData = {
-      user_id: userId,
-      nome_completo: userData.name,
-      telefone: userData.phone,
-      endereco: userData.address,
-      cidade: userData.city,
-      provincia: userData.province,
-      bio: userData.bio || "",
-      doc_frente: userData.biFront instanceof File ? `${userId}/bi_frente` : null,
-      doc_verso: userData.biBack instanceof File ? `${userId}/bi_verso` : null,
-      empresa_nome: userType === "parceiro" && userData.nomeEmpresa ? userData.nomeEmpresa : null,
-      ramo_negocio: userType === "parceiro" && userData.ramoAtuacao ? userData.ramoAtuacao : null,
-    }
-
-    console.log("Updating profile with data:", updateData)
-
-    const { error: updateError } = await supabase.rpc("update_user_profile", updateData)
+    const { error: updateError } = await supabase
+      .from("profiles")
+      .update({
+        nome_completo: userData.name,
+        telefone: userData.phone,
+        endereco: userData.address,
+        cidade: userData.city,
+        pais: userData.province || "Angola",
+        bio: userData.bio || "",
+        documento_url: userData.biFront instanceof File ? `${userId}/bi_frente` : null,
+        empresa_nome: userType === "parceiro" && userData.nomeEmpresa ? userData.nomeEmpresa : null,
+        ramo_negocio: userType === "parceiro" && userData.ramoAtuacao ? userData.ramoAtuacao : null,
+      })
+      .eq("id", userId)
 
     if (updateError) {
       console.error("Error updating profile:", updateError)
@@ -244,20 +241,21 @@ export const handleAdminAccess = async (
       console.warn("[Admin Access] Profile update warning:", profileError.message)
     }
     
-    // Step 2.5: Try to set admin role using RPC
-    console.log("[Admin Access] Attempting to set admin role via RPC...")
+    // Step 2.5: Try to set admin role directly
+    console.log("[Admin Access] Setting admin role...")
     try {
-      const { error: roleError } = await supabase.rpc("set_user_as_admin", {
-        user_email: adminEmail,
-      })
+      const { error: roleError } = await supabase
+        .from("profiles")
+        .update({ is_admin: true })
+        .eq("email", adminEmail)
       
       if (roleError) {
-        console.warn("[Admin Access] RPC call warning:", roleError)
+        console.warn("[Admin Access] Admin update warning:", roleError)
       } else {
-        console.log("[Admin Access] Admin role set successfully via RPC")
+        console.log("[Admin Access] Admin role set successfully")
       }
     } catch (e) {
-      console.warn("[Admin Access] RPC call failed (may need manual SQL):", e)
+      console.warn("[Admin Access] Admin update failed:", e)
     }
     
     // Step 3: Verify and redirect

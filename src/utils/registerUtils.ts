@@ -100,24 +100,21 @@ const handleDocumentUpload = async (userId: string, files: DocumentFiles) => {
 
 const updateUserProfile = async (userId: string, values: RegisterFormValues, files: DocumentFiles) => {
   try {
-    const updateData = {
-      user_id: userId,
-      nome_completo: values.name,
-      telefone: values.phone,
-      endereco: values.address,
-      cidade: values.city,
-      provincia: values.province,
-      bio: values.bio || '',
-      doc_frente: files.biFront ? `${userId}/bi_frente` : null,
-      doc_verso: files.biBack ? `${userId}/bi_verso` : null,
-      empresa_nome: values.userType === 'parceiro' ? values.name : null,
-      ramo_negocio: null
-    };
-    
-    console.log("Atualizando perfil com dados:", updateData);
+    console.log("Atualizando perfil com dados:", values);
     
     const { error } = await supabase
-      .rpc('update_user_profile', updateData);
+      .from("profiles")
+      .update({
+        nome_completo: values.name,
+        telefone: values.phone,
+        endereco: values.address,
+        cidade: values.city,
+        pais: values.province || "Angola",
+        bio: values.bio || '',
+        documento_url: files.biFront ? `${userId}/bi_frente` : null,
+        empresa_nome: values.userType === 'parceiro' ? values.name : null,
+      })
+      .eq("id", userId);
       
     if (error) {
       console.error("Erro ao atualizar perfil:", error);

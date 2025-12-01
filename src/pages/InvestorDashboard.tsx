@@ -369,14 +369,16 @@ const InvestorDashboard = () => {
                 >
                   <div className="flex justify-between items-start mb-4">
                     <div>
-                      <p className="text-muted-foreground text-sm mb-1">Retorno Acumulado</p>
-                      <p className="text-4xl font-bold text-foreground">Kz 12.500</p>
+                      <p className="text-muted-foreground text-sm mb-1">Retorno Acumulado (50% a.a.)</p>
+                      <p className="text-4xl font-bold text-foreground">
+                        Kz {(myInvestments.reduce((sum, inv) => sum + (inv.value * 0.5), 0)).toLocaleString("pt-PT", { maximumFractionDigits: 0 })}
+                      </p>
                     </div>
                     <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center">
                       <TrendingUp className="text-accent" size={24} />
                     </div>
                   </div>
-                  <p className="text-accent text-sm font-semibold">+5% este mês</p>
+                  <p className="text-accent text-sm font-semibold">+50% anual</p>
                 </motion.div>
 
                 <motion.div
