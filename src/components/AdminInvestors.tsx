@@ -164,28 +164,20 @@ const AdminInvestors = () => {
       }
 
       setCreditLoading(true);
-      const currentBalance = Number(selectedInvestor.saldo_disponivel || 0);
-      const newBalance = currentBalance + amount;
 
-      // Fetch current profile to get all fields (required for RLS)
-      const { data: currentProfile, error: fetchError } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", selectedInvestor.id)
-        .single();
+      // Use RPC function to credit balance (bypasses schema cache issues)
+      const { data, error } = await supabase
+        .rpc("credit_balance", {
+          p_user_id: selectedInvestor.id,
+          p_amount: amount,
+        });
 
-      if (fetchError) throw fetchError;
+      if (error) {
+        console.error("Erro ao chamar RPC:", error);
+        throw error;
+      }
 
-      // Update with all profile fields to satisfy RLS
-      const { error } = await supabase
-        .from("profiles")
-        .update({ 
-          ...currentProfile,
-          saldo_disponivel: newBalance 
-        })
-        .eq("id", selectedInvestor.id);
-
-      if (error) throw error;
+      const newBalance = data;
 
       toast({
         title: "Sucesso",
@@ -199,7 +191,7 @@ const AdminInvestors = () => {
       toast({
         variant: "destructive",
         title: "Erro",
-        description: "Não foi possível creditar saldo.",
+        description: error?.message || "Não foi possível creditar saldo.",
       });
     } finally {
       setCreditLoading(false);
