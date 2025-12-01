@@ -34,6 +34,7 @@ import Questionnaire from "@/components/profile/Questionnaire"
 import NotificationsSection from "@/components/NotificationsSection"
 import { ChangePasswordForm } from "@/components/security/ChangePasswordForm"
 import { TwoFactorAuthForm } from "@/components/security/TwoFactorAuthForm"
+import { WithdrawalForm } from "@/components/WithdrawalForm"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
@@ -440,6 +441,7 @@ const InvestorDashboard = () => {
             <TabsList className="mb-8 bg-card border border-border">
               <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
               <TabsTrigger value="meus-investimentos">Meus Investimentos</TabsTrigger>
+              <TabsTrigger value="sacar">Sacar</TabsTrigger>
               <TabsTrigger value="historico">Histórico</TabsTrigger>
               <TabsTrigger value="explorar">Explorar</TabsTrigger>
               <TabsTrigger value="perfil">Perfil</TabsTrigger>
@@ -668,6 +670,16 @@ const InvestorDashboard = () => {
                   </CardContent>
                 </Card>
               </div>
+            </TabsContent>
+
+            {/* Sacar Tab */}
+            <TabsContent value="sacar" className="space-y-6 flex justify-center py-8">
+              <WithdrawalForm 
+                onSuccess={() => {
+                  // Recarregar saldo após saque
+                  location.reload()
+                }} 
+              />
             </TabsContent>
 
             {/* Histórico Tab */}
