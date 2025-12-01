@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "@/integrations/supabase/client"
+import { calculateReturn } from "@/utils/interestCalculations"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -79,7 +80,8 @@ const InvestorDashboard = () => {
                 id,
                 titulo,
                 categoria,
-                retorno_estimado
+                retorno_estimado,
+                tipo_juros
               )
             `)
             .eq("usuario_id", user.id)
@@ -105,9 +107,10 @@ const InvestorDashboard = () => {
             type: inv.investimentos?.categoria || "Outro",
             value: inv.valor_investido || 0,
             date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
-            dateISO: inv.data_inscricao, // Armazenar data ISO original para cálculos
+            dateISO: inv.data_inscricao,
             status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
             return: inv.investimentos?.retorno_estimado || 0,
+            tipoJuros: inv.investimentos?.tipo_juros || "simples",
           }))
           setMyInvestments(formatted)
         }
@@ -230,7 +233,8 @@ const InvestorDashboard = () => {
             id,
             titulo,
             categoria,
-            retorno_estimado
+            retorno_estimado,
+            tipo_juros
           )
         `)
         .eq("usuario_id", userId_to_use)
@@ -243,9 +247,10 @@ const InvestorDashboard = () => {
           type: inv.investimentos?.categoria || "Outro",
           value: inv.valor_investido || 0,
           date: new Date(inv.data_inscricao).toLocaleDateString("pt-PT"),
-          dateISO: inv.data_inscricao, // Armazenar data ISO original para cálculos
+          dateISO: inv.data_inscricao,
           status: inv.status === "aprovado" ? "Ativo" : inv.status === "pendente" ? "Pendente" : "Rejeitado",
           return: inv.investimentos?.retorno_estimado || 0,
+          tipoJuros: inv.investimentos?.tipo_juros || "simples",
         }))
         setMyInvestments(formatted)
       }
@@ -262,17 +267,13 @@ const InvestorDashboard = () => {
   // Calcula retorno acumulado diário (não anual imediato)
   const calculateDailyReturn = () => {
     return myInvestments.reduce((total, inv) => {
-      // Calcular dias desde a data de investimento - usar dateISO (ISO string)
       const investmentDate = new Date(inv.dateISO || inv.date)
       const today = new Date()
       const daysElapsed = Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24))
-      
-      // Retorno estimado anual (50%)
       const annualReturn = inv.return || 50
+      const interestType = inv.tipoJuros || "simples"
       
-      // Retorno diário = (50% / 365) * dias_decorridos * valor / 100
-      const dailyReturnValue = (annualReturn / 365) * daysElapsed * inv.value / 100
-      
+      const dailyReturnValue = calculateReturn(inv.value, annualReturn, daysElapsed, interestType as "simples" | "composto")
       return total + dailyReturnValue
     }, 0)
   }
@@ -283,7 +284,8 @@ const InvestorDashboard = () => {
     const today = new Date()
     const daysElapsed = Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24))
     const annualReturn = investment.return || 50
-    return (annualReturn / 365) * daysElapsed * investment.value / 100
+    const interestType = investment.tipoJuros || "simples"
+    return calculateReturn(investment.value, annualReturn, daysElapsed, interestType as "simples" | "composto")
   }
 
   // Calcula dias decorridos

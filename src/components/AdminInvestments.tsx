@@ -57,6 +57,7 @@ interface Investment {
   descricao: string | null;
   imagem: string | null;
   colocacao?: string | null;
+  tipo_juros?: string | null;
 }
 
 const AdminInvestments = () => {
@@ -77,6 +78,7 @@ const AdminInvestments = () => {
       imagemFile: null as File | null,
     ativo: true,
     colocacao: "oportunidades",
+    tipo_juros: "simples",
   });
   const { toast } = useToast();
 
@@ -124,6 +126,7 @@ const AdminInvestments = () => {
         imagemFile: null,
       ativo: true,
       colocacao: "oportunidades",
+      tipo_juros: "simples",
     });
     setOpenDialog(true);
   };
@@ -141,6 +144,7 @@ const AdminInvestments = () => {
         imagemFile: null,
       ativo: investment.ativo ?? true,
       colocacao: (investment as any).colocacao ?? ((investment as any).featured ? 'destaque' : 'oportunidades'),
+      tipo_juros: investment.tipo_juros || "simples",
     });
     setOpenDialog(true);
   };
@@ -194,6 +198,7 @@ const AdminInvestments = () => {
           imagem: imagemUrl || null,
         ativo: !!formData.ativo,
         colocacao: formData.colocacao || 'oportunidades',
+        tipo_juros: formData.tipo_juros || 'simples',
       };
 
       if (selectedInvestment) {
@@ -498,6 +503,16 @@ const AdminInvestments = () => {
                 <option value="oportunidades">Oportunidades</option>
                 <option value="destaque">Destaque</option>
                 <option value="pagina_inicial">Página Inicial</option>
+              </select>
+
+              <label className="text-sm">Tipo de Juros</label>
+              <select
+                className="w-full border rounded-md px-3 py-2"
+                value={formData.tipo_juros}
+                onChange={(e) => setFormData({ ...formData, tipo_juros: e.target.value })}
+              >
+                <option value="simples">Juros Simples (50% a.a.)</option>
+                <option value="composto">Juros Compostos (50% a.a.)</option>
               </select>
             </div>
               <div>
