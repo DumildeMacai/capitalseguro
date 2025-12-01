@@ -108,7 +108,7 @@ export const AdminDeposits = () => {
       try {
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("saldo_disponivel")
+          .select("*")
           .eq("id", deposit.userId)
           .single()
 

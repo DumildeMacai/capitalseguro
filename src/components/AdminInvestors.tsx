@@ -71,10 +71,10 @@ const AdminInvestors = () => {
   const fetchInvestors = async () => {
     try {
       setLoading(true);
-      // Fetch all profiles including saldo_disponivel
+      // Fetch all profiles using select * to avoid RLS issues
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, nome_completo, email, telefone, bio, created_at, saldo_disponivel")
+        .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
