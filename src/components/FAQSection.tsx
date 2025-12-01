@@ -9,7 +9,7 @@ import {
 
 const faqs = [
   {
-    question: "Como é possível um retorno anual de 100%?",
+    question: "Como é possível um retorno anual de 50%?",
     answer: "Nosso modelo combina aquisições estratégicas, parcerias comerciais e eficiência operacional. Ao focarmos em mercados de alto crescimento e aplicar nossa expertise, conseguimos taxas de retorno superiores para os investidores."
   },
   {

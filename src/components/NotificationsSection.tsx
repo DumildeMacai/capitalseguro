@@ -27,7 +27,7 @@ const mockNotifications: Notification[] = [
   {
     id: "2",
     titulo: "Novo investimento disponível",
-    mensagem: "Uma nova oportunidade de investimento em imóveis está disponível com retorno de 100%.",
+    mensagem: "Uma nova oportunidade de investimento em imóveis está disponível com retorno de 50%.",
     tipo: "investimento",
     lido: false,
     data_criacao: new Date(Date.now() - 86400000).toISOString(),

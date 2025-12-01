@@ -15,7 +15,7 @@ const testimonials = [
     name: "Sarah Johnson",
     title: "Real Estate Investor",
     image: "https://randomuser.me/api/portraits/women/79.jpg",
-    quote: "Capital Seguro transformou o meu futuro financeiro. Os retornos anuais de 100% são incríveis, e a plataforma é muito fácil de usar. Já recomendei a todos os meus amigos."
+    quote: "Capital Seguro transformou o meu futuro financeiro. Os retornos anuais de 50% são incríveis, e a plataforma é muito fácil de usar. Já recomendei a todos os meus amigos."
   },
   {
     id: 2,
@@ -36,7 +36,7 @@ const testimonials = [
     name: "David Thompson",
     title: "Retired Executive",
     image: "https://randomuser.me/api/portraits/men/5.jpg",
-    quote: "Na aposentadoria, a renda passiva é crucial. A Capital Seguro entrega retornos consistentes de 100% que me permitem aproveitar a aposentadoria sem preocupações financeiras. Serviço excepcional!"
+    quote: "Na aposentadoria, a renda passiva é crucial. A Capital Seguro entrega retornos consistentes de 50% que me permitem aproveitar a aposentadoria sem preocupações financeiras. Serviço excepcional!"
   },
   {
     id: 5,

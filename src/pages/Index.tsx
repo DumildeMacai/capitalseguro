@@ -198,7 +198,7 @@ const Index = () => {
               <h2 className="text-3xl md:text-4xl font-bold mb-6">Calcule Seus Retornos Futuros</h2>
               <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
                 Use a nossa calculadora de investimento para ver como o seu dinheiro pode crescer com os nossos retornos
-                anuais de 100%. Planeie o seu futuro financeiro com confiança.
+                anuais de 50%. Planeie o seu futuro financeiro com confiança.
               </p>
             </motion.div>
 

@@ -3,7 +3,24 @@
 ## Overview
 Capital Seguro é uma plataforma React + TypeScript para investimentos, com dashboards para admin, parceiro e investidor. Integrada com Supabase.
 
-## Status Atual (November 29, 2025) 🚀
+## Status Atual (December 1, 2025) 🚀
+
+### 🎯 MUDANÇA GLOBAL: 100% → 50% COMPLETA (December 1, 2025)
+Toda a plataforma foi atualizada para exibir **50% de retorno anual** em vez de 100%.
+
+**Arquivos Atualizados:**
+1. ✅ FAQSection - Pergunta sobre 50% anual
+2. ✅ TestimonialsSection - Depoimentos com 50%
+3. ✅ Chart - Cálculo de crescimento com 0.5 (50%)
+4. ✅ HeroSection - Hero badges com +50%
+5. ✅ HowItWorksSection - "Earn 50% Annually"
+6. ✅ NotificationsSection - Notificações com 50%
+7. ✅ Login.tsx - Descrição com 50% anual
+8. ✅ Index.tsx - Calculadora com 50%
+
+---
+
+## Status Anterior (November 29, 2025)
 
 ### ✅ TODOS OS PROBLEMAS RESOLVIDOS:
 

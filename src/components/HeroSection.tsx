@@ -21,7 +21,7 @@ const HeroSection = () => {
             className="flex flex-col items-start"
           >
             <span className="inline-flex items-center rounded-full border border-purple/30 bg-purple/10 px-3 py-1 text-sm font-medium text-purple mb-6">
-              Retornos Anuais de 100%
+              Retornos Anuais de 50%
             </span>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight mb-6">
               <span className="text-gradient">Comece a Investir</span>
@@ -29,7 +29,7 @@ const HeroSection = () => {
               Construa o Seu Legado Financeiro
             </h1>
             <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-lg">
-              Invista em oportunidades de alto rendimento com a Capital Seguro. Obtenha rendimento passivo com retornos anuais de 100% e transforme o seu futuro financeiro.
+              Invista em oportunidades de alto rendimento com a Capital Seguro. Obtenha rendimento passivo com retornos anuais de 50% e transforme o seu futuro financeiro.
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
@@ -106,7 +106,7 @@ const HeroSection = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Retornos Totais</p>
-                    <p className="text-lg font-bold text-success">+100%</p>
+                    <p className="text-lg font-bold text-success">+50%</p>
                   </div>
                 </div>
               </div>
@@ -122,7 +122,7 @@ const HeroSection = () => {
                   </div>
                   <div>
                     <p className="text-sm text-muted-foreground">Taxa Anual</p>
-                    <p className="text-lg font-bold text-gold">100%</p>
+                    <p className="text-lg font-bold text-gold">50%</p>
                   </div>
                 </div>
               </div>

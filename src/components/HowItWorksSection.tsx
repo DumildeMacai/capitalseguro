@@ -84,8 +84,8 @@ const steps = [
   },
   {
     number: "04",
-    title: "Earn 100% Annually",
-    description: "Watch your investment grow with our guaranteed 100% annual returns.",
+    title: "Earn 50% Annually",
+    description: "Watch your investment grow with our guaranteed 50% annual returns.",
     icon: (
       <svg
         xmlns="http://www.w3.org/2000/svg"
