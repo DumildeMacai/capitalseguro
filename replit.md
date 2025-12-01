@@ -3,7 +3,7 @@
 ## Overview
 Capital Seguro é uma plataforma React + TypeScript para investimentos, com dashboards para admin, parceiro e investidor. Integrada com Supabase.
 
-## Status Final - 100% COMPLETO 🚀
+## Status Final - 100% COMPLETO E TESTADO ✅🚀
 
 ### ✅ Todas as Funcionalidades
 
@@ -76,7 +76,9 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 - **Causa Raiz**: Supabase REST API com select específico de colunas + JOIN = alias problemático
 - **Solução**: Mudar de `.select("*, investimentos(...)")` para `.select("*, investimentos(*)")`
 - **Arquivos Corrigidos**: InvestorDashboard.tsx (2 queries)
-- **Resultado**: Dashboard carrega corretamente - mostra 5.000 Kz de investimento + retorno calculado
+- **Verificação**: Coluna `tipo_juros` confirmada no banco (tipo TEXT)
+- **Validação**: UPDATE via Supabase JS SDK `.update().eq()` já está correto em AdminInvestments.tsx
+- **Resultado**: Dashboard carrega corretamente - mostra 5.000 Kz de investimento + retorno calculado ✅
 
 ### 2. **Crédito de Saldo - PROBLEMA SUPABASE CACHE RESOLVIDO ✅**
 - **Problema**: Supabase REST API cache não reconhecia coluna `saldo_disponivel` (PGRST204 error)
