@@ -37,6 +37,7 @@ import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
 import type { Investment } from "@/types/investment"
 import { Building, CarTaxiFront, Coins } from "lucide-react"
+import ApplyInvestment from "@/components/ApplyInvestment"
 
 const InvestmentDetail = () => {
   const { id } = useParams<{ id: string }>()
@@ -163,81 +164,43 @@ const InvestmentDetail = () => {
   const numInvestors = Math.floor(Math.random() * 500) + 100
   const daysRemaining = Math.floor(Math.random() * 90) + 30
 
-  const handleInvest = async () => {
+  const handleApplySuccess = async () => {
+    // Reload investment data
+    fetchInvestment?.()
+    toast({
+      title: "Sucesso",
+      description: "Aplicação realizada com sucesso!",
+    })
+  }
+
+  const fetchInvestment = async () => {
     try {
-      if (investmentAmount < investment.minInvestment) {
-        toast({
-          title: "Valor inválido",
-          description: `O investimento mínimo é AOA ${investment.minInvestment.toLocaleString("pt-PT")}`,
-          variant: "destructive",
-        })
-        return
+      const { data, error } = await supabase
+        .from("investimentos")
+        .select("*")
+        .eq("id", id)
+        .single()
+      if (error) throw error
+      const row = data as any
+      const mapped: Investment = {
+        id: row.id.toString(),
+        title: row.titulo || "",
+        description: row.descricao || "",
+        category: row.categoria || "Outros",
+        icon: row.categoria === "Imóveis" ? <Building className="text-primary" /> : 
+              row.categoria === "Transporte" ? <CarTaxiFront className="text-blue-500" /> :
+              <Coins className="text-blue-500" />,
+        returnRate: row.retorno_estimado || 0,
+        minInvestment: row.valor_minimo || 0,
+        remaining: row.remaining || 0,
+        totalFunding: row.total_funding || 0,
+        image: row.imagem || "",
+        featured: row.colocacao === 'destaque' || row.colocacao === 'pagina_inicial',
+        risk: "Médio" as const,
       }
-
-      // Get current user
-      const { data: { user } } = await supabase.auth.getUser()
-      
-      if (!user) {
-        toast({
-          title: "Erro",
-          description: "Você precisa estar autenticado para investir",
-          variant: "destructive",
-        })
-        navigate("/login")
-        return
-      }
-
-      // Save investment to database
-      const { error } = await supabase
-        .from("inscricoes_investimentos")
-        .insert({
-          usuario_id: user.id,
-          investimento_id: investment.id, // investment.id é string UUID
-          valor_investido: investmentAmount,
-          status: "Ativo",
-          data_inscricao: new Date().toISOString(),
-        })
-
-      if (error) {
-        console.error("Erro ao salvar investimento:", error)
-        
-        // Detectar erro de duplicate key
-        if (error.code === "23505") {
-          setAlreadyInvested(true)
-          toast({
-            title: "Investimento já realizado",
-            description: "Você já possui um investimento ativo neste produto. Acesse seu dashboard para mais detalhes.",
-            variant: "destructive",
-          })
-          return
-        }
-        
-        toast({
-          title: "Erro ao processar investimento",
-          description: error.message || "Não foi possível salvar seu investimento. Tente novamente.",
-          variant: "destructive",
-        })
-        return
-      }
-
-      toast({
-        title: "Investimento processado",
-        description: `Você investiu AOA ${investmentAmount.toLocaleString("pt-PT")} em ${investment.title}`,
-      })
-
-      // Dispatch custom event for real-time update
-      window.dispatchEvent(new Event("investmentCreated"))
-
-      setTimeout(() => {
-        navigate("/investidor")
-      }, 1500)
+      setInvestment(mapped)
     } catch (err) {
-      console.error("Erro no investimento:", err)
-      toast({
-        title: "Erro",
-        description: "Ocorreu um erro ao processar seu investimento",
-        variant: "destructive",
-      })
+      console.error("Erro ao buscar investimento:", err)
     }
   }
 
@@ -719,99 +682,13 @@ const InvestmentDetail = () => {
                     </p>
                   </div>
 
-                  <div className="space-y-3 bg-gradient-to-br from-primary/8 to-primary/3 p-4 rounded-xl border border-primary/15">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Investimento:</span>
-                      <span className="font-bold text-foreground">AOA {investmentAmount.toLocaleString("pt-PT")}</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Taxa anual:</span>
-                      <span className="font-bold text-primary">{investment.returnRate}%</span>
-                    </div>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-muted-foreground">Duração:</span>
-                      <span className="font-bold text-foreground">24 meses</span>
-                    </div>
-                    <div className="border-t border-primary/20 pt-3 flex justify-between font-bold text-lg">
-                      <span>Retorno anual:</span>
-                      <span className="text-green-600">AOA {estimatedReturn}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <p className="text-xs font-semibold text-muted-foreground mb-3">Valores rápidos</p>
-                    <div className="grid grid-cols-2 gap-2">
-                      {[50000, 100000, 250000, 500000].map((amount) => (
-                        <Button
-                          key={amount}
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setInvestmentAmount(amount)}
-                          disabled={alreadyInvested || checkingInvestment}
-                          className="text-xs hover:bg-primary hover:text-primary-foreground transition-colors"
-                        >
-                          AOA {(amount / 1000).toFixed(0)}K
-                        </Button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {alreadyInvested && (
-                    <motion.div
-                      initial={{ opacity: 0, y: -10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="p-4 rounded-lg bg-amber-500/15 border border-amber-500/30 flex gap-3"
-                    >
-                      <AlertCircle size={20} className="text-amber-600 flex-shrink-0 mt-0.5" />
-                      <div>
-                        <p className="font-semibold text-amber-800 dark:text-amber-200">Investimento já realizado</p>
-                        <p className="text-sm text-amber-700 dark:text-amber-300">Você já possui um investimento ativo neste produto.</p>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  <Button
-                    onClick={handleInvest}
-                    disabled={alreadyInvested || checkingInvestment}
-                    className="w-full bg-gradient-to-r from-primary via-primary to-primary/90 hover:shadow-lg transition-all h-12 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
-                    data-testid="button-invest-now"
-                  >
-                    <CreditCard className="mr-2" size={20} />
-                    {alreadyInvested ? "Investimento Realizado" : "Investir Agora"}
-                  </Button>
-
-                  <div className="space-y-2 pt-2 border-t border-border/50">
-                    <div className="flex gap-2 text-xs">
-                      <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">Investimento seguro com garantia</span>
-                    </div>
-                    <div className="flex gap-2 text-xs">
-                      <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">Retorno garantido e documentado</span>
-                    </div>
-                    <div className="flex gap-2 text-xs">
-                      <CheckCircle size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">Processamento em 24 horas</span>
-                    </div>
-                    <div className="flex gap-2 text-xs">
-                      <Lock size={16} className="text-green-600 flex-shrink-0 mt-0.5" />
-                      <span className="text-muted-foreground">Transação 100% segura</span>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-border/50 space-y-3">
-                    <p className="text-xs font-semibold text-muted-foreground">Precisa de ajuda?</p>
-                    <div className="flex gap-3 flex-col text-xs">
-                      <Button variant="ghost" size="sm" className="justify-start">
-                        <Phone size={14} className="mr-2 text-primary" />
-                        +244 923 123 456
-                      </Button>
-                      <Button variant="ghost" size="sm" className="justify-start">
-                        <Mail size={14} className="mr-2 text-primary" />
-                        suporte@capitalseguro.ao
-                      </Button>
-                    </div>
-                  </div>
+                  <ApplyInvestment
+                    investmentId={investment.id}
+                    investmentTitle={investment.title}
+                    minValue={investment.minInvestment}
+                    tipoJuros={(investment as any)?.tipo_juros || "simples"}
+                    onSuccess={handleApplySuccess}
+                  />
                 </CardContent>
               </Card>
             </motion.div>

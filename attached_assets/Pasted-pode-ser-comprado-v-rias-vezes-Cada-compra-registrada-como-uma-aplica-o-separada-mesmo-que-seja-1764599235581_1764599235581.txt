@@ -1,0 +1,56 @@
+pode ser comprado várias vezes. Cada compra é registrada como uma aplicação separada, mesmo que seja no mesmo tipo de investimento.
+
+Exemplo:
+
+Mês 1: Investidor compra $1.000 no Plano Capital Seguro – Juros Compostos.
+
+Mês 2: Investidor compra mais $500 no mesmo plano.
+
+O sistema registra duas aplicações separadas, cada uma com seu próprio cálculo de juros, vencimento, etc.
+
+2️⃣ Como os juros são aplicados
+
+Depende do tipo de investimento:
+
+Tipo de Juros	Como funciona
+Simples	Cada aplicação cresce apenas sobre o valor aplicado naquela operação. Juros não se acumulam sobre juros anteriores.
+Composto	Juros de cada aplicação vão sendo reinvestidos. Se houver múltiplas aplicações, cada lote cresce de forma independente, mas você pode combinar os rendimentos manualmente ou automaticamente no sistema.
+3️⃣ Como corretoras gerenciam múltiplas compras
+
+Registro de Lotes: Cada compra é um “lote” com valor, data de aplicação e rendimento.
+
+Extrato Consolidado: O usuário vê o saldo total e o rendimento agregado, mesmo que as compras tenham sido em datas diferentes.
+
+Reinvestimento Automático (Opcional): Algumas plataformas permitem que os rendimentos sejam automaticamente aplicados de volta no mesmo plano.
+
+4️⃣ Estratégias comuns para o investidor
+
+Aportes mensais: Comprar sempre que possível para aumentar o capital e aproveitar o efeito de juros compostos.
+
+Compra automática: Definir débito automático todo mês, comum em fundos de investimento ou planos de previdência.
+
+Reinvestimento de rendimentos: Alguns investimentos permitem reinvestir os juros automaticamente no mesmo produto, acelerando o crescimento.
+
+5️⃣ Implementação em apps ou sistemas
+
+Se você quer implementar algo semelhante no Capital Seguro, algumas práticas recomendadas:
+
+Permitir múltiplas aplicações no mesmo tipo de investimento.
+
+Registrar cada aporte como uma linha separada na tabela, com:
+
+id único
+
+user_id
+
+investimento_id
+
+valor_aplicado
+
+data_aplicacao
+
+tipo_juros (simples/composto)
+
+Calcular rendimento separadamente para cada lote e depois consolidar para mostrar saldo total ao usuário.
+
+Opcional: permitir reinvestimento automático de juros no mesmo produto.
