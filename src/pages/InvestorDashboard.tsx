@@ -74,17 +74,7 @@ const InvestorDashboard = () => {
           supabase.from("profiles").select("*").eq("id", user.id).single(),
           supabase
             .from("inscricoes_investimentos")
-            .select(`
-              *,
-              investimentos (
-                id,
-                titulo,
-                categoria,
-                retorno_estimado,
-                tipo_juros,
-                tipo_renda
-              )
-            `)
+            .select("*, investimentos(*)")
             .eq("usuario_id", user.id)
             .order("data_inscricao", { ascending: false })
         ])
@@ -102,6 +92,7 @@ const InvestorDashboard = () => {
 
         // Process investments
         if (investmentsResponse.data) {
+          console.log("Investimentos carregados do Supabase:", investmentsResponse.data)
           const formatted = (investmentsResponse.data || []).map((inv: any) => ({
             id: inv.id,
             name: inv.investimentos?.titulo || "Investimento",
@@ -114,7 +105,10 @@ const InvestorDashboard = () => {
             tipoJuros: inv.investimentos?.tipo_juros || "simples",
             tipoRenda: inv.investimentos?.tipo_renda || "fixa",
           }))
+          console.log("Investimentos formatados:", formatted)
           setMyInvestments(formatted)
+        } else {
+          console.log("Erro ao carregar investimentos:", investmentsResponse.error)
         }
       } catch (err) {
         console.error("Erro ao carregar dados do dashboard:", err)
@@ -229,17 +223,7 @@ const InvestorDashboard = () => {
 
       const { data } = await supabase
         .from("inscricoes_investimentos")
-        .select(`
-          *,
-          investimentos (
-            id,
-            titulo,
-            categoria,
-            retorno_estimado,
-            tipo_juros,
-            tipo_renda
-          )
-        `)
+        .select("*, investimentos(*)")
         .eq("usuario_id", userId_to_use)
         .order("data_inscricao", { ascending: false })
 
