@@ -518,37 +518,37 @@ const InvestorDashboard = () => {
                     <p className="text-muted-foreground text-sm mt-1">Seus últimos investimentos realizados</p>
                   </div>
                   <div className="overflow-x-auto">
-                    <Table>
+                    <Table className="text-sm">
                       <TableHeader>
                         <TableRow className="border-border hover:bg-transparent">
-                          <TableHead className="text-muted-foreground">Nome</TableHead>
-                          <TableHead className="text-muted-foreground">Tipo</TableHead>
-                          <TableHead className="text-muted-foreground">Data Investido</TableHead>
-                          <TableHead className="text-muted-foreground">Data Término</TableHead>
-                          <TableHead className="text-muted-foreground">Dias</TableHead>
-                          <TableHead className="text-muted-foreground">Valor Investido</TableHead>
-                          <TableHead className="text-muted-foreground">Acumulado</TableHead>
-                          <TableHead className="text-muted-foreground">Status</TableHead>
-                          <TableHead className="text-muted-foreground">Retorno</TableHead>
+                          <TableHead className="text-muted-foreground text-xs px-2 py-2">Nome</TableHead>
+                          <TableHead className="text-muted-foreground text-xs px-2 py-2">Tipo</TableHead>
+                          <TableHead className="text-muted-foreground text-xs px-2 py-2">Data Investido</TableHead>
+                          <TableHead className="text-muted-foreground text-xs px-2 py-2">Data Término</TableHead>
+                          <TableHead className="text-muted-foreground text-xs px-2 py-2 text-center">Dias</TableHead>
+                          <TableHead className="text-muted-foreground text-xs px-2 py-2 text-right">Valor</TableHead>
+                          <TableHead className="text-muted-foreground text-xs px-2 py-2 text-right">Acumulado</TableHead>
+                          <TableHead className="text-muted-foreground text-xs px-2 py-2">Status</TableHead>
+                          <TableHead className="text-muted-foreground text-xs px-2 py-2 text-right">Retorno</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {recentInvestments.map((investment) => (
                           <TableRow key={investment.id} className="border-border hover:bg-muted/50">
-                            <TableCell className="font-medium text-foreground">{investment.name}</TableCell>
-                            <TableCell className="text-muted-foreground">{investment.type}</TableCell>
-                            <TableCell className="text-muted-foreground text-sm">{investment.date}</TableCell>
-                            <TableCell className="text-muted-foreground text-sm">{calculateEndDate(investment)}</TableCell>
-                            <TableCell className="text-muted-foreground text-sm font-medium">{calculateDaysElapsed(investment)}d</TableCell>
-                            <TableCell className="text-muted-foreground">
+                            <TableCell className="font-medium text-foreground text-xs px-2 py-2 whitespace-nowrap">{investment.name}</TableCell>
+                            <TableCell className="text-muted-foreground text-xs px-2 py-2 whitespace-nowrap">{investment.type}</TableCell>
+                            <TableCell className="text-muted-foreground text-xs px-2 py-2 whitespace-nowrap">{investment.date}</TableCell>
+                            <TableCell className="text-muted-foreground text-xs px-2 py-2 whitespace-nowrap">{calculateEndDate(investment)}</TableCell>
+                            <TableCell className="text-muted-foreground text-xs px-2 py-2 text-center font-medium">{calculateDaysElapsed(investment)}d</TableCell>
+                            <TableCell className="text-muted-foreground text-xs px-2 py-2 text-right whitespace-nowrap">
                               Kz {investment.value.toLocaleString("pt-PT")}
                             </TableCell>
-                            <TableCell className="text-accent font-semibold">
+                            <TableCell className="text-accent text-xs px-2 py-2 text-right font-semibold whitespace-nowrap">
                               Kz {calculateInvestmentAccumulated(investment).toLocaleString("pt-PT", { maximumFractionDigits: 2 })}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="text-xs px-2 py-2">
                               <span
-                                className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
                                   investment.status === "Ativo"
                                     ? "bg-primary/20 text-primary"
                                     : investment.status === "Em análise"
@@ -559,7 +559,7 @@ const InvestorDashboard = () => {
                                 {investment.status}
                               </span>
                             </TableCell>
-                            <TableCell className="text-primary font-semibold">+{investment.return}%</TableCell>
+                            <TableCell className="text-primary text-xs px-2 py-2 text-right font-semibold">+{investment.return}%</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
