@@ -40,6 +40,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
 import { TransactionHistory } from "@/components/TransactionHistory"
+import ConsolidatedStatement from "@/components/ConsolidatedStatement"
 
 const InvestorDashboard = () => {
   const navigate = useNavigate()
@@ -431,6 +432,7 @@ const InvestorDashboard = () => {
             <TabsList className="mb-8 bg-card border border-border">
               <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
               <TabsTrigger value="meus-investimentos">Meus Investimentos</TabsTrigger>
+              <TabsTrigger value="extrato">Extrato Consolidado</TabsTrigger>
               <TabsTrigger value="sacar">Sacar</TabsTrigger>
               <TabsTrigger value="historico">Histórico</TabsTrigger>
               <TabsTrigger value="explorar">Explorar</TabsTrigger>
@@ -578,6 +580,11 @@ const InvestorDashboard = () => {
             </TabsContent>
 
             {/* Meus Investimentos Tab */}
+            {/* Extrato Consolidado Tab */}
+            <TabsContent value="extrato" className="space-y-6">
+              <ConsolidatedStatement />
+            </TabsContent>
+
             <TabsContent value="meus-investimentos" className="space-y-6">
               <Card>
                 <CardHeader>

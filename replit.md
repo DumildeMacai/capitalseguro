@@ -146,7 +146,7 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 
 ---
 
-## 🎯 NOVO: Sistema de Aportes Múltiplos - IMPLEMENTADO! ✅⭐
+## 🎯 SISTEMA DE APORTES MÚLTIPLOS + EXTRATO CONSOLIDADO - 100% IMPLEMENTADO! ✅⭐⭐
 
 ### O que foi adicionado:
 
@@ -177,7 +177,19 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
    - ✅ Exibe valor, tipo de juros, data e retorno estimado
    - ✅ Tabela com badge de tipo de juros (Simples/Composto)
 
-### Fluxo Completo:
+6. **Componente ConsolidatedStatement.tsx - NOVO! ⭐**
+   - ✅ **Extrato Consolidado**: Agrupa todos os aportes por investimento
+   - ✅ **Totalizações por Produto**: Mostra total investido + retorno agregado por investimento
+   - ✅ **Visão Consolidada**: Dashboard mostra:
+     - Total investido em cada produto
+     - Total de retorno acumulado
+     - Número de aportes por produto
+     - Período (primeira e última aplicação)
+     - Classificação de renda
+   - ✅ **Totais Globais**: Grand total de investimentos + retornos
+   - ✅ **Rentabilidade Média**: Cálculo de rentabilidade média do portfólio
+
+### Fluxo de Aplicação (Múltiplos Aportes):
 1. Investidor vai para investimento
 2. Clica "Aplicar"
 3. Seleciona valor (mínimo validado)
@@ -185,7 +197,17 @@ Capital Seguro é uma plataforma React + TypeScript para investimentos, com dash
 5. Sistema valida saldo disponível
 6. Deduz do saldo
 7. Registra aporte
-8. Investidor pode ver histórico em "Minhas Aplicações"
+8. Investidor pode ver:
+   - Histórico individual em "Meus Investimentos"
+   - **Extrato Consolidado** com totalizações por produto
+
+### Benefícios do Sistema:
+- ✅ Múltiplas aplicações no mesmo investimento sem limitação
+- ✅ Cada aporte rastreado individualmente com seu tipo de juros
+- ✅ Cálculo independente de retornos por aporte
+- ✅ Consolidação automática para visualização clara
+- ✅ Saldo deduzido em tempo real
+- ✅ Histórico completo e auditável
 
 ---
 
