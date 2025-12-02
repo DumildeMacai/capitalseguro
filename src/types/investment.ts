@@ -14,3 +14,18 @@ export type Investment = {
   tipoJuros?: string
   tipo_renda?: string
 }
+
+export type UserInvestment = {
+  id: string
+  investmentId?: string
+  title: string
+  category: string
+  icon?: React.ReactNode
+  amountInvested: number
+  currentValue: number
+  returnRate: number
+  startDate: string
+  endDate: string
+  status: string
+  progress: number
+}

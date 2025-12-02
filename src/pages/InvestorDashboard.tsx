@@ -293,6 +293,16 @@ const InvestorDashboard = () => {
     return endDate.toLocaleDateString("pt-PT")
   }
 
+  // Calcula dias restantes até o término
+  const calculateDaysLeft = (investment: any) => {
+    const investmentDate = new Date(investment.dateISO || investment.date)
+    const endDate = new Date(investmentDate)
+    endDate.setDate(endDate.getDate() + 365)
+    const today = new Date()
+    const daysLeft = Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+    return Math.max(0, daysLeft) // Não pode ser negativo
+  }
+
   // Gera dados dinâmicos para o gráfico, agrupando por categoria
   const portfolioData = myInvestments.length > 0 
     ? Object.values(
@@ -541,7 +551,7 @@ const InvestorDashboard = () => {
                             <TableCell className="text-muted-foreground text-xs px-2 py-2 whitespace-nowrap">{investment.type}</TableCell>
                             <TableCell className="text-muted-foreground text-xs px-2 py-2 whitespace-nowrap">{investment.date}</TableCell>
                             <TableCell className="text-muted-foreground text-xs px-2 py-2 whitespace-nowrap">{calculateEndDate(investment)}</TableCell>
-                            <TableCell className="text-muted-foreground text-xs px-2 py-2 text-center font-medium">{calculateDaysElapsed(investment)}d</TableCell>
+                            <TableCell className="text-muted-foreground text-xs px-2 py-2 text-center font-medium">{calculateDaysLeft(investment)}d</TableCell>
                             <TableCell className="text-muted-foreground text-xs px-2 py-2 text-right whitespace-nowrap">
                               Kz {investment.value.toLocaleString("pt-PT")}
                             </TableCell>
