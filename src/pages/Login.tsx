@@ -1,32 +1,17 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { useToast } from "@/hooks/use-toast";
+import { Link, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
-import { handleAdminAccess } from "@/utils/authHelpers";
 
 const Login = () => {
   const location = useLocation();
-  const navigate = useNavigate();
-  const { toast } = useToast();
   const searchParams = new URLSearchParams(location.search);
   const isRegister = searchParams.get("register") === "true";
   
   const [activeTab, setActiveTab] = useState<string>(isRegister ? "register" : "login");
-  const [adminLoading, setAdminLoading] = useState(false);
-  
-  const handleAdminClick = async () => {
-    setAdminLoading(true);
-    try {
-      await handleAdminAccess(navigate, toast);
-    } finally {
-      setAdminLoading(false);
-    }
-  };
   
   useEffect(() => {
     const newUrl = activeTab === "register" 
@@ -179,18 +164,6 @@ const Login = () => {
               </div>
             </div>
 
-            <div className="mt-6">
-              <Button
-                onClick={handleAdminClick}
-                disabled={adminLoading}
-                className="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-2"
-              >
-                {adminLoading ? "Acessando..." : "🔐 Acesso Admin (Demo)"}
-              </Button>
-              <p className="text-center text-xs text-muted-foreground mt-2">
-                Demo: admin@admin.com / 1dumilde1@A
-              </p>
-            </div>
             
             <p className="mt-6 text-center text-xs text-muted-foreground">
               Ao continuar, você concorda com nossos{" "}
