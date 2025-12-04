@@ -102,6 +102,8 @@ export type Database = {
           remaining: number | null
           retorno_estimado: number | null
           risco: string | null
+          tipo_juros: string | null
+          tipo_renda: string | null
           titulo: string
           total_funding: number | null
           valor_minimo: number | null
@@ -119,6 +121,8 @@ export type Database = {
           remaining?: number | null
           retorno_estimado?: number | null
           risco?: string | null
+          tipo_juros?: string | null
+          tipo_renda?: string | null
           titulo: string
           total_funding?: number | null
           valor_minimo?: number | null
@@ -136,6 +140,8 @@ export type Database = {
           remaining?: number | null
           retorno_estimado?: number | null
           risco?: string | null
+          tipo_juros?: string | null
+          tipo_renda?: string | null
           titulo?: string
           total_funding?: number | null
           valor_minimo?: number | null
@@ -208,6 +214,42 @@ export type Database = {
           saldo_disponivel?: number | null
           telefone?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      saques: {
+        Row: {
+          aprovado_por: string | null
+          comprovante_url: string | null
+          created_at: string | null
+          data_aprovacao: string | null
+          id: string
+          metodo: string
+          status: string | null
+          usuario_id: string
+          valor: number
+        }
+        Insert: {
+          aprovado_por?: string | null
+          comprovante_url?: string | null
+          created_at?: string | null
+          data_aprovacao?: string | null
+          id?: string
+          metodo: string
+          status?: string | null
+          usuario_id: string
+          valor: number
+        }
+        Update: {
+          aprovado_por?: string | null
+          comprovante_url?: string | null
+          created_at?: string | null
+          data_aprovacao?: string | null
+          id?: string
+          metodo?: string
+          status?: string | null
+          usuario_id?: string
+          valor?: number
         }
         Relationships: []
       }
