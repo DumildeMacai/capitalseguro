@@ -259,12 +259,24 @@ export const handleAdminAccess = async (
     }
     
     // Step 3: Verify and redirect
-    const userType = await fetchUserType(user.id)
-    navigate("/admin")
-    toast({
-      title: "Acesso Admin Concedido",
-      description: `Bem-vindo! (${userType || "admin"})`,
-    })
+    try {
+      const userType = await fetchUserType(user.id)
+      toast({
+        title: "Acesso Admin Concedido",
+        description: `Bem-vindo! (${userType || "admin"})`,
+      })
+    } catch (e) {
+      console.warn("[Admin Access] fetchUserType failed:", e)
+      toast({
+        title: "Acesso Admin Concedido",
+        description: "Bem-vindo, Administrador!",
+      })
+    }
+    
+    // Redirect after brief delay to ensure profile is updated
+    setTimeout(() => {
+      navigate("/admin")
+    }, 500)
   } catch (error: any) {
     console.error("[Admin Access] Error:", error)
     const err = new Error(error.message || "Erro ao acessar admin")

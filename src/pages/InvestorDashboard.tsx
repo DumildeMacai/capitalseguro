@@ -270,24 +270,28 @@ const InvestorDashboard = () => {
 
   // Calcula valor acumulado para um investimento específico
   const calculateInvestmentAccumulated = (investment: any) => {
-    const investmentDate = new Date(investment.dateISO || investment.date)
+    if (!investment.dateISO) return 0
+    const investmentDate = new Date(investment.dateISO)
     const today = new Date()
     const daysElapsed = Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24))
     const annualReturn = investment.return || 50
     const interestType = investment.tipoJuros || "simples"
-    return calculateReturn(investment.value, annualReturn, daysElapsed, interestType as "simples" | "composto")
+    return calculateReturn(investment.value, annualReturn, Math.max(1, daysElapsed), interestType as "simples" | "composto")
   }
 
   // Calcula dias decorridos
   const calculateDaysElapsed = (investment: any) => {
-    const investmentDate = new Date(investment.dateISO || investment.date)
+    if (!investment.dateISO) return 0
+    const investmentDate = new Date(investment.dateISO)
     const today = new Date()
-    return Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24))
+    const days = Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24))
+    return Math.max(0, days)
   }
 
   // Calcula data de término (data de investimento + 365 dias)
   const calculateEndDate = (investment: any) => {
-    const investmentDate = new Date(investment.dateISO || investment.date)
+    if (!investment.dateISO) return "N/A"
+    const investmentDate = new Date(investment.dateISO)
     const endDate = new Date(investmentDate)
     endDate.setDate(endDate.getDate() + 365)
     return endDate.toLocaleDateString("pt-PT")
