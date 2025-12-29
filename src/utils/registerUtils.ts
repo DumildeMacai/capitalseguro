@@ -46,6 +46,10 @@ export const registerUser = async (
     });
 
     if (error) {
+      if (error.message.includes("Database error saving new user") || error.status === 500) {
+        // Fallback or retry logic if needed, but for now we report it clearly
+        console.error("Supabase Auth 500 Error - Check Database Triggers:", error);
+      }
       console.error("Erro ao registrar usuário:", error);
       toast({
         variant: "destructive",
