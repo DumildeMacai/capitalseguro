@@ -1,0 +1,63 @@
+{email: 'dumildemacai@gmail.com', userType: 'investidor', userData: {…}}
+   POST https://xmemmdmyzwimluvgiqal.supabase.co/auth/v1/signup 500 (Internal Server Error)
+apply @ injected.js:214
+(anonymous) @ @supabase_supabase-js.js?v=81926b86:7592
+_handleRequest3 @ @supabase_supabase-js.js?v=81926b86:7882
+_request @ @supabase_supabase-js.js?v=81926b86:7872
+signUp @ @supabase_supabase-js.js?v=81926b86:9570
+registerUser @ registerUtils.ts:36
+onSubmit @ RegisterFormSubmit.tsx:20
+(anonymous) @ chunk-SDSLEQWF.js?v=81926b86:1562
+await in (anonymous)
+callCallback2 @ chunk-FJ2A54M7.js?v=81926b86:3674
+invokeGuardedCallbackDev @ chunk-FJ2A54M7.js?v=81926b86:3699
+invokeGuardedCallback @ chunk-FJ2A54M7.js?v=81926b86:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-FJ2A54M7.js?v=81926b86:3736
+executeDispatch @ chunk-FJ2A54M7.js?v=81926b86:7014
+processDispatchQueueItemsInOrder @ chunk-FJ2A54M7.js?v=81926b86:7034
+processDispatchQueue @ chunk-FJ2A54M7.js?v=81926b86:7043
+dispatchEventsForPlugins @ chunk-FJ2A54M7.js?v=81926b86:7051
+(anonymous) @ chunk-FJ2A54M7.js?v=81926b86:7174
+batchedUpdates$1 @ chunk-FJ2A54M7.js?v=81926b86:18913
+batchedUpdates @ chunk-FJ2A54M7.js?v=81926b86:3579
+dispatchEventForPluginEventSystem @ chunk-FJ2A54M7.js?v=81926b86:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-FJ2A54M7.js?v=81926b86:5478
+dispatchEvent @ chunk-FJ2A54M7.js?v=81926b86:5472
+dispatchDiscreteEvent @ chunk-FJ2A54M7.js?v=81926b86:5449
+  Supabase Auth 500 Error - Check Database Triggers: AuthApiError: Database error saving new user
+    at handleError3 (@supabase_supabase-j…s?v=81926b86:7847:9)
+    at async _handleRequest3 (@supabase_supabase-js.js?v=81926b86:7888:5)
+    at async _request (@supabase_supabase-js.js?v=81926b86:7872:16)
+    at async SupabaseAuthClient.signUp (@supabase_supabase-js.js?v=81926b86:9570:15)
+    at async registerUser (registerUtils.ts:36:29)
+    at async onSubmit (RegisterFormSubmit.tsx:20:20)
+    at async chunk-SDSLEQWF.js?v=81926b86:1562:9
+(anonymous) @ injected.js:37
+registerUser @ registerUtils.ts:51
+await in registerUser
+onSubmit @ RegisterFormSubmit.tsx:20
+(anonymous) @ chunk-SDSLEQWF.js?v=81926b86:1562
+await in (anonymous)
+callCallback2 @ chunk-FJ2A54M7.js?v=81926b86:3674
+invokeGuardedCallbackDev @ chunk-FJ2A54M7.js?v=81926b86:3699
+invokeGuardedCallback @ chunk-FJ2A54M7.js?v=81926b86:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-FJ2A54M7.js?v=81926b86:3736
+executeDispatch @ chunk-FJ2A54M7.js?v=81926b86:7014
+processDispatchQueueItemsInOrder @ chunk-FJ2A54M7.js?v=81926b86:7034
+processDispatchQueue @ chunk-FJ2A54M7.js?v=81926b86:7043
+dispatchEventsForPlugins @ chunk-FJ2A54M7.js?v=81926b86:7051
+(anonymous) @ chunk-FJ2A54M7.js?v=81926b86:7174
+batchedUpdates$1 @ chunk-FJ2A54M7.js?v=81926b86:18913
+batchedUpdates @ chunk-FJ2A54M7.js?v=81926b86:3579
+dispatchEventForPluginEventSystem @ chunk-FJ2A54M7.js?v=81926b86:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-FJ2A54M7.js?v=81926b86:5478
+dispatchEvent @ chunk-FJ2A54M7.js?v=81926b86:5472
+dispatchDiscreteEvent @ chunk-FJ2A54M7.js?v=81926b86:5449
+  Erro ao registrar usuário: AuthApiError: Database error saving new user
+    at handleError3 (@supabase_supabase-j…s?v=81926b86:7847:9)
+    at async _handleRequest3 (@supabase_supabase-js.js?v=81926b86:7888:5)
+    at async _request (@supabase_supabase-js.js?v=81926b86:7872:16)
+    at async SupabaseAuthClient.signUp (@supabase_supabase-js.js?v=81926b86:9570:15)
+    at async registerUser (registerUtils.ts:36:29)
+    at async onSubmit (RegisterFormSubmit.tsx:20:20)
+    at async chunk-SDSLEQWF.js?v=81926b86:1562:9

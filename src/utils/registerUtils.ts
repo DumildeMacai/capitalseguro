@@ -40,22 +40,41 @@ export const registerUser = async (
         data: {
           tipo: values.userType,
           nome: values.name,
-          telefone: values.phone
+          telefone: values.phone,
+          full_name: values.name, // Common metadata field
+          phone_number: values.phone // Common metadata field
         }
       }
     });
 
     if (error) {
-      if (error.message.includes("Database error saving new user") || error.status === 500) {
-        // Fallback or retry logic if needed, but for now we report it clearly
-        console.error("Supabase Auth 500 Error - Check Database Triggers:", error);
-      }
-      console.error("Erro ao registrar usuário:", error);
-      toast({
-        variant: "destructive",
-        title: "Erro ao registrar",
-        description: error.message || "Ocorreu um erro durante o registro.",
+      // Detailed error logging for debugging
+      console.error("Supabase Auth Error:", {
+        message: error.message,
+        status: error.status,
+        code: error.code
       });
+
+      // Se for erro de trigger (500), tentamos notificar de forma clara
+      if (error.message.includes("Database error saving new user") || error.status === 500) {
+        toast({
+          variant: "destructive",
+          title: "Erro de Configuração no Banco de Dados",
+          description: "O servidor do Supabase (Trigger) falhou ao criar seu perfil. Por favor, verifique se a tabela 'profiles' tem colunas obrigatórias não preenchidas pelo gatilho 'on_auth_user_created'.",
+        });
+      } else if (error.message.includes("already registered")) {
+        toast({
+          variant: "destructive",
+          title: "Usuário já existe",
+          description: "Este e-mail já está cadastrado. Tente fazer login.",
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Erro no Cadastro",
+          description: error.message || "Ocorreu um erro inesperado.",
+        });
+      }
       return { success: false };
     }
     
