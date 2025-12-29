@@ -90,6 +90,9 @@ export const registerUser = async (
         description: "Você será redirecionado para a página de login.",
       });
       
+      // Logout imediato após cadastro para garantir que o usuário precise logar
+      await supabase.auth.signOut();
+      
       return { success: true };
     }
 
