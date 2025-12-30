@@ -73,14 +73,14 @@ export const DepositForm = () => {
 
       // Inserir depósito em Supabase
       const { error: insertError } = await supabase
-        .from("depositos")
+        .from("deposits")
         .insert({
           usuario_id: user.id,
           valor: parseFloat(amount),
-          metodo: paymentMethod, // Alinhado com o erro 42703 (record "new" has no field "metodo") que sugere que o trigger espera 'metodo'
+          metodo: paymentMethod, 
           comprovante_url: receipt,
           status: "pendente",
-        } as any) // Using any to bypass TS error if 'metodo' is not in types yet
+        })
 
       if (insertError) throw insertError
 
