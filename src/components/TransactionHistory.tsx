@@ -32,10 +32,10 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
       setLoading(true)
       // Carregar depósitos do Supabase
       const { data, error } = await (supabase
-        .from("depositos")
+        .from("deposits")
         .select("*")
         .eq("usuario_id", userId)
-        .order("data_criacao", { ascending: false }) as any)
+        .order("created_at", { ascending: false }) as any)
 
       if (error) throw error
 
@@ -46,8 +46,8 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
         type: "deposit",
         amount: Number(d.valor),
         status: d.status === "pendente" ? "pending" : d.status === "aprovado" ? "approved" : "rejected",
-        description: `Depósito via ${d.metodo_pagamento === "bank_transfer" ? "Banco BAI" : "Multicaixa Express"}`,
-        createdAt: d.data_criacao,
+        description: `Depósito via ${d.metodo === "bank_transfer" ? "Banco BAI" : "Multicaixa Express"}`,
+        createdAt: d.created_at,
         approvedAt: d.data_aprovacao,
       }))
 

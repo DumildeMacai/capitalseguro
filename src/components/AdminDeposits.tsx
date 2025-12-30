@@ -55,9 +55,9 @@ export const AdminDeposits = () => {
   const loadDeposits = async () => {
     try {
       const { data, error } = await (supabase
-        .from("depositos")
+        .from("deposits")
         .select("*")
-        .order("data_criacao", { ascending: false }) as any)
+        .order("created_at", { ascending: false }) as any)
 
       if (error) throw error
 
@@ -65,10 +65,10 @@ export const AdminDeposits = () => {
         id: d.id,
         userId: d.usuario_id,
         amount: Number(d.valor),
-        paymentMethod: d.metodo_pagamento === "bank_transfer" ? "bank_transfer" : "multicaixa",
+        paymentMethod: d.metodo === "bank_transfer" ? "bank_transfer" : "multicaixa",
         receiptUrl: d.comprovante_url,
         status: d.status === "pendente" ? "pending" : d.status === "aprovado" ? "approved" : "rejected",
-        createdAt: d.data_criacao,
+        createdAt: d.created_at,
         approvedAt: d.data_aprovacao,
         approvedBy: d.aprovado_por,
         rejectionReason: d.motivo_rejeicao,
@@ -94,7 +94,7 @@ export const AdminDeposits = () => {
 
       // Atualizar depósito em Supabase
       const { error: depositError } = await (supabase
-        .from("depositos")
+        .from("deposits")
         .update({
           status: "aprovado",
           data_aprovacao: approvedAt,
@@ -104,7 +104,7 @@ export const AdminDeposits = () => {
 
       if (depositError) throw depositError
 
-      // Tentar atualizar saldo do investidor - com fallback se coluna não existir
+      // Atualizar saldo do investidor - conforme solicitado: "saldo deve aparecer para saldo disponivel"
       try {
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
@@ -116,14 +116,22 @@ export const AdminDeposits = () => {
           const currentBalance = Number(profileData.saldo_disponivel || 0)
           const newBalance = currentBalance + deposit.amount
 
-          await supabase
+          const { error: balanceUpdateError } = await supabase
             .from("profiles")
             .update({ saldo_disponivel: newBalance })
             .eq("id", deposit.userId)
+          
+          if (balanceUpdateError) throw balanceUpdateError
+        } else {
+          if (profileError) throw profileError
         }
       } catch (balanceErr) {
-        // Silencioso - não quebra a aprovação se houver erro
-        console.warn("Aviso: Não foi possível atualizar saldo do investidor:", balanceErr)
+        console.error("Erro crítico ao atualizar saldo do investidor:", balanceErr)
+        toast({ 
+          title: "Aviso de Saldo", 
+          description: "Depósito aprovado, mas houve um erro ao atualizar o saldo. Verifique manualmente.", 
+          variant: "destructive" 
+        })
       }
 
       toast({ title: "Sucesso", description: `Depósito de Kz ${deposit.amount.toLocaleString("pt-PT")} aprovado com sucesso!` })
@@ -148,7 +156,7 @@ export const AdminDeposits = () => {
     try {
       // Atualizar depósito em Supabase
       const { error } = await (supabase
-        .from("depositos")
+        .from("deposits")
         .update({
           status: "rejeitado",
         })
