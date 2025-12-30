@@ -123,14 +123,8 @@ export const AdminDeposits = () => {
           
           if (balanceUpdateError) throw balanceUpdateError
 
-          // Criar notificação para o investidor
-          await supabase.from("notifications").insert({
-            user_id: deposit.userId,
-            title: "Depósito Aprovado",
-            message: `Seu depósito de Kz ${deposit.amount.toLocaleString("pt-PT")} foi aprovado e já está disponível em seu saldo.`,
-            type: "deposit_approved",
-            read: false
-          })
+          // Notificação será implementada futuramente
+          console.log("Depósito aprovado para usuário:", deposit.userId)
         } else {
           if (profileError) throw profileError
         }
