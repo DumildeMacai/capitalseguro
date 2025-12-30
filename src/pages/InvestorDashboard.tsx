@@ -83,17 +83,27 @@ const InvestorDashboard = () => {
 
         // Process profile
         const profileData = profileResponse.data
-        if (profileResponse.error) {
-          console.error("Erro ao carregar perfil:", profileResponse.error)
-        }
-        setProfile(profileData || null)
-        if (profileData && "avatar_url" in profileData && profileData.avatar_url) {
-          setAvatarUrl(profileData.avatar_url as string)
-        }
+        if (profileResponse.error || !profileData) {
+          console.error("Erro ao carregar perfil:", profileResponse.error || "Perfil não encontrado")
+          // Se o perfil não existe ou deu erro, vamos tentar criar um básico ou usar dados do user
+          const basicProfile = {
+            id: user.id,
+            email: user.email,
+            nome_completo: user.user_metadata?.full_name || user.user_metadata?.nome_completo || user.email?.split("@")[0] || "Investidor",
+            saldo_disponivel: 0
+          }
+          setProfile(basicProfile)
+          setSaldo(0)
+        } else {
+          setProfile(profileData || null)
+          if (profileData && "avatar_url" in profileData && profileData.avatar_url) {
+            setAvatarUrl(profileData.avatar_url as string)
+          }
 
-        // Process balance - load from Supabase database (saldo_disponivel)
-        const saldoDoDb = profileData?.saldo_disponivel ? Number(profileData.saldo_disponivel) : 0
-        setSaldo(saldoDoDb)
+          // Process balance - load from Supabase database (saldo_disponivel)
+          const saldoDoDb = profileData?.saldo_disponivel ? Number(profileData.saldo_disponivel) : 0
+          setSaldo(saldoDoDb)
+        }
 
         // Process investments
         if (investmentsResponse.data) {

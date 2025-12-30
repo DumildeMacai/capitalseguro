@@ -71,14 +71,26 @@ const AdminInvestors = () => {
   const fetchInvestors = async () => {
     try {
       setLoading(true);
-      // Fetch all profiles using select * to avoid RLS issues
+      // Fetch all profiles
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setInvestors((data || []) as any);
+      
+      // Map data to ensure field names match what the component expects
+      const mappedData = (data || []).map((p: any) => ({
+        id: p.id,
+        nome_completo: p.nome_completo || p.full_name || p.username || "—",
+        email: p.email || "—",
+        telefone: p.telefone || p.phone || "—",
+        bio: p.bio || "",
+        data_criacao: p.created_at || p.data_criacao || p.data_inscricao,
+        saldo_disponivel: Number(p.saldo_disponivel || 0)
+      }));
+      
+      setInvestors(mappedData);
     } catch (error: any) {
       console.error("Erro ao buscar investidores:", error);
       toast({
