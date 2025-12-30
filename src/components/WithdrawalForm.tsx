@@ -115,9 +115,7 @@ export const WithdrawalForm = ({ onSuccess }: { onSuccess?: () => void }) => {
         .insert({
           usuario_id: userId,
           valor: withdrawAmount,
-          metodo_pagamento: withdrawalMethod,
-          numero_conta: withdrawalMethod === "bank_transfer" ? bankAccount : multicaixaNumber,
-          nome_banco: withdrawalMethod === "bank_transfer" ? bankName : null,
+          metodo: withdrawalMethod === "bank_transfer" ? `Banco: ${bankName} - ${bankAccount}` : `Multicaixa: ${multicaixaNumber}`,
           status: "pendente",
         })
 
