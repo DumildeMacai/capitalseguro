@@ -122,6 +122,15 @@ export const AdminDeposits = () => {
             .eq("id", deposit.userId)
           
           if (balanceUpdateError) throw balanceUpdateError
+
+          // Criar notificação para o investidor
+          await supabase.from("notifications").insert({
+            user_id: deposit.userId,
+            title: "Depósito Aprovado",
+            message: `Seu depósito de Kz ${deposit.amount.toLocaleString("pt-PT")} foi aprovado e já está disponível em seu saldo.`,
+            type: "deposit_approved",
+            read: false
+          })
         } else {
           if (profileError) throw profileError
         }
@@ -129,7 +138,7 @@ export const AdminDeposits = () => {
         console.error("Erro crítico ao atualizar saldo do investidor:", balanceErr)
         toast({ 
           title: "Aviso de Saldo", 
-          description: "Depósito aprovado, mas houve um erro ao atualizar o saldo. Verifique manualmente.", 
+          description: "Depósito aprovado, mas houve um erro ao atualizar o saldo ou notificação. Verifique manualmente.", 
           variant: "destructive" 
         })
       }

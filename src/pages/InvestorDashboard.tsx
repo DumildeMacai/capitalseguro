@@ -83,6 +83,9 @@ const InvestorDashboard = () => {
 
         // Process profile
         const profileData = profileResponse.data
+        if (profileResponse.error) {
+          console.error("Erro ao carregar perfil:", profileResponse.error)
+        }
         setProfile(profileData || null)
         if (profileData && "avatar_url" in profileData && profileData.avatar_url) {
           setAvatarUrl(profileData.avatar_url as string)
@@ -171,7 +174,11 @@ const InvestorDashboard = () => {
 
     const loadSaldoFromDb = async () => {
       try {
-        const { data } = await supabase.from("profiles").select("saldo_disponivel").eq("id", userId).single()
+        const { data, error } = await supabase.from("profiles").select("saldo_disponivel").eq("id", userId).single()
+        if (error) {
+          console.error("Erro ao carregar saldo atualizado:", error)
+          return
+        }
         if (data) {
           console.log("Saldo atualizado:", data.saldo_disponivel)
           setSaldo(Number(data.saldo_disponivel || 0))
