@@ -4,6 +4,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { calculateReturn } from "@/utils/interestCalculations"
+import { Button } from "@/components/ui/button"
+import { FileDown } from "lucide-react"
+import jsPDF from "jspdf"
+import "jspdf-autotable"
+
+// Extending jsPDF to include autoTable
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: any) => jsPDF;
+  }
+}
 
 interface ConsolidatedInvestment {
   investmentId: string
@@ -106,6 +117,73 @@ export default function ConsolidatedStatement() {
     }
   }
 
+  const exportToPDF = () => {
+    const doc = new jsPDF()
+    const now = new Date().toLocaleDateString("pt-AO")
+    
+    // Header
+    doc.setFontSize(20)
+    doc.setTextColor(40, 40, 40)
+    doc.text("Extrato Consolidado - Capital Seguro", 14, 22)
+    
+    doc.setFontSize(10)
+    doc.setTextColor(100, 100, 100)
+    doc.text(`Gerado em: ${now}`, 14, 30)
+
+    // Summary Section
+    doc.setFontSize(14)
+    doc.setTextColor(40, 40, 40)
+    doc.text("Resumo Financeiro", 14, 45)
+    
+    const summaryData = [
+      ["Total Investido", `Kz ${grandTotal.toLocaleString("pt-AO")}`],
+      ["Retorno Acumulado", `Kz ${grandReturn.toLocaleString("pt-AO")}`],
+      ["Total Geral", `Kz ${(grandTotal + grandReturn).toLocaleString("pt-AO")}`]
+    ]
+
+    doc.autoTable({
+      startY: 50,
+      head: [["Descrição", "Valor"]],
+      body: summaryData,
+      theme: 'grid',
+      headStyles: { fillColor: [41, 128, 185], textColor: 255 },
+      styles: { fontSize: 10 }
+    })
+
+    // Detailed Table
+    doc.setFontSize(14)
+    doc.text("Detalhes por Investimento", 14, (doc as any).lastAutoTable.finalY + 15)
+
+    const tableRows = consolidated.map(inv => [
+      inv.investmentTitle,
+      inv.tipoRenda.toUpperCase(),
+      `Kz ${inv.totalInvested.toLocaleString("pt-AO")}`,
+      `Kz ${inv.totalReturn.toLocaleString("pt-AO")}`,
+      `${inv.numberOfApplications}x`,
+      `${new Date(inv.firstDate).toLocaleDateString("pt-AO")} - ${new Date(inv.lastDate).toLocaleDateString("pt-AO")}`
+    ])
+
+    doc.autoTable({
+      startY: (doc as any).lastAutoTable.finalY + 20,
+      head: [["Investimento", "Tipo", "Investido", "Retorno", "Aportes", "Período"]],
+      body: tableRows,
+      theme: 'striped',
+      headStyles: { fillColor: [52, 73, 94], textColor: 255 },
+      styles: { fontSize: 8 }
+    })
+
+    // Footer
+    const pageCount = (doc as any).internal.getNumberOfPages()
+    for(let i = 1; i <= pageCount; i++) {
+      doc.setPage(i)
+      doc.setFontSize(8)
+      doc.text("Capital Seguro - Plataforma de Investimentos Seguros", 14, doc.internal.pageSize.height - 10)
+      doc.text(`Página ${i} de ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10)
+    }
+
+    doc.save(`extrato_consolidado_${now.replace(/\//g, '-')}.pdf`)
+  }
+
   if (loading) {
     return (
       <Card>
@@ -142,11 +220,23 @@ export default function ConsolidatedStatement() {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Extrato Consolidado</CardTitle>
-        <CardDescription>
-          Resumo consolidado de todos os seus investimentos agrupados por produto
-        </CardDescription>
+      <CardHeader className="flex flex-row items-center justify-between gap-4 space-y-0">
+        <div>
+          <CardTitle>Extrato Consolidado</CardTitle>
+          <CardDescription>
+            Resumo consolidado de todos os seus investimentos agrupados por produto
+          </CardDescription>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={exportToPDF}
+          className="hover-elevate"
+          data-testid="button-export-pdf"
+        >
+          <FileDown className="mr-2 h-4 w-4" />
+          Exportar PDF
+        </Button>
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
@@ -223,3 +313,4 @@ export default function ConsolidatedStatement() {
     </Card>
   )
 }
+
