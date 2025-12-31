@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Link } from "react-router-dom";
 
 const investmentTypes = [
   {
@@ -142,7 +143,9 @@ const InvestmentOptions = () => {
                         * Valores baseados em taxas médias de mercado. Rendimentos passados não garantem ganhos futuros.
                       </p>
                     </div>
-                    <Button className="w-full mt-4" variant="default">Começar a Investir</Button>
+                    <Button className="w-full mt-4" variant="default" asChild>
+                      <Link to="/investments" data-testid="button-start-investing">Começar a Investir</Link>
+                    </Button>
                   </CardContent>
                 </Card>
               </div>
