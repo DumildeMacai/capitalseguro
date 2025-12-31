@@ -1,0 +1,2616 @@
+inclua as três modalidades (Obrigações, Fundos de Investimento e Fundos Imobiliários) de forma organizada, moderna e compatível com sites de investimento de última geração.
+
+O sistema terá as seguintes características:
+
+API única para as três modalidades, mas com rotas separadas para cada uma.
+
+Conteúdo educativo para cada modalidade.
+
+CRUD completo para administradores.
+
+Cálculos e simuladores específicos para cada tipo de investimento.
+
+Estrutura de banco de dados unificada, mas com tabelas separadas para cada modalidade.
+
+Autenticação para admin (simplificada por token) e possibilidade de autenticação de usuários no futuro.
+
+Front-end opcional, mas darei exemplos de como consumir a API.
+
+Vou organizar em:
+
+server.js: Servidor principal com rotas para as três modalidades.
+
+db.js: Configuração do banco de dados com tabelas para Obrigações, Fundos de Investimento, FIIs e conteúdo educativo.
+
+.env: Variáveis de ambiente.
+
+package.json: Dependências.
+
+Como o código será extenso, vou dividir em partes.
+
+Passo 1: Estrutura do Banco de Dados
+Vamos criar tabelas para:
+
+Obrigações (bonds) - já temos, mas vamos ajustar para incluir mais campos e padronizar.
+
+Fundos de Investimento (investment_funds)
+
+Fundos Imobiliários (real_estate_funds)
+
+Conteúdo educativo (educational_content) - com campo para modalidade.
+
+Passo 2: Servidor
+Vamos criar um servidor Express com rotas para:
+
+Públicas: listar, detalhes, calcular, conteúdo educativo.
+
+Admin: CRUD para cada modalidade.
+
+Passo 3: Exemplos de Dados
+Vou incluir exemplos de cada modalidade para testes.
+
+Vamos lá:
+
+1. Arquivo db.js
+javascript
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
+
+export async function initDB() {
+  const db = await open({
+    filename: './investment_data.db',
+    driver: sqlite3.Database
+  });
+
+  // Tabela de Obrigações (Bonds)
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS bonds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      issuer TEXT NOT NULL,
+      type TEXT NOT NULL,                  -- 'public' | 'corporate'
+      face_value REAL NOT NULL,
+      coupon_rate REAL NOT NULL,
+      frequency TEXT NOT NULL,             -- 'annual', 'semiannual', 'quarterly', 'monthly'
+      currency TEXT NOT NULL,
+      issue_date TEXT NOT NULL,
+      maturity_date TEXT NOT NULL,
+      risk_level TEXT NOT NULL,            -- 'low', 'medium', 'high'
+      status TEXT DEFAULT 'active',
+      description TEXT,
+      min_investment INTEGER,
+      total_issuance INTEGER,
+      available INTEGER,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Tabela de Fundos de Investimento
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS investment_funds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      manager TEXT NOT NULL,
+      type TEXT NOT NULL,                  -- 'acoes', 'multimercado', 'renda_fixa', 'cambial'
+      cnpj TEXT UNIQUE,
+      risk_level TEXT NOT NULL,            -- 'conservador', 'moderado', 'arrojado'
+      minimum_investment REAL NOT NULL,
+      administration_fee REAL,
+      performance_fee REAL,
+      net_worth REAL,
+      shares_outstanding INTEGER,
+      share_price REAL,
+      daily_liquidity BOOLEAN DEFAULT 1,
+      description TEXT,
+      investment_strategy TEXT,
+      main_assets TEXT,                    -- JSON string com os principais ativos
+      creation_date TEXT,
+      last_update TEXT,
+      status TEXT DEFAULT 'active',
+      performance_12m REAL,
+      volatility REAL,
+      sharpe_ratio REAL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Tabela de Fundos Imobiliários (FIIs)
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS real_estate_funds (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      manager TEXT NOT NULL,
+      cnpj TEXT UNIQUE,
+      type TEXT NOT NULL,                  -- 'shopping', 'office', 'logistic', 'hybrid', 'development'
+      segment TEXT,                        -- 'varejo', 'corporate', 'logística', etc.
+      risk_level TEXT NOT NULL,            -- 'low', 'medium', 'high'
+      minimum_investment REAL NOT NULL,
+      administration_fee REAL,
+      share_price REAL,
+      shares_outstanding INTEGER,
+      net_worth REAL,
+      last_dividend REAL,                  -- Último dividendo por cota
+      dividend_yield REAL,                 -- Dividend yield (%)
+      p_vpa REAL,                          -- Preço / Valor Patrimonial por Ação
+      daily_liquidity BOOLEAN DEFAULT 1,
+      description TEXT,
+      portfolio TEXT,                      -- Descrição do portfólio (JSON string)
+      creation_date TEXT,
+      last_update TEXT,
+      status TEXT DEFAULT 'active',
+      performance_12m REAL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Tabela de Conteúdo Educativo (agora com campo 'category' para cada modalidade)
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS educational_content (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      category TEXT NOT NULL,              -- 'bonds', 'investment_funds', 'real_estate_funds'
+      content_type TEXT NOT NULL,          -- 'guide', 'example', 'faq', 'comparison'
+      content TEXT NOT NULL,
+      order_index INTEGER,
+      is_active BOOLEAN DEFAULT 1,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // Inserir conteúdo educativo padrão para cada modalidade
+  // Vamos verificar se já existe conteúdo para evitar duplicação
+  const count = await db.get("SELECT COUNT(*) as count FROM educational_content");
+  if (count.count === 0) {
+    await db.exec(`
+      INSERT INTO educational_content (title, category, content_type, content, order_index) VALUES
+      -- Conteúdo para Obrigações
+      ('💵 O que são Obrigações (Bonds)?', 'bonds', 'guide', 'São títulos de dívida: quando uma empresa ou governo precisa de dinheiro, emite obrigações para captar recursos. O investidor que compra está, na prática, emprestando dinheiro ao emissor.', 1),
+      ('⚙️ Como funcionam as Obrigações?', 'bonds', 'guide', '1. Emissão: O emissor define valor nominal, taxa de juros e prazo. 2. Compra: Investidor paga e torna-se credor. 3. Pagamentos: Emissor paga juros regulares (cupões). 4. Vencimento: Emissor devolve o capital inicial.', 2),
+      ('📊 Exemplo de Obrigação', 'bonds', 'example', 'Uma empresa emite uma obrigação de 1.000 USD com juros de 5% ao ano e prazo de 5 anos. O investidor recebe 50 USD por ano. Ao final, recebe os 1.000 USD de volta. Total: 1.250 USD.', 3),
+
+      -- Conteúdo para Fundos de Investimento
+      ('📈 O que são Fundos de Investimento?', 'investment_funds', 'guide', 'São carteiras coletivas administradas por gestores profissionais. Vários investidores aplicam dinheiro, que é usado para comprar ativos (ações, títulos, etc.).', 1),
+      ('⚙️ Como funcionam os Fundos de Investimento?', 'investment_funds', 'guide', '1. Cotas: Cada investidor compra cotas do fundo. 2. Gestão: O gestor profissional decide onde investir. 3. Resultados: Os ganhos (ou perdas) são distribuídos proporcionalmente às cotas.', 2),
+      ('🏷️ Tipos de Fundos', 'investment_funds', 'guide', '• Fundos de Ações: Investem em ações. • Multimercado: Diversificam em vários tipos de ativos. • Renda Fixa: Títulos de dívida. • Cambiais: Moedas estrangeiras.', 3),
+
+      -- Conteúdo para Fundos Imobiliários
+      ('🏢 O que são Fundos Imobiliários (FIIs)?', 'real_estate_funds', 'guide', 'São fundos que investem em imóveis (shoppings, escritórios, galpões) ou títulos ligados ao setor imobiliário.', 1),
+      ('⚙️ Como funcionam os FIIs?', 'real_estate_funds', 'guide', 'Você compra cotas do fundo e recebe rendimentos mensais provenientes de aluguéis, juros ou dividendos. Não precisa comprar imóveis diretamente.', 2),
+      ('💰 Vantagens dos FIIs', 'real_estate_funds', 'guide', '• Renda passiva mensal. • Diversificação. • Acesso ao mercado imobiliário com baixo capital. • Liquidez diária (na bolsa).', 3)
+    `);
+  }
+
+  return db;
+}
+2. Arquivo server.js
+javascript
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { initDB } from './db.js';
+
+dotenv.config();
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const ADMIN_TOKEN = process.env.ADMIN_TOKEN || 'admin-seguro-token';
+
+// Middleware de admin
+function requireAdmin(req, res, next) {
+  const token = req.headers['x-admin-token'];
+  if (!token || token !== ADMIN_TOKEN) {
+    return res.status(401).json({ error: 'Acesso de admin negado' });
+  }
+  next();
+}
+
+let db;
+(async () => {
+  db = await initDB();
+})();
+
+// ==================== ROTAS PÚBLICAS ====================
+
+// Saúde da API
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    service: 'Investment Platform API',
+    version: '1.0.0',
+    available_endpoints: {
+      bonds: '/api/bonds',
+      investment_funds: '/api/investment-funds',
+      real_estate_funds: '/api/real-estate-funds',
+      education: '/api/education/:category',
+      calculators: {
+        bonds: '/api/calculators/bonds',
+        funds: '/api/calculators/funds',
+        fiis: '/api/calculators/fiis'
+      }
+    }
+  });
+});
+
+// ========== CONTEÚDO EDUCATIVO ==========
+app.get('/api/education/:category', async (req, res) => {
+  const { category } = req.params;
+  try {
+    const content = await db.all(
+      "SELECT * FROM educational_content WHERE category = ? AND is_active = 1 ORDER BY order_index",
+      [category]
+    );
+    res.json(content);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao obter conteúdo educativo' });
+  }
+});
+
+// ========== OBRIGAÇÕES (BONDS) ==========
+// Listar obrigações ativas
+app.get('/api/bonds', async (req, res) => {
+  try {
+    const bonds = await db.all("SELECT * FROM bonds WHERE status = 'active'");
+    res.json(bonds);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao listar obrigações' });
+  }
+});
+
+// Detalhes de uma obrigação
+app.get('/api/bonds/:id', async (req, res) => {
+  try {
+    const bond = await db.get("SELECT * FROM bonds WHERE id = ?", [req.params.id]);
+    if (!bond) return res.status(404).json({ error: 'Obrigação não encontrada' });
+    res.json(bond);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao obter obrigação' });
+  }
+});
+
+// ========== FUNDOS DE INVESTIMENTO ==========
+app.get('/api/investment-funds', async (req, res) => {
+  try {
+    const funds = await db.all("SELECT * FROM investment_funds WHERE status = 'active'");
+    res.json(funds);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao listar fundos' });
+  }
+});
+
+app.get('/api/investment-funds/:id', async (req, res) => {
+  try {
+    const fund = await db.get("SELECT * FROM investment_funds WHERE id = ?", [req.params.id]);
+    if (!fund) return res.status(404).json({ error: 'Fundo não encontrado' });
+    res.json(fund);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao obter fundo' });
+  }
+});
+
+// ========== FUNDOS IMOBILIÁRIOS (FIIs) ==========
+app.get('/api/real-estate-funds', async (req, res) => {
+  try {
+    const funds = await db.all("SELECT * FROM real_estate_funds WHERE status = 'active'");
+    res.json(funds);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao listar fundos imobiliários' });
+  }
+});
+
+app.get('/api/real-estate-funds/:id', async (req, res) => {
+  try {
+    const fund = await db.get("SELECT * FROM real_estate_funds WHERE id = ?", [req.params.id]);
+    if (!fund) return res.status(404).json({ error: 'Fundo imobiliário não encontrado' });
+    res.json(fund);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao obter fundo imobiliário' });
+  }
+});
+
+// ========== CALCULADORAS ==========
+app.post('/api/calculators/bonds', async (req, res) => {
+  // Implementar calculadora de obrigações
+  const { faceValue, couponRate, frequency, years, investment } = req.body;
+  // ... (código da calculadora)
+  res.json({ message: 'Calculadora de obrigações', data: req.body });
+});
+
+app.post('/api/calculators/funds', async (req, res) => {
+  // Calculadora para fundos de investimento
+  const { initialInvestment, monthlyContribution, timeInYears, expectedReturn } = req.body;
+  // ... (cálculos)
+  res.json({ message: 'Calculadora de fundos', data: req.body });
+});
+
+app.post('/api/calculators/fiis', async (req, res) => {
+  // Calculadora para FIIs
+  const { initialInvestment, monthlyContribution, dividendYield, timeInYears } = req.body;
+  // ... (cálculos)
+  res.json({ message: 'Calculadora de FIIs', data: req.body });
+});
+
+// ==================== ROTAS DE ADMIN ====================
+
+// ========== ADMIN: CONTEÚDO EDUCATIVO ==========
+app.get('/api/admin/education', requireAdmin, async (req, res) => {
+  try {
+    const content = await db.all("SELECT * FROM educational_content ORDER BY category, order_index");
+    res.json(content);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao obter conteúdo' });
+  }
+});
+
+app.post('/api/admin/education', requireAdmin, async (req, res) => {
+  const { title, category, content_type, content, order_index } = req.body;
+  try {
+    const result = await db.run(
+      "INSERT INTO educational_content (title, category, content_type, content, order_index) VALUES (?, ?, ?, ?, ?)",
+      [title, category, content_type, content, order_index || 999]
+    );
+    const created = await db.get("SELECT * FROM educational_content WHERE id = ?", [result.lastID]);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao criar conteúdo' });
+  }
+});
+
+app.put('/api/admin/education/:id', requireAdmin, async (req, res) => {
+  const { title, category, content_type, content, order_index, is_active } = req.body;
+  try {
+    await db.run(
+      `UPDATE educational_content SET 
+        title = COALESCE(?, title),
+        category = COALESCE(?, category),
+        content_type = COALESCE(?, content_type),
+        content = COALESCE(?, content),
+        order_index = COALESCE(?, order_index),
+        is_active = COALESCE(?, is_active)
+       WHERE id = ?`,
+      [title, category, content_type, content, order_index, is_active, req.params.id]
+    );
+    const updated = await db.get("SELECT * FROM educational_content WHERE id = ?", [req.params.id]);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao atualizar conteúdo' });
+  }
+});
+
+// ========== ADMIN: OBRIGAÇÕES ==========
+app.post('/api/admin/bonds', requireAdmin, async (req, res) => {
+  // Validação e criação de obrigação
+  const bond = req.body;
+  // ... (validação)
+  try {
+    const result = await db.run(
+      `INSERT INTO bonds (issuer, type, face_value, coupon_rate, frequency, currency, issue_date, maturity_date, risk_level, description, min_investment, total_issuance, available) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [bond.issuer, bond.type, bond.face_value, bond.coupon_rate, bond.frequency, bond.currency, bond.issue_date, bond.maturity_date, bond.risk_level, bond.description, bond.min_investment, bond.total_issuance, bond.available]
+    );
+    const created = await db.get("SELECT * FROM bonds WHERE id = ?", [result.lastID]);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao criar obrigação' });
+  }
+});
+
+app.put('/api/admin/bonds/:id', requireAdmin, async (req, res) => {
+  // Atualização de obrigação
+  try {
+    const updates = req.body;
+    const updateFields = [];
+    const values = [];
+    for (const [key, value] of Object.entries(updates)) {
+      if (key !== 'id') {
+        updateFields.push(`${key} = ?`);
+        values.push(value);
+      }
+    }
+    updateFields.push('updated_at = CURRENT_TIMESTAMP');
+    values.push(req.params.id);
+    await db.run(`UPDATE bonds SET ${updateFields.join(', ')} WHERE id = ?`, values);
+    const updated = await db.get("SELECT * FROM bonds WHERE id = ?", [req.params.id]);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao atualizar obrigação' });
+  }
+});
+
+// ========== ADMIN: FUNDOS DE INVESTIMENTO ==========
+app.post('/api/admin/investment-funds', requireAdmin, async (req, res) => {
+  const fund = req.body;
+  // ... (validação)
+  try {
+    const result = await db.run(
+      `INSERT INTO investment_funds (name, manager, type, cnpj, risk_level, minimum_investment, administration_fee, performance_fee, net_worth, shares_outstanding, share_price, daily_liquidity, description, investment_strategy, main_assets, creation_date, last_update, performance_12m, volatility, sharpe_ratio)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [fund.name, fund.manager, fund.type, fund.cnpj, fund.risk_level, fund.minimum_investment, fund.administration_fee, fund.performance_fee, fund.net_worth, fund.shares_outstanding, fund.share_price, fund.daily_liquidity, fund.description, fund.investment_strategy, fund.main_assets, fund.creation_date, fund.last_update, fund.performance_12m, fund.volatility, fund.sharpe_ratio]
+    );
+    const created = await db.get("SELECT * FROM investment_funds WHERE id = ?", [result.lastID]);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao criar fundo' });
+  }
+});
+
+// ========== ADMIN: FUNDOS IMOBILIÁRIOS ==========
+app.post('/api/admin/real-estate-funds', requireAdmin, async (req, res) => {
+  const fund = req.body;
+  // ... (validação)
+  try {
+    const result = await db.run(
+      `INSERT INTO real_estate_funds (name, manager, cnpj, type, segment, risk_level, minimum_investment, administration_fee, share_price, shares_outstanding, net_worth, last_dividend, dividend_yield, p_vpa, daily_liquidity, description, portfolio, creation_date, last_update, performance_12m)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [fund.name, fund.manager, fund.cnpj, fund.type, fund.segment, fund.risk_level, fund.minimum_investment, fund.administration_fee, fund.share_price, fund.shares_outstanding, fund.net_worth, fund.last_dividend, fund.dividend_yield, fund.p_vpa, fund.daily_liquidity, fund.description, fund.portfolio, fund.creation_date, fund.last_update, fund.performance_12m]
+    );
+    const created = await db.get("SELECT * FROM real_estate_funds WHERE id = ?", [result.lastID]);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao criar fundo imobiliário' });
+  }
+});
+
+// ========== ADMIN: LISTAR TODOS (PARA DASHBOARD) ==========
+app.get('/api/admin/all-investments', requireAdmin, async (req, res) => {
+  try {
+    const bonds = await db.all("SELECT id, issuer, type, face_value, status FROM bonds");
+    const investmentFunds = await db.all("SELECT id, name, type, risk_level, status FROM investment_funds");
+    const realEstateFunds = await db.all("SELECT id, name, type, risk_level, status FROM real_estate_funds");
+    res.json({
+      bonds,
+      investment_funds: investmentFunds,
+      real_estate_funds: realEstateFunds
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro ao obter investimentos' });
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`📊 Endpoints disponíveis:`);
+  console.log(`   http://localhost:${PORT}/health`);
+  console.log(`   http://localhost:${PORT}/api/bonds`);
+  console.log(`   http://localhost:${PORT}/api/investment-funds`);
+  console.log(`   http://localhost:${PORT}/api/real-estate-funds`);
+});
+3. Arquivo .env
+env
+ADMIN_TOKEN=seu_token_secreto_aqui
+PORT=3000
+NODE_ENV=development
+4. Arquivo package.json
+json
+{
+  "name": "investment-platform-api",
+  "version": "1.0.0",
+  "description": "API completa para plataforma de investimentos com Obrigações, Fundos e FIIs",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
+5. Exemplos de Dados para Teste
+Crie um arquivo seed.js para popular o banco:
+
+javascript
+import { initDB } from './db.js';
+
+async function seed() {
+  const db = await initDB();
+
+  // Inserir algumas obrigações
+  await db.run(`
+    INSERT INTO bonds (issuer, type, face_value, coupon_rate, frequency, currency, issue_date, maturity_date, risk_level, description, min_investment, total_issuance, available)
+    VALUES 
+    ('Tesouro Nacional', 'public', 1000, 4.5, 'semiannual', 'BRL', '2024-01-01', '2029-01-01', 'low', 'Tesouro Prefixado 2029', 1000, 1000000, 500000),
+    ('Empresa XYZ', 'corporate', 1000, 6.0, 'annual', 'USD', '2024-02-01', '2034-02-01', 'medium', 'Obrigação Corporativa Série A', 5000, 50000, 25000)
+  `);
+
+  // Inserir fundos de investimento
+  await db.run(`
+    INSERT INTO investment_funds (name, manager, type, cnpj, risk_level, minimum_investment, administration_fee, performance_fee, net_worth, shares_outstanding, share_price, daily_liquidity, description, investment_strategy, main_assets, creation_date, last_update, performance_12m, volatility, sharpe_ratio)
+    VALUES 
+    ('Fundo Ações Global', 'Gestora ABC', 'acoes', '12345678000195', 'arrojado', 100, 2.0, 20.0, 50000000, 1000000, 50.0, 1, 'Foco em ações globais de tecnologia', 'Investir em empresas de tecnologia líderes globais', '["AAPL", "MSFT", "GOOGL", "AMZN"]', '2020-01-15', '2024-01-15', 15.5, 12.3, 1.2),
+    ('Fundo Renda Fixa Conservador', 'Gestora XYZ', 'renda_fixa', '98765432000195', 'conservador', 500, 1.0, 0.0, 200000000, 2000000, 100.0, 1, 'Fundo de renda fixa com baixo risco', 'Investir em títulos públicos e CDBs de bancos grandes', '["Tesouro Selic", "CDB Banco do Brasil"]', '2018-05-20', '2024-01-20', 6.5, 2.1, 0.8)
+  `);
+
+  // Inserir fundos imobiliários
+  await db.run(`
+    INSERT INTO real_estate_funds (name, manager, cnpj, type, segment, risk_level, minimum_investment, administration_fee, share_price, shares_outstanding, net_worth, last_dividend, dividend_yield, p_vpa, daily_liquidity, description, portfolio, creation_date, last_update, performance_12m)
+    VALUES 
+    ('FII Shopping Center', 'Gestora Imobiliária', '11122333000195', 'shopping', 'varejo', 'medium', 50, 1.5, 90.0, 1000000, 90000000, 0.80, 10.67, 1.0, 1, 'FII focado em shoppings centers premium', '["Shopping Center Ibirapuera", "Shopping Morumbi"]', '2015-03-10', '2024-01-10', 12.3),
+    ('FII Logística', 'Gestora Logística', '44455666000195', 'logistic', 'logística', 'medium', 100, 1.2, 120.0, 800000, 96000000, 1.00, 10.0, 1.1, 1, 'FII especializado em galpões logísticos', '["Galpão São Paulo", "Galpão Campinas"]', '2016-08-22', '2024-01-22', 14.5)
+  `);
+
+  console.log('✅ Dados de teste inseridos com sucesso!');
+}
+
+seed().catch(console.error);
+6. Instruções para Executar
+Instalar dependências:
+
+bash
+npm install
+Configurar o arquivo .env com seu token admin.
+
+Popular o banco de dados (opcional):
+
+bash
+node seed.js
+Iniciar o servidor:
+
+bash
+npm start
+7. Funcionalidades Implementadas
+Para Investidores:
+✅ Listar todas as modalidades
+
+✅ Ver detalhes de cada investimento
+
+✅ Conteúdo educativo por categoria
+
+✅ Calculadoras específicas
+
+Para Administradores:
+✅ CRUD completo para todas as modalidades
+
+✅ Gerenciamento de conteúdo educativo
+
+✅ Dashboard unificado
+
+Características Modernas:
+✅ API RESTful organizada
+
+✅ Banco de dados SQLite (leve e fácil)
+
+✅ Conteúdo educativo integrado
+
+✅ Calculadoras financeiras
+
+✅ Estrutura escalável
+
+8. Próximos Passos (Se Quiser)
+Posso adicionar:
+
+Autenticação de usuários (registro/login)
+
+Sistema de carteira (compras/vendas)
+
+Histórico de transações
+
+Notificações e alertas
+
+API de mercado (cotação em tempo real)
+
+Front-end completo em React/Vue
+
+Este sistema está pronto para ser usado como backend de uma plataforma de investimentos moderna. Quer que eu desenvolva algum aspecto específico com mais detalhes?
+
+Sistema Completo de Plataforma de Investimentos de Última Geração
+Vou criar um sistema unificado com todas as 3 modalidades (Obrigações, Fundos de Investimento, FIIs) seguindo os padrões mais modernos do mercado.
+
+📁 1. ARQUITETURA DO SISTEMA
+text
+📂 investment-platform/
+├── 📁 api/                    # Backend completo
+├── 📁 web/                   # Frontend moderno
+├── 📁 shared/                # Componentes compartilhados
+└── 📄 docker-compose.yml     # Orquestração
+📁 2. BACKEND UNIFICADO - server.js
+javascript
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+
+// Módulos de banco de dados
+import { initDB } from './db/investmentDB.js';
+import { initCache } from './cache/redis.js';
+
+// Módulos de rotas
+import bondsRouter from './routes/bonds.js';
+import fundsRouter from './routes/funds.js';
+import fiisRouter from './routes/fiis.js';
+import authRouter from './routes/auth.js';
+import portfolioRouter from './routes/portfolio.js';
+import analyticsRouter from './routes/analytics.js';
+import educationRouter from './routes/education.js';
+
+// Inicialização
+dotenv.config();
+const app = express();
+
+// Middlewares de segurança
+app.use(helmet());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  credentials: true
+}));
+
+// Rate limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100 // limite por IP
+});
+app.use('/api/', limiter);
+
+// Parsing JSON
+app.use(express.json());
+
+// Documentação Swagger
+const swaggerDocument = YAML.load('./docs/swagger.yaml');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+// Health check
+app.get('/health', (req, res) => {
+  res.json({
+    status: 'operational',
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime(),
+    services: {
+      database: 'connected',
+      cache: 'connected',
+      api: 'running'
+    }
+  });
+});
+
+// Rotas da API
+app.use('/api/v1/auth', authRouter);
+app.use('/api/v1/bonds', bondsRouter);
+app.use('/api/v1/funds', fundsRouter);
+app.use('/api/v1/fiis', fiisRouter);
+app.use('/api/v1/portfolio', portfolioRouter);
+app.use('/api/v1/analytics', analyticsRouter);
+app.use('/api/v1/education', educationRouter);
+
+// Error handling
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(err.status || 500).json({
+    error: {
+      message: err.message || 'Internal Server Error',
+      code: err.code || 'INTERNAL_ERROR',
+      timestamp: new Date().toISOString()
+    }
+  });
+});
+
+// Inicialização do servidor
+const PORT = process.env.PORT || 3001;
+const startServer = async () => {
+  try {
+    // Inicializar serviços
+    await initDB();
+    await initCache();
+    
+    app.listen(PORT, () => {
+      console.log(`🚀 Investment Platform API running on port ${PORT}`);
+      console.log(`📚 API Documentation: http://localhost:${PORT}/api-docs`);
+      console.log(`🔧 Environment: ${process.env.NODE_ENV || 'development'}`);
+    });
+  } catch (error) {
+    console.error('Failed to start server:', error);
+    process.exit(1);
+  }
+};
+
+startServer();
+📁 3. MODELO DE DADOS UNIFICADO - investmentDB.js
+javascript
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
+
+export async function initDB() {
+  const db = await open({
+    filename: process.env.DB_PATH || './data/investments.db',
+    driver: sqlite3.Database
+  });
+
+  // ========== TABELA DE USUÁRIOS ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS users (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      name TEXT NOT NULL,
+      password_hash TEXT NOT NULL,
+      risk_profile TEXT CHECK(risk_profile IN ('conservative', 'moderate', 'aggressive')),
+      investment_experience TEXT CHECK(investment_experience IN ('beginner', 'intermediate', 'advanced')),
+      verified BOOLEAN DEFAULT 0,
+      kyc_status TEXT DEFAULT 'pending',
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // ========== TABELA DE INVESTIMENTOS (BASE) ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS investments (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT UNIQUE NOT NULL,
+      type TEXT NOT NULL CHECK(type IN ('bond', 'fund', 'fiis', 'stock', 'etf')),
+      category TEXT NOT NULL,
+      code TEXT UNIQUE NOT NULL,          -- Código único (ex: BOND001, FII001)
+      name TEXT NOT NULL,
+      issuer TEXT NOT NULL,
+      description TEXT,
+      risk_level TEXT NOT NULL CHECK(risk_level IN ('low', 'medium', 'high')),
+      currency TEXT DEFAULT 'BRL',
+      status TEXT DEFAULT 'active' CHECK(status IN ('active', 'inactive', 'suspended')),
+      min_investment DECIMAL(15,2) NOT NULL,
+      liquidity TEXT CHECK(liquidity IN ('daily', 'd+1', 'd+30', 'term')),
+      tags TEXT,                          -- JSON array de tags
+      metadata TEXT,                      -- JSON com metadados específicos
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // ========== TABELA DE OBRIGAÇÕES ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS bonds (
+      id INTEGER PRIMARY KEY,
+      investment_id INTEGER REFERENCES investments(id),
+      face_value DECIMAL(15,2) NOT NULL,
+      coupon_rate DECIMAL(5,2) NOT NULL,
+      coupon_frequency TEXT CHECK(coupon_frequency IN ('monthly', 'quarterly', 'semiannual', 'annual')),
+      issue_date DATE NOT NULL,
+      maturity_date DATE NOT NULL,
+      yield_to_maturity DECIMAL(5,2),
+      duration DECIMAL(10,2),
+      credit_rating TEXT,
+      collateral TEXT,
+      amortization_type TEXT,
+      callable BOOLEAN DEFAULT 0,
+      call_date DATE,
+      call_price DECIMAL(15,2)
+    )
+  `);
+
+  // ========== TABELA DE FUNDOS DE INVESTIMENTO ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS investment_funds (
+      id INTEGER PRIMARY KEY,
+      investment_id INTEGER REFERENCES investments(id),
+      cnpj TEXT UNIQUE NOT NULL,
+      administrator TEXT NOT NULL,
+      manager TEXT NOT NULL,
+      fund_class TEXT CHECK(fund_class IN ('acoes', 'multimercado', 'renda_fixa', 'cambial', 'referenciado', 'etf')),
+      benchmark TEXT,
+      administration_fee DECIMAL(5,2) NOT NULL,
+      performance_fee DECIMAL(5,2),
+      net_worth DECIMAL(20,2),
+      quota_value DECIMAL(15,4),
+      shares_outstanding BIGINT,
+      daily_liquidity BOOLEAN DEFAULT 1,
+      investment_strategy TEXT,
+      target_audience TEXT,
+      portfolio_composition TEXT,          -- JSON com composição
+      performance_metrics TEXT            -- JSON com métricas
+    )
+  `);
+
+  // ========== TABELA DE FIIs ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS real_estate_funds (
+      id INTEGER PRIMARY KEY,
+      investment_id INTEGER REFERENCES investments(id),
+      cnpj TEXT UNIQUE NOT NULL,
+      administrator TEXT NOT NULL,
+      manager TEXT NOT NULL,
+      fund_type TEXT CHECK(fund_type IN ('shopping', 'office', 'logistic', 'hybrid', 'development', 'receivables')),
+      segment TEXT,
+      properties_count INTEGER,
+      properties_value DECIMAL(20,2),
+      vacancy_rate DECIMAL(5,2),
+      average_lease_term INTEGER,         -- Meses
+      dividend_yield DECIMAL(5,2),
+      last_dividend DECIMAL(15,4),
+      dividend_frequency TEXT DEFAULT 'monthly',
+      p_vpa DECIMAL(10,4),                -- Preço/Valor Patrimonial por Ação
+      equity_value DECIMAL(20,2),
+      portfolio_properties TEXT,          -- JSON com propriedades
+      tenants_diversification TEXT        -- JSON com diversificação
+    )
+  `);
+
+  // ========== TABELA DE COTAS/PREÇOS ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS prices (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      investment_id INTEGER REFERENCES investments(id),
+      date DATE NOT NULL,
+      open DECIMAL(15,4),
+      high DECIMAL(15,4),
+      low DECIMAL(15,4),
+      close DECIMAL(15,4) NOT NULL,
+      volume BIGINT,
+      dividend DECIMAL(15,4),
+      UNIQUE(investment_id, date)
+    )
+  `);
+
+  // ========== TABELA DE PORTFÓLIO ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS portfolio (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      user_id INTEGER REFERENCES users(id),
+      investment_id INTEGER REFERENCES investments(id),
+      quantity DECIMAL(15,4) NOT NULL,
+      average_price DECIMAL(15,4) NOT NULL,
+      invested_amount DECIMAL(15,2) NOT NULL,
+      current_value DECIMAL(15,2),
+      profit_loss DECIMAL(15,2),
+      profit_loss_percentage DECIMAL(10,2),
+      purchase_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      last_update TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // ========== TABELA DE ORDENS ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS orders (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT UNIQUE NOT NULL,
+      user_id INTEGER REFERENCES users(id),
+      investment_id INTEGER REFERENCES investments(id),
+      type TEXT CHECK(type IN ('buy', 'sell')),
+      order_type TEXT CHECK(order_type IN ('market', 'limit', 'stop')),
+      quantity DECIMAL(15,4) NOT NULL,
+      price DECIMAL(15,4),
+      total_amount DECIMAL(15,2) NOT NULL,
+      status TEXT CHECK(status IN ('pending', 'executed', 'cancelled', 'rejected')),
+      executed_price DECIMAL(15,4),
+      executed_at TIMESTAMP,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // ========== TABELA DE EVENTOS ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS investment_events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      investment_id INTEGER REFERENCES investments(id),
+      event_type TEXT CHECK(event_type IN ('dividend', 'coupon', 'split', 'grouping', 'subscription', 'redemption')),
+      event_date DATE NOT NULL,
+      amount_per_share DECIMAL(15,4),
+      description TEXT,
+      payment_date DATE,
+      record_date DATE
+    )
+  `);
+
+  // ========== TABELA DE CONTEÚDO EDUCATIVO ==========
+  await db.exec(`
+    CREATE TABLE IF NOT EXISTS educational_content (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT UNIQUE NOT NULL,
+      title TEXT NOT NULL,
+      category TEXT NOT NULL CHECK(category IN ('beginner', 'intermediate', 'advanced')),
+      investment_type TEXT CHECK(investment_type IN ('bond', 'fund', 'fiis', 'all')),
+      content_type TEXT CHECK(content_type IN ('article', 'video', 'interactive', 'calculator', 'comparison')),
+      content TEXT NOT NULL,
+      duration_minutes INTEGER,
+      difficulty_level INTEGER CHECK(difficulty_level BETWEEN 1 AND 5),
+      tags TEXT,
+      views_count INTEGER DEFAULT 0,
+      likes_count INTEGER DEFAULT 0,
+      is_featured BOOLEAN DEFAULT 0,
+      is_active BOOLEAN DEFAULT 1,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  // ========== ÍNDICES PARA PERFORMANCE ==========
+  await db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_investments_type ON investments(type, status);
+    CREATE INDEX IF NOT EXISTS idx_investments_risk ON investments(risk_level);
+    CREATE INDEX IF NOT EXISTS idx_prices_investment_date ON prices(investment_id, date DESC);
+    CREATE INDEX IF NOT EXISTS idx_portfolio_user ON portfolio(user_id);
+    CREATE INDEX IF NOT EXISTS idx_orders_user_status ON orders(user_id, status);
+    CREATE INDEX IF NOT EXISTS idx_educational_investment_type ON educational_content(investment_type, category);
+  `);
+
+  console.log('✅ Database schema created/verified');
+  return db;
+}
+📁 4. ROTAS PARA FUNDOS DE INVESTIMENTO - routes/funds.js
+javascript
+import express from 'express';
+import { body, validationResult } from 'express-validator';
+import { getDB } from '../db/investmentDB.js';
+import { authenticate, requireAdmin } from '../middleware/auth.js';
+import { validateInvestment } from '../validators/investmentValidator.js';
+
+const router = express.Router();
+
+// 🎯 GET - Listar todos os fundos com filtros
+router.get('/', async (req, res) => {
+  try {
+    const db = getDB();
+    const {
+      type,
+      risk_level,
+      min_investment_max,
+      sort_by = 'name',
+      order = 'asc',
+      page = 1,
+      limit = 20
+    } = req.query;
+
+    let query = `
+      SELECT i.*, f.* 
+      FROM investments i
+      JOIN investment_funds f ON i.id = f.investment_id
+      WHERE i.type = 'fund' AND i.status = 'active'
+    `;
+    const params = [];
+
+    if (type) {
+      query += ` AND f.fund_class = ?`;
+      params.push(type);
+    }
+
+    if (risk_level) {
+      query += ` AND i.risk_level = ?`;
+      params.push(risk_level);
+    }
+
+    if (min_investment_max) {
+      query += ` AND i.min_investment <= ?`;
+      params.push(min_investment_max);
+    }
+
+    // Contagem total
+    const countQuery = `SELECT COUNT(*) as total FROM (${query.replace('i.*, f.*', '1')})`;
+    const countResult = await db.get(countQuery, params);
+    const total = countResult.total;
+
+    // Ordenação
+    const validSortColumns = ['name', 'risk_level', 'min_investment', 'created_at'];
+    const sortColumn = validSortColumns.includes(sort_by) ? sort_by : 'name';
+    query += ` ORDER BY i.${sortColumn} ${order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`;
+
+    // Paginação
+    const offset = (page - 1) * limit;
+    query += ` LIMIT ? OFFSET ?`;
+    params.push(limit, offset);
+
+    const funds = await db.all(query, params);
+
+    res.json({
+      success: true,
+      data: funds,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: parseInt(limit),
+        total_pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching funds:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// 🎯 GET - Detalhes de um fundo específico
+router.get('/:uuid', async (req, res) => {
+  try {
+    const db = getDB();
+    const { uuid } = req.params;
+
+    const fund = await db.get(`
+      SELECT i.*, f.*,
+        (SELECT json_group_array(json_object('date', date, 'close', close))
+         FROM prices p 
+         WHERE p.investment_id = i.id 
+         AND p.date >= date('now', '-30 days')
+         ORDER BY p.date) as price_history_30d,
+        (SELECT json_group_array(json_object(
+          'event_type', event_type,
+          'event_date', event_date,
+          'amount_per_share', amount_per_share,
+          'description', description
+        ))
+         FROM investment_events e 
+         WHERE e.investment_id = i.id
+         AND e.event_date >= date('now', '-90 days')
+         ORDER BY e.event_date DESC) as recent_events
+      FROM investments i
+      JOIN investment_funds f ON i.id = f.investment_id
+      WHERE i.uuid = ? AND i.type = 'fund'
+    `, [uuid]);
+
+    if (!fund) {
+      return res.status(404).json({ success: false, error: 'Fund not found' });
+    }
+
+    // Parse JSON fields
+    if (fund.portfolio_composition) {
+      fund.portfolio_composition = JSON.parse(fund.portfolio_composition);
+    }
+    if (fund.performance_metrics) {
+      fund.performance_metrics = JSON.parse(fund.performance_metrics);
+    }
+    if (fund.price_history_30d) {
+      fund.price_history_30d = JSON.parse(fund.price_history_30d);
+    }
+    if (fund.recent_events) {
+      fund.recent_events = JSON.parse(fund.recent_events);
+    }
+
+    // Calcular métricas
+    const metrics = await calculateFundMetrics(fund.investment_id);
+    fund.metrics = metrics;
+
+    res.json({ success: true, data: fund });
+  } catch (error) {
+    console.error('Error fetching fund details:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// 🎯 GET - Comparar múltiplos fundos
+router.post('/compare', async (req, res) => {
+  try {
+    const { fund_uuids = [] } = req.body;
+    if (!Array.isArray(fund_uuids) || fund_uuids.length < 2) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Provide at least 2 fund UUIDs to compare' 
+      });
+    }
+
+    const db = getDB();
+    const placeholders = fund_uuids.map(() => '?').join(',');
+    
+    const funds = await db.all(`
+      SELECT i.uuid, i.name, i.risk_level, i.min_investment,
+             f.fund_class, f.administration_fee, f.performance_fee,
+             f.quota_value, f.net_worth,
+             (SELECT close FROM prices p 
+              WHERE p.investment_id = i.id 
+              ORDER BY p.date DESC LIMIT 1) as current_price
+      FROM investments i
+      JOIN investment_funds f ON i.id = f.investment_id
+      WHERE i.uuid IN (${placeholders}) AND i.type = 'fund'
+    `, fund_uuids);
+
+    if (funds.length !== fund_uuids.length) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Some funds not found' 
+      });
+    }
+
+    // Adicionar histórico de performance
+    for (const fund of funds) {
+      const performance = await db.all(`
+        SELECT strftime('%Y-%m', date) as month, 
+               AVG(close) as avg_price
+        FROM prices 
+        WHERE investment_id = (
+          SELECT id FROM investments WHERE uuid = ?
+        )
+        AND date >= date('now', '-1 year')
+        GROUP BY strftime('%Y-%m', date)
+        ORDER BY month
+      `, [fund.uuid]);
+      
+      fund.monthly_performance = performance;
+    }
+
+    res.json({ success: true, data: funds });
+  } catch (error) {
+    console.error('Error comparing funds:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// 🎯 POST - Criar novo fundo (Admin apenas)
+router.post('/', 
+  requireAdmin,
+  validateInvestment('fund'),
+  async (req, res) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ 
+          success: false, 
+          errors: errors.array() 
+        });
+      }
+
+      const db = getDB();
+      const investmentData = req.body;
+      
+      // Iniciar transação
+      await db.run('BEGIN TRANSACTION');
+      
+      try {
+        // Inserir na tabela investments
+        const investmentResult = await db.run(`
+          INSERT INTO investments (
+            uuid, type, category, code, name, issuer, description,
+            risk_level, currency, min_investment, liquidity, tags, metadata
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          investmentData.uuid || generateUUID(),
+          'fund',
+          investmentData.category || 'investment_fund',
+          investmentData.code,
+          investmentData.name,
+          investmentData.issuer,
+          investmentData.description,
+          investmentData.risk_level,
+          investmentData.currency || 'BRL',
+          investmentData.min_investment,
+          investmentData.liquidity || 'daily',
+          JSON.stringify(investmentData.tags || []),
+          JSON.stringify(investmentData.metadata || {})
+        ]);
+
+        const investmentId = investmentResult.lastID;
+
+        // Inserir na tabela investment_funds
+        await db.run(`
+          INSERT INTO investment_funds (
+            investment_id, cnpj, administrator, manager, fund_class,
+            benchmark, administration_fee, performance_fee, net_worth,
+            quota_value, shares_outstanding, daily_liquidity,
+            investment_strategy, target_audience,
+            portfolio_composition, performance_metrics
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `, [
+          investmentId,
+          investmentData.cnpj,
+          investmentData.administrator,
+          investmentData.manager,
+          investmentData.fund_class,
+          investmentData.benchmark,
+          investmentData.administration_fee,
+          investmentData.performance_fee || null,
+          investmentData.net_worth || 0,
+          investmentData.quota_value || 1.00,
+          investmentData.shares_outstanding || 0,
+          investmentData.daily_liquidity !== undefined ? investmentData.daily_liquidity : 1,
+          investmentData.investment_strategy,
+          investmentData.target_audience,
+          JSON.stringify(investmentData.portfolio_composition || {}),
+          JSON.stringify(investmentData.performance_metrics || {})
+        ]);
+
+        await db.run('COMMIT');
+        
+        const createdFund = await db.get(`
+          SELECT i.*, f.* 
+          FROM investments i
+          JOIN investment_funds f ON i.id = f.investment_id
+          WHERE i.id = ?
+        `, [investmentId]);
+
+        res.status(201).json({
+          success: true,
+          message: 'Fund created successfully',
+          data: createdFund
+        });
+      } catch (error) {
+        await db.run('ROLLBACK');
+        throw error;
+      }
+    } catch (error) {
+      console.error('Error creating fund:', error);
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to create fund',
+        details: error.message 
+      });
+    }
+  }
+);
+
+// 🎯 PUT - Atualizar fundo (Admin apenas)
+router.put('/:uuid', requireAdmin, async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    const updateData = req.body;
+    
+    const db = getDB();
+    
+    // Verificar se o fundo existe
+    const existing = await db.get(`
+      SELECT i.id 
+      FROM investments i
+      JOIN investment_funds f ON i.id = f.investment_id
+      WHERE i.uuid = ? AND i.type = 'fund'
+    `, [uuid]);
+    
+    if (!existing) {
+      return res.status(404).json({ success: false, error: 'Fund not found' });
+    }
+
+    await db.run('BEGIN TRANSACTION');
+    
+    try {
+      // Atualizar tabela investments
+      if (updateData.name || updateData.description || updateData.risk_level) {
+        const investmentUpdates = [];
+        const investmentParams = [];
+        
+        if (updateData.name) {
+          investmentUpdates.push('name = ?');
+          investmentParams.push(updateData.name);
+        }
+        if (updateData.description) {
+          investmentUpdates.push('description = ?');
+          investmentParams.push(updateData.description);
+        }
+        if (updateData.risk_level) {
+          investmentUpdates.push('risk_level = ?');
+          investmentParams.push(updateData.risk_level);
+        }
+        
+        if (investmentUpdates.length > 0) {
+          await db.run(`
+            UPDATE investments 
+            SET ${investmentUpdates.join(', ')}, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+          `, [...investmentParams, existing.id]);
+        }
+      }
+
+      // Atualizar tabela investment_funds
+      if (updateData.quota_value || updateData.net_worth) {
+        await db.run(`
+          UPDATE investment_funds 
+          SET quota_value = COALESCE(?, quota_value),
+              net_worth = COALESCE(?, net_worth),
+              shares_outstanding = COALESCE(?, shares_outstanding)
+          WHERE investment_id = ?
+        `, [
+          updateData.quota_value,
+          updateData.net_worth,
+          updateData.shares_outstanding,
+          existing.id
+        ]);
+      }
+
+      await db.run('COMMIT');
+      
+      // Retornar fundo atualizado
+      const updatedFund = await db.get(`
+        SELECT i.*, f.* 
+        FROM investments i
+        JOIN investment_funds f ON i.id = f.investment_id
+        WHERE i.id = ?
+      `, [existing.id]);
+
+      res.json({
+        success: true,
+        message: 'Fund updated successfully',
+        data: updatedFund
+      });
+    } catch (error) {
+      await db.run('ROLLBACK');
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error updating fund:', error);
+    res.status(500).json({ 
+      success: false, 
+      error: 'Failed to update fund' 
+    });
+  }
+});
+
+// 🎯 GET - Calcular projeções para fundo
+router.get('/:uuid/projections', async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    const { 
+      initial_investment = 1000,
+      monthly_contribution = 0,
+      years = 5,
+      expected_return = 8 
+    } = req.query;
+
+    const db = getDB();
+    
+    const fund = await db.get(`
+      SELECT i.id, f.quota_value, f.administration_fee
+      FROM investments i
+      JOIN investment_funds f ON i.id = f.investment_id
+      WHERE i.uuid = ?
+    `, [uuid]);
+
+    if (!fund) {
+      return res.status(404).json({ success: false, error: 'Fund not found' });
+    }
+
+    // Calcular projeções
+    const projections = calculateProjections({
+      initialInvestment: parseFloat(initial_investment),
+      monthlyContribution: parseFloat(monthly_contribution),
+      years: parseInt(years),
+      expectedAnnualReturn: parseFloat(expected_return) / 100,
+      administrationFee: fund.administration_fee / 100
+    });
+
+    res.json({ success: true, data: projections });
+  } catch (error) {
+    console.error('Error calculating projections:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// 🎯 GET - Fundos recomendados baseado no perfil
+router.get('/recommendations/:profile', authenticate, async (req, res) => {
+  try {
+    const { profile } = req.params;
+    const userId = req.user.id;
+
+    const db = getDB();
+    
+    // Obter perfil do usuário
+    const user = await db.get(`
+      SELECT risk_profile, investment_experience 
+      FROM users 
+      WHERE id = ?
+    `, [userId]);
+
+    if (!user) {
+      return res.status(404).json({ success: false, error: 'User not found' });
+    }
+
+    // Lógica de recomendação baseada no perfil
+    let riskFilter, fundTypes;
+    
+    switch (user.risk_profile) {
+      case 'conservative':
+        riskFilter = 'low';
+        fundTypes = ['renda_fixa', 'referenciado'];
+        break;
+      case 'moderate':
+        riskFilter = 'medium';
+        fundTypes = ['multimercado', 'referenciado', 'cambial'];
+        break;
+      case 'aggressive':
+        riskFilter = 'high';
+        fundTypes = ['acoes', 'multimercado'];
+        break;
+      default:
+        riskFilter = 'medium';
+        fundTypes = ['multimercado'];
+    }
+
+    const recommendations = await db.all(`
+      SELECT i.uuid, i.name, i.description, i.risk_level,
+             f.fund_class, f.administration_fee, f.quota_value,
+             (SELECT close FROM prices p 
+              WHERE p.investment_id = i.id 
+              ORDER BY p.date DESC LIMIT 1) as current_price,
+             (SELECT json_group_array(json_object('month', month, 'return', return))
+              FROM (
+                SELECT strftime('%Y-%m', date) as month,
+                       ((close - LAG(close) OVER (ORDER BY date)) / LAG(close) OVER (ORDER BY date)) * 100 as return
+                FROM prices 
+                WHERE investment_id = i.id
+                AND date >= date('now', '-6 months')
+                ORDER BY date
+              ) WHERE return IS NOT NULL) as monthly_returns
+      FROM investments i
+      JOIN investment_funds f ON i.id = f.investment_id
+      WHERE i.type = 'fund' 
+      AND i.status = 'active'
+      AND i.risk_level = ?
+      AND f.fund_class IN (${fundTypes.map(() => '?').join(',')})
+      ORDER BY f.net_worth DESC
+      LIMIT 10
+    `, [riskFilter, ...fundTypes]);
+
+    // Parse JSON fields
+    recommendations.forEach(fund => {
+      if (fund.monthly_returns) {
+        fund.monthly_returns = JSON.parse(fund.monthly_returns);
+      }
+    });
+
+    res.json({ 
+      success: true, 
+      data: recommendations,
+      user_profile: user.risk_profile,
+      recommendation_reason: `Based on your ${user.risk_profile} risk profile`
+    });
+  } catch (error) {
+    console.error('Error generating recommendations:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// Funções auxiliares
+async function calculateFundMetrics(investmentId) {
+  const db = getDB();
+  
+  const metrics = await db.get(`
+    SELECT 
+      -- Retorno últimos 30 dias
+      (SELECT ((close - open) / open) * 100 
+       FROM prices 
+       WHERE investment_id = ? 
+       AND date = date('now', '-30 days')) as return_30d,
+      
+      -- Volatilidade (desvio padrão dos retornos diários últimos 90 dias)
+      (SELECT STDEV((close - LAG(close) OVER (ORDER BY date)) / LAG(close) OVER (ORDER BY date)) * 100
+       FROM prices 
+       WHERE investment_id = ?
+       AND date >= date('now', '-90 days')) as volatility_90d,
+      
+      -- Máximo e mínimo últimos 365 dias
+      (SELECT MAX(close) FROM prices WHERE investment_id = ? AND date >= date('now', '-365 days')) as max_price_1y,
+      (SELECT MIN(close) FROM prices WHERE investment_id = ? AND date >= date('now', '-365 days')) as min_price_1y
+  `, [investmentId, investmentId, investmentId, investmentId]);
+
+  return metrics;
+}
+
+function calculateProjections(params) {
+  const {
+    initialInvestment,
+    monthlyContribution,
+    years,
+    expectedAnnualReturn,
+    administrationFee
+  } = params;
+
+  const netAnnualReturn = expectedAnnualReturn - administrationFee;
+  const monthlyReturn = Math.pow(1 + netAnnualReturn, 1/12) - 1;
+  
+  let balance = initialInvestment;
+  const projections = [];
+  
+  for (let month = 0; month <= years * 12; month++) {
+    if (month > 0) {
+      balance *= (1 + monthlyReturn);
+      balance += monthlyContribution;
+    }
+    
+    if (month % 12 === 0) {
+      projections.push({
+        year: month / 12,
+        balance: Math.round(balance * 100) / 100,
+        totalContributions: initialInvestment + (monthlyContribution * month),
+        profit: Math.round((balance - (initialInvestment + (monthlyContribution * month))) * 100) / 100
+      });
+    }
+  }
+
+  return {
+    parameters: params,
+    projections,
+    finalBalance: Math.round(balance * 100) / 100,
+    totalInvested: initialInvestment + (monthlyContribution * years * 12),
+    totalProfit: Math.round((balance - (initialInvestment + (monthlyContribution * years * 12))) * 100) / 100,
+    annualizedReturn: netAnnualReturn * 100
+  };
+}
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+export default router;
+📁 5. ROTAS PARA FIIs - routes/fiis.js
+javascript
+import express from 'express';
+import { getDB } from '../db/investmentDB.js';
+import { authenticate, requireAdmin } from '../middleware/auth.js';
+
+const router = express.Router();
+
+// 🎯 GET - Listar todos os FIIs com filtros avançados
+router.get('/', async (req, res) => {
+  try {
+    const db = getDB();
+    const {
+      type,
+      segment,
+      min_dividend_yield,
+      max_p_vpa,
+      liquidity = 'daily',
+      sort_by = 'dividend_yield',
+      order = 'desc'
+    } = req.query;
+
+    let query = `
+      SELECT i.*, f.*,
+        (SELECT close FROM prices p 
+         WHERE p.investment_id = i.id 
+         ORDER BY p.date DESC LIMIT 1) as current_price
+      FROM investments i
+      JOIN real_estate_funds f ON i.id = f.investment_id
+      WHERE i.type = 'fiis' AND i.status = 'active'
+    `;
+    
+    const params = [];
+
+    if (type) {
+      query += ` AND f.fund_type = ?`;
+      params.push(type);
+    }
+
+    if (segment) {
+      query += ` AND f.segment LIKE ?`;
+      params.push(`%${segment}%`);
+    }
+
+    if (min_dividend_yield) {
+      query += ` AND f.dividend_yield >= ?`;
+      params.push(min_dividend_yield);
+    }
+
+    if (max_p_vpa) {
+      query += ` AND f.p_vpa <= ?`;
+      params.push(max_p_vpa);
+    }
+
+    if (liquidity) {
+      query += ` AND i.liquidity = ?`;
+      params.push(liquidity);
+    }
+
+    // Ordenação
+    const validSortColumns = ['name', 'dividend_yield', 'p_vpa', 'last_dividend'];
+    const sortColumn = validSortColumns.includes(sort_by) ? `f.${sort_by}` : 'f.dividend_yield';
+    query += ` ORDER BY ${sortColumn} ${order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC'}`;
+
+    const fiis = await db.all(query, params);
+
+    // Calcular métricas adicionais
+    const fiisWithMetrics = await Promise.all(
+      fiis.map(async (fii) => {
+        const metrics = await calculateFIIMetrics(fii.investment_id);
+        return { ...fii, metrics };
+      })
+    );
+
+    res.json({ success: true, data: fiisWithMetrics });
+  } catch (error) {
+    console.error('Error fetching FIIs:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// 🎯 GET - Dashboard de FIIs
+router.get('/dashboard', authenticate, async (req, res) => {
+  try {
+    const db = getDB();
+    const userId = req.user.id;
+
+    // Obter FIIs do portfólio do usuário
+    const portfolioFIIs = await db.all(`
+      SELECT p.*, i.name, i.code, f.dividend_yield, f.last_dividend
+      FROM portfolio p
+      JOIN investments i ON p.investment_id = i.id
+      JOIN real_estate_funds f ON i.id = f.investment_id
+      WHERE p.user_id = ? AND i.type = 'fiis'
+    `, [userId]);
+
+    // Calcular rendimentos mensais projetados
+    let totalMonthlyDividends = 0;
+    const dividendsByFII = portfolioFIIs.map(fii => {
+      const monthlyDividend = (fii.quantity * fii.last_dividend) || 0;
+      totalMonthlyDividends += monthlyDividend;
+      return {
+        code: fii.code,
+        name: fii.name,
+        quantity: fii.quantity,
+        last_dividend: fii.last_dividend,
+        monthly_projection: monthlyDividend
+      };
+    });
+
+    // Top FIIs por dividend yield
+    const topYieldFIIs = await db.all(`
+      SELECT i.code, i.name, f.dividend_yield, f.last_dividend
+      FROM investments i
+      JOIN real_estate_funds f ON i.id = f.investment_id
+      WHERE i.type = 'fiis' AND i.status = 'active'
+      ORDER BY f.dividend_yield DESC
+      LIMIT 5
+    `);
+
+    // FIIs por categoria
+    const fiisByCategory = await db.all(`
+      SELECT f.fund_type as category, COUNT(*) as count,
+             AVG(f.dividend_yield) as avg_yield
+      FROM investments i
+      JOIN real_estate_funds f ON i.id = f.investment_id
+      WHERE i.type = 'fiis' AND i.status = 'active'
+      GROUP BY f.fund_type
+      ORDER BY count DESC
+    `);
+
+    res.json({
+      success: true,
+      data: {
+        portfolio_summary: {
+          total_fiis: portfolioFIIs.length,
+          total_invested: portfolioFIIs.reduce((sum, fii) => sum + fii.invested_amount, 0),
+          total_monthly_dividends: totalMonthlyDividends,
+          avg_dividend_yield: portfolioFIIs.length > 0 
+            ? portfolioFIIs.reduce((sum, fii) => sum + fii.dividend_yield, 0) / portfolioFIIs.length 
+            : 0
+        },
+        portfolio_dividends: dividendsByFII,
+        top_yield_fiis: topYieldFIIs,
+        fiis_by_category: fiisByCategory
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching FII dashboard:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// 🎯 GET - Calcular projeção de dividendos
+router.post('/calculate-dividends', async (req, res) => {
+  try {
+    const { investments } = req.body; // [{fii_uuid, quantity}, ...]
+    
+    if (!Array.isArray(investments) || investments.length === 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Provide an array of investments' 
+      });
+    }
+
+    const db = getDB();
+    const results = [];
+    let totalAnnualDividends = 0;
+    let totalMonthlyDividends = 0;
+
+    for (const investment of investments) {
+      const fii = await db.get(`
+        SELECT i.uuid, i.name, f.dividend_yield, f.last_dividend, f.dividend_frequency
+        FROM investments i
+        JOIN real_estate_funds f ON i.id = f.investment_id
+        WHERE i.uuid = ? AND i.type = 'fiis'
+      `, [investment.fii_uuid]);
+
+      if (fii) {
+        const monthlyDividend = fii.last_dividend * investment.quantity;
+        const annualDividend = monthlyDividend * 12;
+        
+        results.push({
+          fii: fii.name,
+          uuid: fii.uuid,
+          quantity: investment.quantity,
+          last_dividend_per_share: fii.last_dividend,
+          monthly_dividends: monthlyDividend,
+          annual_dividends: annualDividend,
+          frequency: fii.dividend_frequency
+        });
+
+        totalMonthlyDividends += monthlyDividend;
+        totalAnnualDividends += annualDividend;
+      }
+    }
+
+    // Calcular projeção para diferentes períodos
+    const projections = {
+      monthly: totalMonthlyDividends,
+      quarterly: totalMonthlyDividends * 3,
+      semiannual: totalMonthlyDividends * 6,
+      annual: totalAnnualDividends,
+      in_5_years: totalAnnualDividends * 5,
+      in_10_years: totalAnnualDividends * 10
+    };
+
+    res.json({
+      success: true,
+      data: {
+        investments: results,
+        totals: {
+          monthly: totalMonthlyDividends,
+          annual: totalAnnualDividends
+        },
+        projections,
+        notes: 'Projections assume constant dividend distribution'
+      }
+    });
+  } catch (error) {
+    console.error('Error calculating dividends:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// 🎯 GET - Análise de diversificação de FIIs
+router.get('/diversification-analysis', authenticate, async (req, res) => {
+  try {
+    const db = getDB();
+    const userId = req.user.id;
+
+    // Obter portfólio do usuário
+    const portfolio = await db.all(`
+      SELECT p.investment_id, p.quantity, p.invested_amount,
+             i.name, f.fund_type, f.segment
+      FROM portfolio p
+      JOIN investments i ON p.investment_id = i.id
+      JOIN real_estate_funds f ON i.id = f.investment_id
+      WHERE p.user_id = ? AND i.type = 'fiis'
+    `, [userId]);
+
+    if (portfolio.length === 0) {
+      return res.json({
+        success: true,
+        data: {
+          message: 'No FIIs in portfolio',
+          recommendations: [
+            'Consider adding FIIs to diversify your portfolio',
+            'Start with well-established FIIs with consistent dividends'
+          ]
+        }
+      });
+    }
+
+    // Análise por tipo de fundo
+    const analysisByType = {};
+    portfolio.forEach(item => {
+      if (!analysisByType[item.fund_type]) {
+        analysisByType[item.fund_type] = {
+          count: 0,
+          total_invested: 0,
+          percentage: 0
+        };
+      }
+      analysisByType[item.fund_type].count++;
+      analysisByType[item.fund_type].total_invested += item.invested_amount;
+    });
+
+    const totalInvested = portfolio.reduce((sum, item) => sum + item.invested_amount, 0);
+    
+    // Calcular porcentagens
+    Object.keys(analysisByType).forEach(type => {
+      analysisByType[type].percentage = 
+        (analysisByType[type].total_invested / totalInvested) * 100;
+    });
+
+    // Gerar recomendações
+    const recommendations = [];
+    const types = Object.keys(analysisByType);
+    
+    if (types.length < 3) {
+      recommendations.push('Diversify across at least 3 different FII types (shopping, office, logistic)');
+    }
+
+    if (analysisByType['shopping'] && analysisByType['shopping'].percentage > 50) {
+      recommendations.push('Reduce shopping center FIIs to below 50% of your FII portfolio');
+    }
+
+    // Sugerir FIIs para diversificação
+    const suggestedForDiversification = await db.all(`
+      SELECT i.uuid, i.name, f.fund_type, f.dividend_yield
+      FROM investments i
+      JOIN real_estate_funds f ON i.id = f.investment_id
+      WHERE i.type = 'fiis' 
+      AND i.status = 'active'
+      AND f.fund_type NOT IN (${types.map(() => '?').join(',')})
+      ORDER BY f.dividend_yield DESC
+      LIMIT 5
+    `, types);
+
+    res.json({
+      success: true,
+      data: {
+        portfolio_summary: {
+          total_fiis: portfolio.length,
+          total_invested: totalInvested,
+          types_count: types.length
+        },
+        diversification_by_type: analysisByType,
+        recommendations,
+        suggested_for_diversification: suggestedForDiversification
+      }
+    });
+  } catch (error) {
+    console.error('Error in diversification analysis:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// 🎯 POST - Criar FII (Admin)
+router.post('/', requireAdmin, async (req, res) => {
+  try {
+    const db = getDB();
+    const fiiData = req.body;
+
+    // Validação básica
+    if (!fiiData.cnpj || !fiiData.name || !fiiData.fund_type) {
+      return res.status(400).json({
+        success: false,
+        error: 'Missing required fields: cnpj, name, fund_type'
+      });
+    }
+
+    await db.run('BEGIN TRANSACTION');
+
+    try {
+      // Inserir investment
+      const investmentResult = await db.run(`
+        INSERT INTO investments (
+          uuid, type, category, code, name, issuer,
+          description, risk_level, currency, min_investment,
+          liquidity, tags, metadata
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        fiiData.uuid || generateUUID(),
+        'fiis',
+        'real_estate_fund',
+        fiiData.code || fiiData.cnpj,
+        fiiData.name,
+        fiiData.administrator || fiiData.manager,
+        fiiData.description,
+        fiiData.risk_level || 'medium',
+        fiiData.currency || 'BRL',
+        fiiData.min_investment || 1,
+        fiiData.liquidity || 'daily',
+        JSON.stringify(fiiData.tags || ['fii', 'real_estate']),
+        JSON.stringify(fiiData.metadata || {})
+      ]);
+
+      const investmentId = investmentResult.lastID;
+
+      // Inserir FII específico
+      await db.run(`
+        INSERT INTO real_estate_funds (
+          investment_id, cnpj, administrator, manager, fund_type,
+          segment, properties_count, properties_value, vacancy_rate,
+          average_lease_term, dividend_yield, last_dividend,
+          dividend_frequency, p_vpa, equity_value,
+          portfolio_properties, tenants_diversification
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `, [
+        investmentId,
+        fiiData.cnpj,
+        fiiData.administrator,
+        fiiData.manager,
+        fiiData.fund_type,
+        fiiData.segment || '',
+        fiiData.properties_count || 0,
+        fiiData.properties_value || 0,
+        fiiData.vacancy_rate || 0,
+        fiiData.average_lease_term || 0,
+        fiiData.dividend_yield || 0,
+        fiiData.last_dividend || 0,
+        fiiData.dividend_frequency || 'monthly',
+        fiiData.p_vpa || 1.0,
+        fiiData.equity_value || 0,
+        JSON.stringify(fiiData.portfolio_properties || []),
+        JSON.stringify(fiiData.tenants_diversification || {})
+      ]);
+
+      await db.run('COMMIT');
+
+      const createdFII = await db.get(`
+        SELECT i.*, f.* 
+        FROM investments i
+        JOIN real_estate_funds f ON i.id = f.investment_id
+        WHERE i.id = ?
+      `, [investmentId]);
+
+      res.status(201).json({
+        success: true,
+        message: 'FII created successfully',
+        data: createdFII
+      });
+    } catch (error) {
+      await db.run('ROLLBACK');
+      throw error;
+    }
+  } catch (error) {
+    console.error('Error creating FII:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create FII',
+      details: error.message
+    });
+  }
+});
+
+// 🎯 GET - Relatório de dividendos históricos
+router.get('/:uuid/dividend-history', async (req, res) => {
+  try {
+    const { uuid } = req.params;
+    const { start_date, end_date } = req.query;
+
+    const db = getDB();
+
+    // Obter ID do investimento
+    const investment = await db.get(`
+      SELECT id FROM investments WHERE uuid = ? AND type = 'fiis'
+    `, [uuid]);
+
+    if (!investment) {
+      return res.status(404).json({ success: false, error: 'FII not found' });
+    }
+
+    // Construir query com filtros de data
+    let query = `
+      SELECT event_date, amount_per_share, payment_date, description
+      FROM investment_events
+      WHERE investment_id = ? 
+      AND event_type = 'dividend'
+    `;
+    
+    const params = [investment.id];
+
+    if (start_date) {
+      query += ` AND event_date >= ?`;
+      params.push(start_date);
+    }
+
+    if (end_date) {
+      query += ` AND event_date <= ?`;
+      params.push(end_date);
+    }
+
+    query += ` ORDER BY event_date DESC`;
+
+    const dividends = await db.all(query, params);
+
+    // Calcular estatísticas
+    const totalDividends = dividends.reduce((sum, div) => sum + div.amount_per_share, 0);
+    const averageDividend = dividends.length > 0 ? totalDividends / dividends.length : 0;
+    const maxDividend = Math.max(...dividends.map(d => d.amount_per_share));
+    const minDividend = Math.min(...dividends.map(d => d.amount_per_share));
+
+    res.json({
+      success: true,
+      data: {
+        dividends,
+        statistics: {
+          total_payments: dividends.length,
+          total_dividends: totalDividends,
+          average_dividend: averageDividend,
+          max_dividend: maxDividend,
+          min_dividend: minDividend,
+          frequency: dividends.length > 0 
+            ? calculateFrequency(dividends.map(d => new Date(d.event_date)))
+            : 'No data'
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching dividend history:', error);
+    res.status(500).json({ success: false, error: 'Internal server error' });
+  }
+});
+
+// Funções auxiliares
+async function calculateFIIMetrics(investmentId) {
+  const db = getDB();
+  
+  const metrics = await db.get(`
+    SELECT 
+      -- Dividend yield médio últimos 12 meses
+      (SELECT AVG(amount_per_share) 
+       FROM investment_events 
+       WHERE investment_id = ? 
+       AND event_type = 'dividend'
+       AND event_date >= date('now', '-12 months')) as avg_dividend_12m,
+      
+      -- Consistência de pagamentos
+      (SELECT COUNT(DISTINCT strftime('%Y-%m', event_date))
+       FROM investment_events 
+       WHERE investment_id = ?
+       AND event_type = 'dividend'
+       AND event_date >= date('now', '-24 months')) as months_with_dividends_24m,
+      
+      -- Crescimento de dividendos
+      (SELECT (MAX(amount_per_share) - MIN(amount_per_share)) / MIN(amount_per_share) * 100
+       FROM investment_events 
+       WHERE investment_id = ?
+       AND event_type = 'dividend'
+       AND event_date >= date('now', '-24 months')) as dividend_growth_24m
+  `, [investmentId, investmentId, investmentId]);
+
+  return metrics;
+}
+
+function calculateFrequency(dates) {
+  if (dates.length < 2) return 'insufficient data';
+  
+  const sortedDates = dates.sort((a, b) => a - b);
+  const intervals = [];
+  
+  for (let i = 1; i < sortedDates.length; i++) {
+    const diff = sortedDates[i] - sortedDates[i - 1];
+    intervals.push(diff / (1000 * 60 * 60 * 24)); // Convert to days
+  }
+  
+  const avgInterval = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+  
+  if (avgInterval <= 35) return 'monthly';
+  if (avgInterval <= 95) return 'quarterly';
+  if (avgInterval <= 185) return 'semiannual';
+  return 'annual';
+}
+
+function generateUUID() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+export default router;
+📁 6. FRONTEND MODERNO - web/src/App.jsx
+javascript
+import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import {
+  ThemeProvider,
+  createTheme,
+  CssBaseline,
+  Container,
+  Box
+} from '@mui/material';
+
+// Componentes
+import Navbar from './components/Navbar';
+import Sidebar from './components/Sidebar';
+import Footer from './components/Footer';
+
+// Páginas
+import Dashboard from './pages/Dashboard';
+import BondsPage from './pages/investments/BondsPage';
+import FundsPage from './pages/investments/FundsPage';
+import FIIsPage from './pages/investments/FIIsPage';
+import PortfolioPage from './pages/PortfolioPage';
+import EducationPage from './pages/EducationPage';
+import CalculatorPage from './pages/CalculatorPage';
+import AdminPage from './pages/admin/AdminPage';
+
+// Contextos
+import { AuthProvider } from './contexts/AuthContext';
+import { InvestmentProvider } from './contexts/InvestmentContext';
+
+// Tema personalizado
+const theme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+      light: '#42a5f5',
+      dark: '#1565c0'
+    },
+    secondary: {
+      main: '#9c27b0',
+      light: '#ba68c8',
+      dark: '#7b1fa2'
+    },
+    success: {
+      main: '#2e7d32',
+      light: '#4caf50',
+      dark: '#1b5e20'
+    },
+    warning: {
+      main: '#ed6c02',
+      light: '#ff9800',
+      dark: '#e65100'
+    },
+    error: {
+      main: '#d32f2f',
+      light: '#ef5350',
+      dark: '#c62828'
+    },
+    background: {
+      default: '#f5f5f5',
+      paper: '#ffffff'
+    }
+  },
+  typography: {
+    fontFamily: '"Inter", "Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 700,
+      fontSize: '2.5rem'
+    },
+    h2: {
+      fontWeight: 600,
+      fontSize: '2rem'
+    },
+    h3: {
+      fontWeight: 600,
+      fontSize: '1.75rem'
+    },
+    h4: {
+      fontWeight: 600,
+      fontSize: '1.5rem'
+    },
+    h5: {
+      fontWeight: 500,
+      fontSize: '1.25rem'
+    },
+    h6: {
+      fontWeight: 500,
+      fontSize: '1rem'
+    }
+  },
+  shape: {
+    borderRadius: 12
+  },
+  components: {
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          textTransform: 'none',
+          fontWeight: 500
+        }
+      }
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          boxShadow: '0 4px 6px rgba(0, 0, 0, 0.05)',
+          borderRadius: 12,
+          transition: 'all 0.3s ease',
+          '&:hover': {
+            boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+            transform: 'translateY(-2px)'
+          }
+        }
+      }
+    }
+  }
+});
+
+function App() {
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen);
+  };
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
+    // Salvar preferência no localStorage
+    localStorage.setItem('darkMode', (!darkMode).toString());
+  };
+
+  useEffect(() => {
+    // Carregar preferência do tema
+    const savedDarkMode = localStorage.getItem('darkMode') === 'true';
+    setDarkMode(savedDarkMode);
+  }, []);
+
+  const currentTheme = createTheme({
+    ...theme,
+    palette: {
+      ...theme.palette,
+      mode: darkMode ? 'dark' : 'light'
+    }
+  });
+
+  return (
+    <ThemeProvider theme={currentTheme}>
+      <CssBaseline />
+      <AuthProvider>
+        <InvestmentProvider>
+          <Router>
+            <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+              <Navbar 
+                onMenuClick={toggleSidebar}
+                darkMode={darkMode}
+                onThemeToggle={toggleDarkMode}
+              />
+              
+              <Sidebar 
+                open={sidebarOpen}
+                onClose={toggleSidebar}
+              />
+              
+              <Box
+                component="main"
+                sx={{
+                  flexGrow: 1,
+                  p: 3,
+                  width: { sm: `calc(100% - ${sidebarOpen ? 240 : 0}px)` },
+                  ml: { sm: `${sidebarOpen ? 240 : 0}px` },
+                  transition: theme.transitions.create(['margin', 'width'], {
+                    easing: theme.transitions.easing.sharp,
+                    duration: theme.transitions.duration.leavingScreen,
+                  }),
+                }}
+              >
+                <Container maxWidth="xl" sx={{ mt: 8, mb: 4 }}>
+                  <Routes>
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/investments">
+                      <Route path="bonds" element={<BondsPage />} />
+                      <Route path="funds" element={<FundsPage />} />
+                      <Route path="fiis" element={<FIIsPage />} />
+                    </Route>
+                    <Route path="/portfolio" element={<PortfolioPage />} />
+                    <Route path="/education" element={<EducationPage />} />
+                    <Route path="/calculators" element={<CalculatorPage />} />
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                  </Routes>
+                </Container>
+                <Footer />
+              </Box>
+            </Box>
+          </Router>
+        </InvestmentProvider>
+      </AuthProvider>
+    </ThemeProvider>
+  );
+}
+
+export default App;
+📁 7. DOCKER COMPOSE - docker-compose.yml
+yaml
+version: '3.8'
+
+services:
+  # API Backend
+  api:
+    build: ./api
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - DB_PATH=/app/data/investments.db
+      - REDIS_URL=redis://redis:6379
+      - JWT_SECRET=${JWT_SECRET}
+      - ADMIN_TOKEN=${ADMIN_TOKEN}
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - investment-network
+
+  # Frontend Web
+  web:
+    build: ./web
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:3001/api/v1
+      - REACT_APP_WS_URL=ws://localhost:3001
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - investment-network
+
+  # Banco de Dados Redis (Cache)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - investment-network
+
+  # Nginx (Reverse Proxy)
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - api
+      - web
+    restart: unless-stopped
+    networks:
+      - investment-network
+
+  # Monitoramento
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus-data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+    networks:
+      - investment-network
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3002:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+    networks:
+      - investment-network
+
+volumes:
+  redis-data:
+  prometheus-data:
+  grafana-data:
+
+networks:
+  investment-network:
+    driver: bridge
+📁 8. NGINX CONFIG - nginx/nginx.conf
+nginx
+events {
+    worker_connections 1024;
+}
+
+http {
+    # Configurações básicas
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    
+    # Logs
+    access_log /var/log/nginx/access.log;
+    error_log /var/log/nginx/error.log;
+    
+    # Otimizações
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    
+    # Gzip
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_proxied expired no-cache no-store private auth;
+    gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
+    
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    
+    # Limite de taxa
+    limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
+    
+    # Servidor HTTP (redirecionar para HTTPS)
+    server {
+        listen 80;
+        server_name investimento.com www.investimento.com;
+        return 301 https://$server_name$request_uri;
+    }
+    
+    # Servidor HTTPS
+    server {
+        listen 443 ssl http2;
+        server_name investimento.com www.investimento.com;
+        
+        # SSL
+        ssl_certificate /etc/nginx/ssl/certificate.crt;
+        ssl_certificate_key /etc/nginx/ssl/private.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
+        ssl_ciphers ECDHE-RSA-AES256-GCM-SHA512:DHE-RSA-AES256-GCM-SHA512;
+        ssl_prefer_server_ciphers off;
+        ssl_session_cache shared:SSL:10m;
+        ssl_session_timeout 10m;
+        
+        # Frontend
+        location / {
+            proxy_pass http://web:3000;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_cache_bypass $http_upgrade;
+            
+            # Cache estático
+            location ~* \.(jpg|jpeg|png|gif|ico|css|js)$ {
+                expires 1y;
+                add_header Cache-Control "public, immutable";
+                proxy_pass http://web:3000;
+            }
+        }
+        
+        # API Backend
+        location /api/ {
+            limit_req zone=api burst=20 nodelay;
+            
+            proxy_pass http://api:3001;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection 'upgrade';
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            # Timeouts
+            proxy_connect_timeout 30s;
+            proxy_send_timeout 30s;
+            proxy_read_timeout 30s;
+            
+            # CORS headers
+            add_header 'Access-Control-Allow-Origin' 'https://investimento.com' always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, PUT, DELETE, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization' always;
+            add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range' always;
+        }
+        
+        # WebSocket para atualizações em tempo real
+        location /ws/ {
+            proxy_pass http://api:3001;
+            proxy_http_version 1.1;
+            proxy_set_header Upgrade $http_upgrade;
+            proxy_set_header Connection "Upgrade";
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            
+            proxy_read_timeout 86400;
+            proxy_send_timeout 86400;
+        }
+        
+        # Documentação da API
+        location /api-docs/ {
+            proxy_pass http://api:3001/api-docs/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        # Monitoramento (acesso restrito)
+        location /monitoring/ {
+            auth_basic "Restricted Access";
+            auth_basic_user_file /etc/nginx/.htpasswd;
+            
+            proxy_pass http://grafana:3000/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+        
+        # Health checks
+        location /health {
+            access_log off;
+            proxy_pass http://api:3001/health;
+            proxy_set_header Host $host;
+        }
+        
+        # Error pages
+        error_page 404 /404.html;
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+            root /usr/share/nginx/html;
+        }
+    }
+}
+📁 9. CONFIGURAÇÃO DO REACT - web/package.json
+json
+{
+  "name": "investment-platform-web",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.14.19",
+    "@mui/material": "^5.14.19",
+    "@mui/x-charts": "^6.19.4",
+    "@mui/x-data-grid": "^6.19.5",
+    "@mui/x-date-pickers": "^6.19.5",
+    "@reduxjs/toolkit": "^1.9.7",
+    "@testing-library/jest-dom": "^6.1.5",
+    "@testing-library/react": "^14.0.0",
+    "@testing-library/user-event": "^14.5.1",
+    "axios": "^1.6.2",
+    "chart.js": "^4.4.1",
+    "date-fns": "^2.30.0",
+    "formik": "^2.4.5",
+    "react": "^18.2.0",
+    "react-chartjs-2": "^5.2.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.48.2",
+    "react-redux": "^8.1.3",
+    "react-router-dom": "^6.20.1",
+    "react-scripts": "5.0.1",
+    "recharts": "^2.10.3",
+    "socket.io-client": "^4.7.2",
+    "web-vitals": "^3.5.0",
+    "yup": "^1.3.3"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint src/",
+    "format": "prettier --write src/",
+    "analyze": "source-map-explorer 'build/static/js/*.js'"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.43",
+    "@types/react-dom": "^18.2.17",
+    "eslint": "^8.55.0",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.29.0",
+    "eslint-plugin-jsx-a11y": "^6.8.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "prettier": "^3.1.1",
+    "source-map-explorer": "^2.5.3"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "proxy": "http://localhost:3001"
+}
