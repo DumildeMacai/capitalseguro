@@ -12,6 +12,7 @@ const investmentTypes = [
   {
     id: "obrigações",
     title: "Obrigações (Bonds)",
+    tabLabel: "Obrigações",
     description: "Títulos de dívida pública ou corporativa com juros fixos.",
     icon: Wallet,
     color: "bg-blue-500",
@@ -21,6 +22,7 @@ const investmentTypes = [
   {
     id: "fundos_investimento",
     title: "Fundos de Investimento",
+    tabLabel: "Fundos",
     description: "Carteiras coletivas geridas por profissionais experientes.",
     icon: TrendingUp,
     color: "bg-green-500",
@@ -30,6 +32,7 @@ const investmentTypes = [
   {
     id: "fundos_imobiliarios",
     title: "Fundos Imobiliários (FIIs)",
+    tabLabel: "FIIs",
     description: "Investimento em imóveis comerciais e residenciais.",
     icon: Building2,
     color: "bg-orange-500",
@@ -84,7 +87,7 @@ const InvestmentOptions = () => {
             {investmentTypes.map((type) => (
               <TabsTrigger key={type.id} value={type.id} className="flex gap-2 items-center">
                 <type.icon className="w-4 h-4 hidden sm:block" />
-                <span className="text-xs sm:text-sm">{type.title.split(' ')[0]}</span>
+                <span className="text-xs sm:text-sm">{type.tabLabel}</span>
               </TabsTrigger>
             ))}
           </TabsList>
