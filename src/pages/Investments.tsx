@@ -110,8 +110,26 @@ const Investments = () => {
 
   // Filtrar investimentos por categoria e outros critérios
   const filteredInvestments = availableInvestments.filter((investment) => {
-    if (activeTab !== "todos" && investment.category.toLowerCase() !== activeTab) {
-      return false
+    // Normalizar a aba ativa para comparação (ex: 'obrigações' -> 'obrigações')
+    const activeTabLower = activeTab.toLowerCase();
+    const investmentCategoryLower = investment.category.toLowerCase();
+
+    if (activeTabLower !== "todos") {
+      // Mapeamento de abas para categorias específicas
+      const categoryMap: { [key: string]: string } = {
+        "imóveis": "imóveis",
+        "empresas": "empresas",
+        "transporte": "transporte",
+        "obrigações": "renda fixa",
+        "fundos": "multimercado",
+        "fiis": "renda passiva"
+      };
+
+      const targetCategory = categoryMap[activeTabLower] || activeTabLower;
+      
+      if (investmentCategoryLower !== targetCategory) {
+        return false;
+      }
     }
     if (
       searchQuery &&

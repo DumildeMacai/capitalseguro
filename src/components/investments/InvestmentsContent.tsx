@@ -22,11 +22,14 @@ const InvestmentsContent = ({
   return (
     <>
       <Tabs defaultValue="todos" value={activeTab} onValueChange={setActiveTab} className="mb-10">
-        <TabsList className="mb-8">
+        <TabsList className="mb-8 flex-wrap h-auto">
           <TabsTrigger value="todos">Todos</TabsTrigger>
           <TabsTrigger value="imóveis">Imóveis</TabsTrigger>
           <TabsTrigger value="empresas">Empresas</TabsTrigger>
           <TabsTrigger value="transporte">Transporte</TabsTrigger>
+          <TabsTrigger value="obrigações">Obrigações</TabsTrigger>
+          <TabsTrigger value="fundos">Fundos</TabsTrigger>
+          <TabsTrigger value="fiis">FIIs</TabsTrigger>
         </TabsList>
         
         <TabsContent value={activeTab}>
