@@ -199,6 +199,14 @@ const AdminInvestors = () => {
         throw error;
       }
 
+      // Enviar notificação real de crédito
+      await supabase.from("notificacoes").insert({
+        usuario_id: selectedInvestor.id,
+        titulo: "Saldo Creditado",
+        mensagem: `Foi creditado o valor de Kz ${amount.toLocaleString('pt-AO')} em sua conta pela administração.`,
+        tipo: "sistema"
+      });
+
       toast({
         title: "Sucesso",
         description: `Creditado Kz ${amount.toFixed(2)} ao investidor. Novo saldo: Kz ${newBalance.toFixed(2)}`,
