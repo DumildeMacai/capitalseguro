@@ -104,6 +104,14 @@ export const AdminDeposits = () => {
 
       if (depositError) throw depositError
 
+      // Enviar notificação real
+      await supabase.from("notificacoes").insert({
+        usuario_id: deposit.userId,
+        titulo: "Depósito Aprovado",
+        mensagem: `Seu depósito de Kz ${deposit.amount.toLocaleString('pt-AO')} via ${deposit.paymentMethod === "bank_transfer" ? "Banco BAI" : "Multicaixa"} foi aprovado.`,
+        tipo: "sistema"
+      });
+
       // Atualizar saldo do investidor - conforme solicitado: "saldo deve aparecer para saldo disponivel"
       try {
         const { data: profileData, error: profileError } = await supabase

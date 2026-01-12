@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Trash2, Check } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface Notification {
   id: string;
@@ -14,43 +15,55 @@ interface Notification {
   relacionada_a?: string;
 }
 
-// Mock notifications until table is created
-const mockNotifications: Notification[] = [
-  {
-    id: "1",
-    titulo: "Bem-vindo à plataforma",
-    mensagem: "Obrigado por se registrar. Explore as oportunidades de investimento disponíveis.",
-    tipo: "sistema",
-    lido: false,
-    data_criacao: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    titulo: "Novo investimento disponível",
-    mensagem: "Uma nova oportunidade de investimento em imóveis está disponível com retorno de 50%.",
-    tipo: "investimento",
-    lido: false,
-    data_criacao: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: "3",
-    titulo: "Atualização de rendimento",
-    mensagem: "Seus investimentos acumularam Kz 5.000 em rendimentos este mês.",
-    tipo: "rendimento",
-    lido: false,
-    data_criacao: new Date(Date.now() - 172800000).toISOString(),
-  }
-];
-
 interface NotificationsSectionProps {
   userId: string;
   onUnreadCountChange?: (count: number) => void;
 }
 
 const NotificationsSection = ({ userId, onUnreadCountChange }: NotificationsSectionProps) => {
-  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
 
   const unreadCount = notifications.filter((n) => !n.lido).length;
+
+  const loadNotifications = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("notificacoes")
+        .select("*")
+        .eq("usuario_id", userId)
+        .order("data_criacao", { ascending: false });
+
+      if (error) throw error;
+      setNotifications(data || []);
+    } catch (err) {
+      console.error("Erro ao carregar notificações:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (userId) {
+      loadNotifications();
+      
+      // Real-time updates
+      const channel = supabase
+        .channel("public:notificacoes")
+        .on(
+          "postgres_changes",
+          { event: "*", schema: "public", table: "notificacoes", filter: `usuario_id=eq.${userId}` },
+          () => {
+            loadNotifications();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [userId]);
 
   useEffect(() => {
     if (onUnreadCountChange) {
@@ -58,15 +71,45 @@ const NotificationsSection = ({ userId, onUnreadCountChange }: NotificationsSect
     }
   }, [unreadCount, onUnreadCountChange]);
 
-  const handleMarkAsRead = (notificationId: string) => {
-    setNotifications((prev) =>
-      prev.map((n) => (n.id === notificationId ? { ...n, lido: true } : n))
-    );
+  const handleMarkAsRead = async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from("notificacoes")
+        .update({ lido: true })
+        .eq("id", notificationId);
+
+      if (error) throw error;
+      setNotifications((prev) =>
+        prev.map((n) => (n.id === notificationId ? { ...n, lido: true } : n))
+      );
+    } catch (err) {
+      console.error("Erro ao marcar como lida:", err);
+    }
   };
 
-  const handleDeleteNotification = (notificationId: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+  const handleDeleteNotification = async (notificationId: string) => {
+    try {
+      const { error } = await supabase
+        .from("notificacoes")
+        .delete()
+        .eq("id", notificationId);
+
+      if (error) throw error;
+      setNotifications((prev) => prev.filter((n) => n.id !== notificationId));
+    } catch (err) {
+      console.error("Erro ao deletar notificação:", err);
+    }
   };
+
+  if (loading) {
+    return (
+      <Card>
+        <CardContent className="py-8 text-center text-muted-foreground">
+          Carregando notificações...
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
