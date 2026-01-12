@@ -116,13 +116,15 @@ export const AdminDeposits = () => {
       try {
         const { data: profileData, error: profileError } = await supabase
           .from("profiles")
-          .select("*")
+          .select("id, saldo_disponivel")
           .eq("id", deposit.userId)
           .single()
 
         if (!profileError && profileData) {
           const currentBalance = Number(profileData.saldo_disponivel || 0)
           const newBalance = currentBalance + deposit.amount
+
+          console.log(`Atualizando saldo do usuário ${deposit.userId}: ${currentBalance} -> ${newBalance}`);
 
           const { error: balanceUpdateError } = await supabase
             .from("profiles")
@@ -131,9 +133,9 @@ export const AdminDeposits = () => {
           
           if (balanceUpdateError) throw balanceUpdateError
 
-          // Notificação será implementada futuramente
-          console.log("Depósito aprovado para usuário:", deposit.userId)
+          console.log("Saldo atualizado com sucesso no banco de dados.");
         } else {
+          console.error("Erro ao buscar perfil para atualização de saldo:", profileError);
           if (profileError) throw profileError
         }
       } catch (balanceErr) {
