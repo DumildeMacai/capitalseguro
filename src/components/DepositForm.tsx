@@ -85,12 +85,12 @@ export const DepositForm = () => {
       if (insertError) throw insertError
 
       // Enviar notificação real de solicitação de depósito
-      await supabase.from("notificacoes").insert({
+      await (supabase.from("notificacoes").insert({
         usuario_id: user.id,
         titulo: "Depósito Solicitado",
         mensagem: `Sua solicitação de depósito de Kz ${parseFloat(amount).toLocaleString('pt-AO')} foi enviada e aguarda aprovação do administrador.`,
         tipo: "sistema"
-      });
+      }) as any);
 
       setSubmitted(true)
       toast({ title: "Sucesso", description: "Depósito solicitado! Aguardando aprovação do admin." })

@@ -200,7 +200,22 @@ const InvestorDashboard = () => {
 
     const handleInvestmentStatusUpdate = () => {
       reloadMyInvestments(userId)
+      loadSaldoFromDb() // Recarregar saldo também quando investimento mudar
     }
+
+    const channel = supabase
+      .channel(`public:profiles:id=eq.${userId}`)
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "profiles", filter: `id=eq.${userId}` },
+        (payload) => {
+          console.log("Perfil atualizado via Realtime:", payload.new)
+          if (payload.new && "saldo_disponivel" in payload.new) {
+            setSaldo(Number(payload.new.saldo_disponivel || 0))
+          }
+        }
+      )
+      .subscribe()
     
     window.addEventListener("balanceUpdated", loadSaldoFromDb)
     window.addEventListener("depositApproved", loadSaldoFromDb)
@@ -208,6 +223,7 @@ const InvestorDashboard = () => {
     window.addEventListener("investmentApproved", handleInvestmentStatusUpdate)
     
     return () => {
+      supabase.removeChannel(channel)
       window.removeEventListener("balanceUpdated", loadSaldoFromDb)
       window.removeEventListener("depositApproved", loadSaldoFromDb)
       window.removeEventListener("investmentStatusUpdated", handleInvestmentStatusUpdate)

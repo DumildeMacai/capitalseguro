@@ -189,10 +189,10 @@ const AdminInvestors = () => {
       const newBalance = (Number(profile?.saldo_disponivel || 0)) + amount;
 
       // Update using minimal fields
-      const { error } = await supabase
+      const { error } = await (supabase
         .from("profiles")
         .update({ saldo_disponivel: newBalance })
-        .eq("id", selectedInvestor.id);
+        .eq("id", selectedInvestor.id) as any);
 
       if (error) {
         console.error("Erro ao atualizar:", error);
@@ -200,12 +200,12 @@ const AdminInvestors = () => {
       }
 
       // Enviar notificação real de crédito
-      await supabase.from("notificacoes").insert({
+      await (supabase.from("notificacoes").insert({
         usuario_id: selectedInvestor.id,
         titulo: "Saldo Creditado",
         mensagem: `Foi creditado o valor de Kz ${amount.toLocaleString('pt-AO')} em sua conta pela administração.`,
         tipo: "sistema"
-      });
+      }) as any);
 
       toast({
         title: "Sucesso",
