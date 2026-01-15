@@ -485,16 +485,16 @@ const InvestorDashboard = () => {
 
         <main className="flex-1 overflow-auto p-6 md:p-8">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="mb-8 bg-card border border-border">
-              <TabsTrigger value="visao-geral">Visão Geral</TabsTrigger>
-              <TabsTrigger value="meus-investimentos">Meus Investimentos</TabsTrigger>
-              <TabsTrigger value="extrato">Extrato Consolidado</TabsTrigger>
-              <TabsTrigger value="sacar">Sacar</TabsTrigger>
-              <TabsTrigger value="historico">Histórico</TabsTrigger>
-              <TabsTrigger value="explorar">Explorar</TabsTrigger>
-              <TabsTrigger value="perfil">Perfil</TabsTrigger>
-              <TabsTrigger value="notificacoes">Notificações</TabsTrigger>
-              <TabsTrigger value="configuracoes">Configurações</TabsTrigger>
+            <TabsList className="mb-8 bg-card/50 backdrop-blur-sm border border-border p-1 rounded-xl">
+              <TabsTrigger value="visao-geral" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Visão Geral</TabsTrigger>
+              <TabsTrigger value="meus-investimentos" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Meus Investimentos</TabsTrigger>
+              <TabsTrigger value="extrato" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Extrato Consolidado</TabsTrigger>
+              <TabsTrigger value="sacar" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Sacar</TabsTrigger>
+              <TabsTrigger value="historico" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Histórico</TabsTrigger>
+              <TabsTrigger value="explorar" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Explorar</TabsTrigger>
+              <TabsTrigger value="perfil" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Perfil</TabsTrigger>
+              <TabsTrigger value="notificacoes" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Notificações</TabsTrigger>
+              <TabsTrigger value="configuracoes" className="rounded-lg data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">Configurações</TabsTrigger>
             </TabsList>
 
             {/* Visão Geral Tab */}

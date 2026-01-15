@@ -44,12 +44,22 @@ export const AdminDeposits = () => {
   useEffect(() => {
     loadDeposits()
     
-    // Polling automático a cada 3 segundos
-    const interval = setInterval(() => {
-      loadDeposits()
-    }, 3000)
+    // Canal do Supabase para escutar novos depósitos em tempo real
+    const channel = supabase
+      .channel("public:deposits")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "deposits" },
+        () => {
+          console.log("Mudança detectada em depósitos via Realtime")
+          loadDeposits()
+        }
+      )
+      .subscribe()
     
-    return () => clearInterval(interval)
+    return () => {
+      supabase.removeChannel(channel)
+    }
   }, [])
 
   const loadDeposits = async () => {
