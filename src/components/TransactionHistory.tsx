@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { supabase } from "@/integrations/supabase/client"
-import { TrendingUp, TrendingDown, Clock } from "lucide-react"
+import { TrendingUp, TrendingDown, Clock, PieChart } from "lucide-react"
+import { calculateReturn } from "@/utils/interestCalculations"
 
 interface TransactionHistoryProps {
   userId: string
@@ -29,18 +30,45 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
 
   const loadTransactions = async () => {
     try {
-      setLoading(true)
-      // Carregar depósitos do Supabase
-      const { data, error } = await (supabase
+      setLoading(true);
+      
+      // Carregar depósitos
+      const { data: depositsData, error: depositsError } = await (supabase
         .from("deposits")
         .select("*")
         .eq("usuario_id", userId)
-        .order("created_at", { ascending: false }) as any)
+        .order("created_at", { ascending: false }) as any);
 
-      if (error) throw error
+      if (depositsError) throw depositsError;
 
-      // Transformar depósitos em transações
-      const formattedTransactions = (data || []).map((d: any) => ({
+      // Carregar rendimentos (inscricoes_investimentos) para compor o extrato
+      const { data: investmentsData, error: investmentsError } = await (supabase
+        .from("inscricoes_investimentos")
+        .select("*, investimentos(*)")
+        .eq("usuario_id", userId) as any);
+
+      const rendimentosTransactions = (investmentsData || []).map((inv: any) => {
+        const investmentDate = new Date(inv.data_inscricao);
+        const today = new Date();
+        const daysElapsed = Math.floor((today.getTime() - investmentDate.getTime()) / (1000 * 60 * 60 * 24));
+        const annualRate = inv.investimentos?.retorno_estimado || 50;
+        const interestType = inv.investimentos?.tipo_juros || "simples";
+        
+        const accumulatedReturn = calculateReturn(inv.valor_investido, annualRate, Math.max(0, daysElapsed), interestType as "simples" | "composto");
+
+        return {
+          id: `yield-${inv.id}`,
+          userId: inv.usuario_id,
+          type: "yield",
+          amount: accumulatedReturn,
+          status: "completed",
+          description: `Rendimento Acumulado: ${inv.investimentos?.titulo || "Investimento"}`,
+          createdAt: new Date().toISOString(), // Data atual para o rendimento acumulado
+        };
+      }).filter((tx: any) => tx.amount > 0);
+
+      // Transformar depósitos
+      const depositTransactions = (depositsData || []).map((d: any) => ({
         id: d.id,
         userId: d.usuario_id,
         type: "deposit",
@@ -49,15 +77,20 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
         description: `Depósito via ${d.metodo === "bank_transfer" ? "Banco BAI" : "Multicaixa Express"}`,
         createdAt: d.created_at,
         approvedAt: d.data_aprovacao,
-      }))
+      }));
 
-      setTransactions(formattedTransactions)
+      // Combinar e ordenar por data
+      const allTransactions = [...depositTransactions, ...rendimentosTransactions].sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      setTransactions(allTransactions);
     } catch (error) {
-      console.error("Erro ao carregar histórico:", error)
+      console.error("Erro ao carregar histórico:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, "default" | "secondary" | "destructive" | "outline"> = {
@@ -70,7 +103,9 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
   }
 
   const getTypeIcon = (type: string) => {
-    return type === "deposit" ? <TrendingDown className="h-4 w-4" /> : <TrendingUp className="h-4 w-4" />
+    if (type === "deposit") return <TrendingDown className="h-4 w-4 text-red-500" />;
+    if (type === "yield") return <TrendingUp className="h-4 w-4 text-green-500" />;
+    return <TrendingUp className="h-4 w-4" />;
   }
 
   if (loading) {
@@ -122,7 +157,9 @@ export const TransactionHistory = ({ userId }: TransactionHistoryProps) => {
                 <TableRow key={tx.id}>
                   <TableCell className="flex items-center gap-2">
                     {getTypeIcon(tx.type)}
-                    <span className="capitalize">{tx.type === "deposit" ? "Depósito" : tx.type}</span>
+                    <span className="capitalize">
+                      {tx.type === "deposit" ? "Depósito" : tx.type === "yield" ? "Rendimento" : tx.type}
+                    </span>
                   </TableCell>
                   <TableCell>{tx.description}</TableCell>
                   <TableCell className="text-right font-semibold">{Number(tx.amount).toLocaleString("pt-PT")}</TableCell>
