@@ -22,7 +22,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Home, PieChart, Search, User, Settings, LogOut, Wallet, TrendingUp, Bell, Download } from "lucide-react"
+import { Home, PieChart, Search, User, Settings, LogOut, Wallet, TrendingUp, Bell, Download, PlusCircle } from "lucide-react"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import InvestmentCard from "@/components/InvestmentCard"
 import InvestorPortfolioChart from "@/components/InvestorPortfolioChart"
@@ -35,6 +35,7 @@ import NotificationsSection from "@/components/NotificationsSection"
 import { ChangePasswordForm } from "@/components/security/ChangePasswordForm"
 import { TwoFactorAuthForm } from "@/components/security/TwoFactorAuthForm"
 import { WithdrawalForm } from "@/components/WithdrawalForm"
+import { DepositModal } from "@/components/DepositModal"
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { motion } from "framer-motion"
@@ -68,6 +69,7 @@ const InvestorDashboard = () => {
   const [activeTab, setActiveTab] = useState("visao-geral")
   const [editOpen, setEditOpen] = useState(false)
   const [avatarOpen, setAvatarOpen] = useState(false)
+  const [depositOpen, setDepositOpen] = useState(false)
   const [questionOpen, setQuestionOpen] = useState(false)
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null)
   const [profile, setProfile] = useState<any>(null)
@@ -264,7 +266,18 @@ const InvestorDashboard = () => {
                       </CardHeader>
                       <CardContent>
                         <div className="text-2xl font-bold">Kz {saldo.toLocaleString("pt-PT", { minimumFractionDigits: 2 })}</div>
-                        <p className="text-xs text-success mt-1">Pronto para investir</p>
+                        <div className="flex justify-between items-center mt-2">
+                          <p className="text-xs text-success font-semibold">Pronto para investir</p>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => setDepositOpen(true)}
+                            className="h-7 text-[10px] gap-1 hover:text-success"
+                          >
+                            <PlusCircle className="h-3 w-3" />
+                            Depositar
+                          </Button>
+                        </div>
                       </CardContent>
                     </Card>
                   </div>
@@ -332,6 +345,7 @@ const InvestorDashboard = () => {
       <Dialog open={avatarOpen} onOpenChange={setAvatarOpen}><DialogContent><UploadAvatar onUpload={(url) => { setAvatarUrl(url); setAvatarOpen(false) }} /></DialogContent></Dialog>
       <Dialog open={showChangePassword} onOpenChange={setShowChangePassword}><DialogContent><ChangePasswordForm onClose={() => setShowChangePassword(false)} onSuccess={() => setShowChangePassword(false)} /></DialogContent></Dialog>
       <Dialog open={show2FA} onOpenChange={setShow2FA}><DialogContent><TwoFactorAuthForm onClose={() => setShow2FA(false)} /></DialogContent></Dialog>
+      <DepositModal open={depositOpen} onOpenChange={setDepositOpen} />
     </SidebarProvider>
   )
 }
