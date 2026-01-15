@@ -203,6 +203,7 @@ const InvestorDashboard = () => {
       loadSaldoFromDb() // Recarregar saldo também quando investimento mudar
     }
 
+    // Canal do Supabase para escutar mudanças no perfil (saldo) em tempo real
     const channel = supabase
       .channel(`public:profiles:id=eq.${userId}`)
       .on(
