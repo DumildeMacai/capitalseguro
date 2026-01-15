@@ -83,6 +83,34 @@ export function DepositModal({ open, onOpenChange }: DepositModalProps) {
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          <div className="bg-muted/50 p-4 rounded-lg border border-border space-y-2">
+            <h4 className="text-sm font-semibold flex items-center gap-2">
+              <Building2 className="h-4 w-4 text-primary" />
+              Dados para Transferência
+            </h4>
+            <div className="grid grid-cols-1 gap-1 text-xs">
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Banco:</span>
+                <span className="font-medium">Banco BAI</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Titular:</span>
+                <span className="font-medium">Capital Seguro, Lda</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">IBAN:</span>
+                <span className="font-medium">AO06 0040 0000 1234 5678 9012 3</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Conta:</span>
+                <span className="font-medium">123456789</span>
+              </div>
+            </div>
+            <p className="text-[10px] text-muted-foreground mt-2 italic">
+              * Após a transferência, anexe o comprovativo abaixo para validação.
+            </p>
+          </div>
+
           <div className="grid gap-2">
             <Label htmlFor="amount">Valor (Kz)</Label>
             <Input

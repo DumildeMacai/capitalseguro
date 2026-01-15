@@ -1,0 +1,48 @@
+injected.js:214   POST https://xmemmdmyzwimluvgiqal.supabase.co/storage/v1/object/comprovativos/a07a77eb-782d-4244-825b-0946ffe020a3-0.7631867403951488.PDF 400 (Bad Request)
+apply @ injected.js:214
+(anonymous) @ @supabase_supabase-js.js?v=a77c7419:7172
+(anonymous) @ @supabase_supabase-js.js?v=a77c7419:7190
+await in (anonymous)
+(anonymous) @ @supabase_supabase-js.js?v=a77c7419:3692
+(anonymous) @ @supabase_supabase-js.js?v=a77c7419:3692
+(anonymous) @ @supabase_supabase-js.js?v=a77c7419:3774
+(anonymous) @ @supabase_supabase-js.js?v=a77c7419:3773
+(anonymous) @ chunk-WXTWEME6.js?v=a77c7419:147
+__awaiter @ chunk-WXTWEME6.js?v=a77c7419:129
+_handleRequest @ @supabase_supabase-js.js?v=a77c7419:3772
+(anonymous) @ @supabase_supabase-js.js?v=a77c7419:3791
+(anonymous) @ chunk-WXTWEME6.js?v=a77c7419:147
+__awaiter @ chunk-WXTWEME6.js?v=a77c7419:129
+post @ @supabase_supabase-js.js?v=a77c7419:3790
+(anonymous) @ @supabase_supabase-js.js?v=a77c7419:3971
+(anonymous) @ chunk-WXTWEME6.js?v=a77c7419:147
+__awaiter @ chunk-WXTWEME6.js?v=a77c7419:129
+uploadOrUpdate @ @supabase_supabase-js.js?v=a77c7419:3933
+(anonymous) @ @supabase_supabase-js.js?v=a77c7419:4033
+(anonymous) @ chunk-WXTWEME6.js?v=a77c7419:147
+__awaiter @ chunk-WXTWEME6.js?v=a77c7419:129
+upload @ @supabase_supabase-js.js?v=a77c7419:4032
+handleDeposit @ DepositModal.tsx:47
+await in handleDeposit
+callCallback2 @ chunk-W6L2VRDA.js?v=a77c7419:3674
+invokeGuardedCallbackDev @ chunk-W6L2VRDA.js?v=a77c7419:3699
+invokeGuardedCallback @ chunk-W6L2VRDA.js?v=a77c7419:3733
+invokeGuardedCallbackAndCatchFirstError @ chunk-W6L2VRDA.js?v=a77c7419:3736
+executeDispatch @ chunk-W6L2VRDA.js?v=a77c7419:7014
+processDispatchQueueItemsInOrder @ chunk-W6L2VRDA.js?v=a77c7419:7034
+processDispatchQueue @ chunk-W6L2VRDA.js?v=a77c7419:7043
+dispatchEventsForPlugins @ chunk-W6L2VRDA.js?v=a77c7419:7051
+(anonymous) @ chunk-W6L2VRDA.js?v=a77c7419:7174
+batchedUpdates$1 @ chunk-W6L2VRDA.js?v=a77c7419:18913
+batchedUpdates @ chunk-W6L2VRDA.js?v=a77c7419:3579
+dispatchEventForPluginEventSystem @ chunk-W6L2VRDA.js?v=a77c7419:7173
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ chunk-W6L2VRDA.js?v=a77c7419:5478
+dispatchEvent @ chunk-W6L2VRDA.js?v=a77c7419:5472
+dispatchDiscreteEvent @ chunk-W6L2VRDA.js?v=a77c7419:5449
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more
+        Don't show again
+injected.js:37  StorageApiError: Bucket not found
+    at @supabase_supabase-js.js?v=a77c7419:3747:14
