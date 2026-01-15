@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Link } from "react-router-dom";
+import { calculateReturn } from "@/utils/interestCalculations";
 
 const investmentTypes = [
   {
@@ -17,7 +18,9 @@ const investmentTypes = [
     icon: Wallet,
     color: "bg-blue-500",
     details: "As obrigações são empréstimos que você faz a uma entidade (governo ou empresa) em troca de juros regulares.",
-    category: "Renda Fixa"
+    category: "Renda Fixa",
+    rate: 50,
+    defaultType: "simples" as const
   },
   {
     id: "fundos_investimento",
@@ -27,7 +30,9 @@ const investmentTypes = [
     icon: TrendingUp,
     color: "bg-green-500",
     details: "Diversificação automática em ações, títulos e outros ativos com gestão profissional.",
-    category: "Multimercado"
+    category: "Multimercado",
+    rate: 50,
+    defaultType: "composto" as const
   },
   {
     id: "fundos_imobiliarios",
@@ -37,7 +42,9 @@ const investmentTypes = [
     icon: Building2,
     color: "bg-orange-500",
     details: "Receba rendimentos mensais provenientes de aluguéis sem precisar comprar um imóvel físico.",
-    category: "Renda Passiva"
+    category: "Renda Passiva",
+    rate: 50,
+    defaultType: "composto" as const
   }
 ];
 
@@ -45,7 +52,7 @@ const educationalContent = {
   obrigações: [
     { title: "💵 O que são Obrigações?", content: "São títulos de dívida emitidos por empresas ou governos quando precisam captar recursos." },
     { title: "⚙️ Como funcionam?", content: "Você empresta dinheiro e recebe juros (cupões) periódicos até o vencimento do título." },
-    { title: "📊 Exemplo", content: "Um título de 1.000 Kz com 10% de juros ao ano rende 100 Kz anuais ao investidor." }
+    { title: "📊 Exemplo", content: "Um título de 1.000 Kz com 50% de juros ao ano rende 500 Kz anuais ao investidor." }
   ],
   fundos_investimento: [
     { title: "📈 O que são?", content: "Carteiras coletivas onde vários investidores aplicam juntos para acessar diversos mercados." },
@@ -63,13 +70,13 @@ const InvestmentOptions = () => {
   const [activeTab, setActiveTab] = useState("obrigações");
   const [simValue, setSimValue] = useState(100000);
   const [simMonths, setSimMonths] = useState(12);
+  const [interestType, setInterestType] = useState<"simples" | "composto">("simples");
 
   const calculateSim = () => {
-    const rate = activeTab === "obrigações" ? 0.15 : activeTab === "fundos_investimento" ? 0.20 : 0.08 / 12;
-    if (activeTab === "fundos_imobiliarios") {
-      return (simValue * rate * simMonths).toFixed(2);
-    }
-    return (simValue * Math.pow(1 + rate, simMonths / 12) - simValue).toFixed(2);
+    const type = investmentTypes.find(t => t.id === activeTab);
+    const rate = type?.rate || 50;
+    const days = simMonths * 30; // Aproximação de dias
+    return calculateReturn(simValue, rate, days, interestType).toFixed(2);
   };
 
   return (
@@ -82,7 +89,11 @@ const InvestmentOptions = () => {
           </p>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs value={activeTab} onValueChange={(v) => {
+          setActiveTab(v);
+          const type = investmentTypes.find(t => t.id === v);
+          if (type) setInterestType(type.defaultType);
+        }} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             {investmentTypes.map((type) => (
               <TabsTrigger key={type.id} value={type.id} className="flex gap-2 items-center">
@@ -120,7 +131,7 @@ const InvestmentOptions = () => {
                       <Calculator className="text-primary w-5 h-5" />
                       <CardTitle>Simulador de {type.title.split(' ')[0]}</CardTitle>
                     </div>
-                    <CardDescription>Estime seus ganhos potenciais</CardDescription>
+                    <CardDescription>Estime seus ganhos potenciais (50% a.a.)</CardDescription>
                   </CardHeader>
                   <CardContent className="space-y-4">
                     <div className="space-y-2">
@@ -139,11 +150,33 @@ const InvestmentOptions = () => {
                         onChange={(e) => setSimMonths(Number(e.target.value))} 
                       />
                     </div>
+                    <div className="space-y-2">
+                      <Label>Tipo de Juros</Label>
+                      <div className="flex gap-2">
+                        <Button 
+                          variant={interestType === "simples" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setInterestType("simples")}
+                          className="flex-1"
+                        >
+                          Simples
+                        </Button>
+                        <Button 
+                          variant={interestType === "composto" ? "default" : "outline"}
+                          size="sm"
+                          onClick={() => setInterestType("composto")}
+                          className="flex-1"
+                        >
+                          Composto
+                        </Button>
+                      </div>
+                    </div>
                     <div className="pt-4 border-t border-primary/10">
                       <p className="text-sm text-muted-foreground">Retorno Estimado:</p>
                       <p className="text-3xl font-bold text-primary">Kz {Number(calculateSim()).toLocaleString("pt-PT")}</p>
+                      <p className="text-sm font-semibold text-primary/80">Total Final: Kz {(simValue + Number(calculateSim())).toLocaleString("pt-PT")}</p>
                       <p className="text-xs text-muted-foreground mt-2">
-                        * Valores baseados em taxas médias de mercado. Rendimentos passados não garantem ganhos futuros.
+                        * Simulação baseada na taxa fixa de 50% ao ano oferecida pela Capital Seguro.
                       </p>
                     </div>
                     <Button className="w-full mt-4" variant="default" asChild>
