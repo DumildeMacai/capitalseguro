@@ -344,7 +344,7 @@ const InvestorDashboard = () => {
       <Questionnaire open={questionOpen} onOpenChange={setQuestionOpen} />
       <Dialog open={avatarOpen} onOpenChange={setAvatarOpen}><DialogContent><UploadAvatar onUpload={(url) => { setAvatarUrl(url); setAvatarOpen(false) }} /></DialogContent></Dialog>
       <Dialog open={showChangePassword} onOpenChange={setShowChangePassword}><DialogContent><ChangePasswordForm onClose={() => setShowChangePassword(false)} onSuccess={() => setShowChangePassword(false)} /></DialogContent></Dialog>
-      <Dialog open={show2FA} onOpenChange={setShow2FA}><DialogContent><TwoFactorAuthForm onClose={() => setShow2FA(false)} /></DialogContent></Dialog>
+      <Dialog open={show2FA} onOpenChange={setShow2FA}><DialogContent><TwoFactorAuthForm onClose={() => setShow2FA(false)} onSuccess={() => setShow2FA(false)} /></DialogContent></Dialog>
       <DepositModal open={depositOpen} onOpenChange={setDepositOpen} />
     </SidebarProvider>
   )
