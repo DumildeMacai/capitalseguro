@@ -79,25 +79,25 @@ const About = () => {
     {
       name: "Dumilde Macai",
       role: "CEO & Fundador",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop",
+      image: dumildeImg.url,
       description: "15 anos de experiência em mercados financeiros"
     },
     {
       name: "Ana Paula",
       role: "Diretora de Investimentos",
-      image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400&h=400&fit=crop",
+      image: anaPaulaImg.url,
       description: "Especialista em análise de investimentos e gestão de portfólio"
     },
     {
       name: "Elizeu Macai",
       role: "Diretor de Tecnologia",
-      image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop",
+      image: elizeuImg.url,
       description: "Expert em fintech e desenvolvimento de plataformas"
     },
     {
       name: "Cláudia Alice",
       role: "Diretora de Relacionamento",
-      image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop",
+      image: claudiaImg.url,
       description: "Focada em experiência do cliente e suporte"
     }
   ];
