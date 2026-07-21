@@ -5,6 +5,10 @@ import FeatureCard from "@/components/FeatureCard";
 import { motion } from "framer-motion";
 import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import dumildeImg from "@/assets/team/dumilde-macai.png.asset.json";
+import anaPaulaImg from "@/assets/team/ana-paula.png.asset.json";
+import elizeuImg from "@/assets/team/elizeu-macai.png.asset.json";
+import claudiaImg from "@/assets/team/claudia-alice.png.asset.json";
 
 const About = () => {
   const values = [
