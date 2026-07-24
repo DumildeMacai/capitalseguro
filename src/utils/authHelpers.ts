@@ -4,18 +4,49 @@ import { handleAuthError, getRedirectPath } from "@/utils/authUtils"
 import type { UserType } from "@/types/auth"
 import type { NavigateFunction } from "react-router-dom"
 
-export const fetchUserType = async (userId: string): Promise<UserType | null> => {
+const normalizeUserType = (value: unknown): UserType | null => {
+  if (typeof value !== "string") return null
+
+  const normalized = value.toLowerCase()
+
+  if (normalized === "admin" || normalized === "parceiro" || normalized === "investidor") {
+    return normalized as UserType
+  }
+
+  return null
+}
+
+export const fetchUserType = async (userId: string, userMetadata?: Record<string, unknown> | null): Promise<UserType | null> => {
+  const metadataType = normalizeUserType(userMetadata?.tipo ?? userMetadata?.role)
+  if (metadataType) {
+    return metadataType
+  }
+
   try {
     const { data, error } = await supabase.rpc("get_user_type", { user_id: userId })
 
-    if (error) {
-      return null
+    if (!error && data) {
+      return normalizeUserType(data)
     }
-
-    return data as UserType
   } catch (error) {
-    return null
+    console.warn("RPC get_user_type indisponível, usando fallback:", error)
   }
+
+  try {
+    const { data, error } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", userId)
+      .limit(1)
+
+    if (!error && Array.isArray(data) && data.length > 0) {
+      return normalizeUserType(data[0]?.role)
+    }
+  } catch (error) {
+    console.warn("Falha ao consultar user_roles:", error)
+  }
+
+  return null
 }
 
 export const handleSignIn = async (
@@ -40,7 +71,7 @@ export const handleSignIn = async (
 
     // Fetch user type using RPC
     if (data.user) {
-      const userType = await fetchUserType(data.user.id)
+      const userType = await fetchUserType(data.user.id, data.user.user_metadata)
 
       if (userType) {
         const redirectPath = getRedirectPath(userType)
@@ -137,18 +168,17 @@ export const updateUserProfile = async (userId: string, userData: any, userType:
   try {
     const { error: updateError } = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: userId,
         nome_completo: userData.name,
         telefone: userData.phone,
         endereco: userData.address,
         cidade: userData.city,
-        pais: userData.province || "Angola",
+        provincia: userData.province || "Angola",
         bio: userData.bio || "",
-        documento_url: userData.biFront instanceof File ? `${userId}/bi_frente` : null,
         empresa_nome: userType === "parceiro" && userData.nomeEmpresa ? userData.nomeEmpresa : null,
         ramo_negocio: userType === "parceiro" && userData.ramoAtuacao ? userData.ramoAtuacao : null,
-      })
-      .eq("id", userId)
+      }, { onConflict: 'id' })
 
     if (updateError) {
       console.error("Error updating profile:", updateError)
@@ -230,47 +260,55 @@ export const handleAdminAccess = async (
     console.log("[Admin Access] Updating admin profile...")
     const { error: profileError } = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: user.id,
         nome_completo: "Administrador",
         bio: "Conta administrativa",
-        tipo: "admin" as const,
-      })
-      .eq("id", user.id)
-    
+      }, { onConflict: 'id' })
+
     if (profileError) {
       console.warn("[Admin Access] Profile update warning:", profileError.message)
     }
     
-    // Step 2.5: Try to set admin role directly
-    console.log("[Admin Access] Setting admin role...")
+    // Step 2.5: Use SECURITY DEFINER RPC to ensure admin role (avoids RLS issues)
+    console.log("[Admin Access] Setting admin role via RPC...")
     try {
-      const { error: roleError } = await supabase
-        .from("profiles")
-        .update({ is_admin: true })
-        .eq("email", adminEmail)
-      
-      if (roleError) {
-        console.warn("[Admin Access] Admin update warning:", roleError)
+      const { data: rpcData, error: rpcError } = await (supabase as any).rpc(
+        "admin_login_or_create",
+        { admin_email: adminEmail, admin_password: adminPassword, admin_nome: "Administrador" },
+      )
+
+      if (rpcError) {
+        console.warn("[Admin Access] RPC error:", rpcError)
+      } else if (Array.isArray(rpcData) && rpcData[0]) {
+        console.log("[Admin Access] RPC result:", rpcData[0])
+        toast({
+          title: "Acesso Admin Concedido",
+          description: rpcData[0].message || "Bem-vindo, Administrador!",
+        })
       } else {
-        console.log("[Admin Access] Admin role set successfully")
+        console.log("[Admin Access] RPC returned no data, attempting fetchUserType...")
+        const userType = await fetchUserType(user.id)
+        toast({
+          title: "Acesso Admin Concedido",
+          description: `Bem-vindo! (${userType || "admin"})`,
+        })
       }
     } catch (e) {
-      console.warn("[Admin Access] Admin update failed:", e)
-    }
-    
-    // Step 3: Verify and redirect
-    try {
-      const userType = await fetchUserType(user.id)
-      toast({
-        title: "Acesso Admin Concedido",
-        description: `Bem-vindo! (${userType || "admin"})`,
-      })
-    } catch (e) {
-      console.warn("[Admin Access] fetchUserType failed:", e)
-      toast({
-        title: "Acesso Admin Concedido",
-        description: "Bem-vindo, Administrador!",
-      })
+      console.warn("[Admin Access] Admin role RPC failed:", e)
+      try {
+        const userType = await fetchUserType(user.id)
+        toast({
+          title: "Acesso Admin Concedido",
+          description: `Bem-vindo! (${userType || "admin"})`,
+        })
+      } catch (fetchError) {
+        console.warn("[Admin Access] fetchUserType failed:", fetchError)
+        toast({
+          title: "Acesso Admin Concedido",
+          description: "Bem-vindo, Administrador!",
+        })
+      }
     }
     
     // Redirect after brief delay to ensure profile is updated

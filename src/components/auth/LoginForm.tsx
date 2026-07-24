@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button"
 import { EyeIcon, EyeOffIcon } from "lucide-react"
 import { supabase } from "@/integrations/supabase/client"
 import { getRedirectPath, handleAuthError } from "@/utils/authUtils"
+import { fetchUserType } from "@/utils/authHelpers"
 
 const loginFormSchema = z.object({
   email: z.string().email({
@@ -54,18 +55,12 @@ export const LoginForm = () => {
         let userType: "admin" | "parceiro" | "investidor" | null = null
 
         try {
-          const { data: userTypeData, error: userTypeError } = await supabase.rpc("get_user_type", {
-            user_id: data.user.id,
-          })
-
-          if (!userTypeError && userTypeData) {
-            const typeStr = String(userTypeData).toLowerCase()
-            if (typeStr === "admin" || typeStr === "parceiro" || typeStr === "investidor") {
-              userType = typeStr as "admin" | "parceiro" | "investidor"
-            }
+          const resolvedUserType = await fetchUserType(data.user.id, data.user.user_metadata)
+          if (resolvedUserType) {
+            userType = resolvedUserType
           }
         } catch (userTypeError) {
-          // Silently fail if RPC not available
+          console.warn("Falha ao resolver tipo de usuário após login:", userTypeError)
         }
 
         const redirectPath = getRedirectPath(userType)

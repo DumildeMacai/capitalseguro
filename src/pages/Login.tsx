@@ -4,20 +4,26 @@ import { Link, useLocation } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { RegisterForm } from "@/components/auth/RegisterForm";
+import { AdminRegisterForm } from "@/components/auth/AdminRegisterForm";
 import { AuthSocialButtons } from "@/components/auth/AuthSocialButtons";
 
 const Login = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const isRegister = searchParams.get("register") === "true";
+  const isAdminCreate = searchParams.get("admin") === "true";
   
-  const [activeTab, setActiveTab] = useState<string>(isRegister ? "register" : "login");
+  const [activeTab, setActiveTab] = useState<string>(isRegister ? "register" : isAdminCreate ? "admin-register" : "login");
   
   useEffect(() => {
-    const newUrl = activeTab === "register" 
-      ? `${window.location.pathname}?register=true`
-      : window.location.pathname;
-    
+    let newUrl = window.location.pathname;
+
+    if (activeTab === "register") {
+      newUrl = `${window.location.pathname}?register=true`;
+    } else if (activeTab === "admin-register") {
+      newUrl = `${window.location.pathname}?admin=true`;
+    }
+
     window.history.replaceState({}, "", newUrl);
   }, [activeTab]);
 
@@ -43,12 +49,18 @@ const Login = () => {
               </div>
               
               <h1 className="text-4xl font-bold mb-6">
-                {activeTab === "login" ? "Bem-vindo de volta!" : "Junte-se a nós"}
+                {activeTab === "login"
+                  ? "Bem-vindo de volta!"
+                  : activeTab === "admin-register"
+                    ? "Crie um acesso admin"
+                    : "Junte-se a nós"}
               </h1>
               <p className="text-white/80 text-lg mb-8">
                 {activeTab === "login"
                   ? "Entre para acessar seu painel de investimentos e acompanhar seus rendimentos."
-                  : "Crie uma conta para começar sua jornada rumo à liberdade financeira com 50% de retorno anual."}
+                  : activeTab === "admin-register"
+                    ? "Registre um novo usuário administrador para acessar o painel administrativo."
+                    : "Crie uma conta para começar sua jornada rumo à liberdade financeira com 50% de retorno anual."}
               </p>
             </div>
             
@@ -98,12 +110,18 @@ const Login = () => {
               </div>
             </Link>
             <h1 className="text-3xl font-bold">
-              {activeTab === "login" ? "Bem-vindo de volta!" : "Junte-se a nós"}
+              {activeTab === "login"
+                ? "Bem-vindo de volta!"
+                : activeTab === "admin-register"
+                  ? "Crie um acesso admin"
+                  : "Junte-se a nós"}
             </h1>
             <p className="text-muted-foreground mt-2">
               {activeTab === "login"
                 ? "Entre para acessar seu painel de investimentos"
-                : "Comece sua jornada rumo à liberdade financeira"}
+                : activeTab === "admin-register"
+                  ? "Registre um novo administrador e faça login em seguida"
+                  : "Comece sua jornada rumo à liberdade financeira"}
             </p>
           </div>
           
@@ -113,9 +131,10 @@ const Login = () => {
             transition={{ duration: 0.5, delay: 0.2 }}
           >
             <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-              <TabsList className="grid w-full grid-cols-2 mb-8">
+              <TabsList className="grid w-full grid-cols-3 mb-8">
                 <TabsTrigger value="login">Entrar</TabsTrigger>
                 <TabsTrigger value="register">Registrar</TabsTrigger>
+                <TabsTrigger value="admin-register">Admin</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login">
@@ -142,6 +161,20 @@ const Login = () => {
                     className="text-purple hover:text-purple-dark font-medium"
                   >
                     Entre
+                  </button>
+                </div>
+              </TabsContent>
+
+              <TabsContent value="admin-register">
+                <AdminRegisterForm onSuccess={() => setActiveTab("login")} />
+                <div className="text-center text-sm text-muted-foreground mt-4">
+                  Já criou a conta?{" "}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab("login")}
+                    className="text-purple hover:text-purple-dark font-medium"
+                  >
+                    Faça login
                   </button>
                 </div>
               </TabsContent>
