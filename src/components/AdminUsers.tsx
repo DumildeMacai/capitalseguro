@@ -33,8 +33,9 @@ interface UserData {
   id: string;
   email: string | null;
   nome_completo: string | null;
-  is_admin: boolean | null;
+  is_admin: boolean;
   telefone: string | null;
+  role?: string | null;
 }
 
 const AdminUsers = () => {
@@ -53,15 +54,52 @@ const AdminUsers = () => {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
+      // Fetch profiles
+      const { data: profiles, error: profilesError } = await supabase
         .from('profiles')
-        .select('id, email, nome_completo, is_admin, telefone');
+        .select('id, nome_completo, telefone');
         
-      if (error) {
-        throw error;
+      if (profilesError) {
+        throw profilesError;
       }
+
+      // Fetch user roles
+      const { data: userRoles, error: rolesError } = await supabase
+        .from('user_roles')
+        .select('user_id, role');
+        
+      if (rolesError) {
+        throw rolesError;
+      }
+
+      // Try to get emails from auth API (may fail if not service role)
+      let authUserEmails: Record<string, string> = {};
+      try {
+        const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
+        if (!authError && authUsers) {
+          authUserEmails = Object.fromEntries(
+            authUsers.map(u => [u.id, u.email || ''])
+          );
+        }
+      } catch (e) {
+        console.log("Admin API not available, using profile IDs as fallback");
+      }
+
+      // Combine data
+      const userData: UserData[] = (profiles || []).map(profile => {
+        const userRole = userRoles?.find(r => r.user_id === profile.id);
+        
+        return {
+          id: profile.id,
+          email: authUserEmails[profile.id] || profile.id,
+          nome_completo: profile.nome_completo,
+          is_admin: userRole?.role === 'admin',
+          telefone: profile.telefone,
+          role: userRole?.role || null
+        };
+      });
       
-      setUsers((data || []) as UserData[]);
+      setUsers(userData);
     } catch (error: any) {
       console.error("Erro ao buscar usuários:", error);
       toast({
@@ -88,11 +126,10 @@ const AdminUsers = () => {
     try {
       setOpenModal(false);
       
-      // Update is_admin directly on profiles table
+      // Insert or update user role to admin
       const { error } = await supabase
-        .from('profiles')
-        .update({ is_admin: true })
-        .eq('id', userId);
+        .from('user_roles')
+        .upsert({ user_id: userId, role: 'admin' });
       
       if (error) throw error;
       

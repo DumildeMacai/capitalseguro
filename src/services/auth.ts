@@ -37,66 +37,81 @@ export const registerUser = async (
       throw error
     }
 
-    console.log("User registered successfully:", data.user?.id)
+    if (!data.user) {
+      throw new Error("User creation failed")
+    }
 
-    // If we have document images and user was created successfully, upload them
-    if (data.user && (userData.biFront || userData.biBack)) {
-      const userId = data.user.id
+    const userId = data.user.id
+    console.log("User registered successfully:", userId)
+
+    // Upload documents if available
+    if (userData.biFront || userData.biBack) {
       console.log("Uploading documents for user:", userId)
 
       // Upload front document image if available
       if (userData.biFront instanceof File) {
-        console.log("Uploading front document:", userData.biFront.name)
-        const { error: frontError } = await supabase.storage
-          .from("documentos")
-          .upload(`${userId}/bi_frente`, userData.biFront)
+        try {
+          const frontPath = `${userId}/bi_frente_${Date.now()}.${userData.biFront.name.split('.').pop()}`
+          console.log("Uploading front document to:", frontPath)
+          
+          const { error: frontError } = await supabase.storage
+            .from("documentos")
+            .upload(frontPath, userData.biFront, { upsert: false })
 
-        if (frontError) {
-          console.error("Error uploading front document:", frontError)
-        } else {
-          console.log("Front document uploaded successfully")
+          if (frontError) {
+            console.error("Error uploading front document:", frontError)
+          } else {
+            console.log("Front document uploaded successfully")
+          }
+        } catch (err) {
+          console.error("Exception uploading front document:", err)
         }
       }
 
       // Upload back document image if available
       if (userData.biBack instanceof File) {
-        console.log("Uploading back document:", userData.biBack.name)
-        const { error: backError } = await supabase.storage
-          .from("documentos")
-          .upload(`${userId}/bi_verso`, userData.biBack)
+        try {
+          const backPath = `${userId}/bi_verso_${Date.now()}.${userData.biBack.name.split('.').pop()}`
+          console.log("Uploading back document to:", backPath)
+          
+          const { error: backError } = await supabase.storage
+            .from("documentos")
+            .upload(backPath, userData.biBack, { upsert: false })
 
-        if (backError) {
-          console.error("Error uploading back document:", backError)
-        } else {
-          console.log("Back document uploaded successfully")
+          if (backError) {
+            console.error("Error uploading back document:", backError)
+          } else {
+            console.log("Back document uploaded successfully")
+          }
+        } catch (err) {
+          console.error("Exception uploading back document:", err)
         }
       }
+    }
 
-      // Update profile with document paths and additional user data
-      try {
-        const { error: updateError } = await supabase
-          .from("profiles")
-          .update({
-            nome_completo: userData.name,
-            telefone: userData.phone,
-            endereco: userData.address,
-            cidade: userData.city,
-            pais: userData.province || "Angola",
-            bio: userData.bio || "",
-            documento_url: userData.biFront instanceof File ? `${userId}/bi_frente` : null,
-            empresa_nome: userType === "parceiro" && userData.nomeEmpresa ? userData.nomeEmpresa : null,
-            ramo_negocio: userType === "parceiro" && userData.ramoAtuacao ? userData.ramoAtuacao : null,
-          })
-          .eq("id", userId)
+    // Update profile with user data (use upsert to handle new profiles)
+    try {
+      const { error: updateError } = await supabase
+        .from("profiles")
+        .upsert({
+          id: userId,
+          nome_completo: userData.name,
+          telefone: userData.phone,
+          endereco: userData.address,
+          cidade: userData.city,
+          provincia: userData.province || "Angola",
+          bio: userData.bio || "",
+          empresa_nome: userType === "parceiro" && userData.nomeEmpresa ? userData.nomeEmpresa : null,
+          ramo_negocio: userType === "parceiro" && userData.ramoAtuacao ? userData.ramoAtuacao : null,
+        }, { onConflict: "id" })
 
-        if (updateError) {
-          console.error("Error updating profile with document paths:", updateError)
-        } else {
-          console.log("Profile updated successfully")
-        }
-      } catch (updateError) {
-        console.error("Exception during profile update:", updateError)
+      if (updateError) {
+        console.error("Error updating profile:", updateError)
+      } else {
+        console.log("Profile updated successfully")
       }
+    } catch (updateError) {
+      console.error("Exception during profile update:", updateError)
     }
 
     return data

@@ -71,23 +71,37 @@ const AdminInvestors = () => {
   const fetchInvestors = async () => {
     try {
       setLoading(true);
+      
       // Fetch all profiles
-      const { data, error } = await supabase
+      const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("*")
+        .select("id, nome_completo, telefone, bio, created_at")
         .order("created_at", { ascending: false });
 
-      if (error) throw error;
+      if (profilesError) throw profilesError;
       
-      // Map data to ensure field names match what the component expects
-      const mappedData = (data || []).map((p: any) => ({
+      // Try to get emails from auth API (may fail if not service role)
+      let authUserEmails: Record<string, string> = {};
+      try {
+        const { data: { users: authUsers }, error: authError } = await supabase.auth.admin.listUsers();
+        if (!authError && authUsers) {
+          authUserEmails = Object.fromEntries(
+            authUsers.map(u => [u.id, u.email || ''])
+          );
+        }
+      } catch (e) {
+        console.log("Admin API not available, using fallback");
+      }
+      
+      // Map data to component format
+      const mappedData = (profiles || []).map((p: any) => ({
         id: p.id,
-        nome_completo: p.nome_completo || p.full_name || p.username || "—",
-        email: p.email || "—",
-        telefone: p.telefone || p.phone || "—",
+        nome_completo: p.nome_completo || "—",
+        email: authUserEmails[p.id] || "—",
+        telefone: p.telefone || "—",
         bio: p.bio || "",
-        data_criacao: p.created_at || p.data_criacao || p.data_inscricao,
-        saldo_disponivel: Number(p.saldo_disponivel || 0)
+        data_criacao: p.created_at,
+        saldo_disponivel: 0  // Default, pode ser implementado depois
       }));
       
       setInvestors(mappedData);

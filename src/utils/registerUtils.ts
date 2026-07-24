@@ -130,17 +130,17 @@ const updateUserProfile = async (userId: string, values: RegisterFormValues, fil
     
     const { error } = await supabase
       .from("profiles")
-      .update({
+      .upsert({
+        id: userId,
         nome_completo: values.name,
         telefone: values.phone,
         endereco: values.address,
         cidade: values.city,
-        pais: values.province || "Angola",
+        provincia: values.province || "Angola",
         bio: values.bio || '',
-        documento_url: files.biFront ? `${userId}/bi_frente` : null,
-        empresa_nome: values.userType === 'parceiro' ? values.name : null,
-      })
-      .eq("id", userId);
+        empresa_nome: values.userType === 'parceiro' ? values.company_name : null,
+        ramo_negocio: values.userType === 'parceiro' ? values.business_line : null,
+      }, { onConflict: 'id' });
       
     if (error) {
       console.error("Erro ao atualizar perfil:", error);

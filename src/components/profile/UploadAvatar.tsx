@@ -28,10 +28,10 @@ const UploadAvatar: React.FC<Props> = ({ onUpload }) => {
       const ext = file.name.split('.').pop();
       const fileName = `${user.id}/avatar_${uuidv4()}.${ext}`;
 
-      const { error } = await supabase.storage.from('documentos').upload(fileName, file, { upsert: true });
+      const { error } = await supabase.storage.from('avatars').upload(fileName, file, { upsert: true });
       if (error) throw error;
 
-      const { data } = supabase.storage.from('documentos').getPublicUrl(fileName);
+      const { data } = supabase.storage.from('avatars').getPublicUrl(fileName);
       const publicUrl = data.publicUrl;
 
       toast({ title: 'Foto atualizada', description: 'Sua foto de perfil foi enviada com sucesso.' });
